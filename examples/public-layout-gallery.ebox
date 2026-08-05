@@ -7,7 +7,7 @@
       :bgcolor "#FFFDF8"
       :face 'bold
       :text-align 'center)
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
  (box :content "01  FIXED + FRACTIONAL\nA definite Grid width divides into one exact track and one flexible track."
       :width '(720)
       :padding '(0 (16))
@@ -32,7 +32,7 @@
        :grid-column '(1 :span 2) :width '(718) :padding '(1 0)
        :color "#663322" :bgcolor "#FFFDF8"
        :text-align 'center :wrap-mode 'word))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
  (box :content "02  EXPLICIT PLACEMENT\nSpan columns, target cells, and leave the remaining nodes to auto placement."
       :width '(720)
       :padding '(0 (16))
@@ -60,7 +60,7 @@
        :text-align 'center :color "#24422D" :bgcolor "#E3F0E5")
   (box :content "STABLE CELLS" :width '(278) :padding '(1 0)
        :text-align 'center :color "#24422D" :bgcolor "#D4E6D7"))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
  (box :content "03  PUBLIC COMPOSITION\nColumn, Flex, and Grid share the same public node contract."
       :width '(720)
       :padding '(0 (16))
@@ -88,7 +88,7 @@
        :flex-grow 1 :flex-shrink 1 :flex-basis '(200)
        :min-width '(180) :padding '(1 (12))
        :color "#6B3020" :bgcolor "#F1D4C9"))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
  (box :content "PUBLIC CONTRACT  ebox-create · ebox-column · ebox-flex · ebox-grid · ebox-spacer"
       :width '(720)
       :padding '(0 (16))

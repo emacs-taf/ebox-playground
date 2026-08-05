@@ -4,6 +4,8 @@
 
 The gallery owns one definite 720 px canvas so its nested Grid examples cannot each reinterpret the surrounding viewport width. It fits a compact GUI Emacs window with at least 760 px of body width. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 
+Standalone fixture renders use the same compact 720 px default viewport unless the caller dynamically binds `ebox-viewport-width`; viewport-based references therefore stay inside the example canvas.
+
 ```elisp
 (require 'ebox-playground)
 (ebox-playground-open)

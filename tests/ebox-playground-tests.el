@@ -17,6 +17,26 @@
   "Return a color from executable DSL property code."
   "#123456")
 
+(defun ebox-playground-test--boxes (form)
+  "Return every nested BOX form in FORM."
+  (when (consp form)
+    (append (when (eq (car form) 'box)
+              (list form))
+            (cl-mapcan #'ebox-playground-test--boxes form))))
+
+(ert-deftest ebox-playground-tinted-content-has-explicit-ink ()
+  "Every tinted content box in the public fixtures should set its text color."
+  (dolist (file (append ebox-playground-test--fixtures
+                        '("public-layout-gallery.ebox")))
+    (let ((form (ebox-playground--read-file
+                 (expand-file-name (concat "examples/" file)
+                                   ebox-playground-directory))))
+      (dolist (box (ebox-playground-test--boxes form))
+        (let ((properties (cdr box)))
+          (when (and (memq :content properties)
+                     (memq :bgcolor properties))
+            (should (memq :color properties))))))))
+
 (ert-deftest ebox-playground-uses-only-public-layout-apis ()
   "The example should build and render through the public Ebox entry point."
   (let* ((node (ebox-playground-view))
@@ -52,6 +72,36 @@
         (should (file-readable-p path))
         (should (stringp text))
         (should (cl-every (lambda (width) (<= width 720)) widths))))))
+
+(ert-deftest ebox-playground-flex-reference-uses-a-compact-default-viewport ()
+  "The public Flex file entry point should use the compact default viewport."
+  (let ((path (expand-file-name "examples/flex-reference.ebox"
+                               ebox-playground-directory))
+        (name " *ebox-playground-flex-viewport-test*"))
+    (unwind-protect
+        (progn
+          (ebox-playground-open-file path name)
+          (with-current-buffer name
+            (let ((widths (mapcar #'ebox-string-pixel-width
+                                  (ebox-string-lines (buffer-string)))))
+              (should (cl-every (lambda (width) (<= width 720)) widths)))))
+      (ebox-playground-close name))))
+
+(ert-deftest ebox-playground-fixed-reference-spacers-paint-the-canvas ()
+  "Fixed-width reference separators should keep a continuous canvas surface."
+  (dolist (file '("grid-reference.ebox" "public-layout-gallery.ebox"))
+    (let* ((path (expand-file-name (concat "examples/" file)
+                                   ebox-playground-directory))
+           (lines (ebox-string-lines
+                   (ebox-render (ebox-playground-view path))))
+           (separators 0))
+      (dolist (line lines)
+        (when (equal (get-text-property 0 'display line)
+                     '(space :width (720)))
+          (setq separators (1+ separators))
+          (should (equal (get-text-property 0 'face line)
+                         '(:background "#FAF7F0")))))
+      (should (> separators 0)))))
 
 (ert-deftest ebox-playground-grid-reference-covers-public-properties ()
   "The Grid reference should name every public Grid property in the fixture."

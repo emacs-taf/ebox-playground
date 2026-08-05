@@ -51,13 +51,15 @@
 (defun ebox-dsl-render ()
   "Render the current Ebox DSL buffer into a preview buffer."
   (interactive)
-  (let* ((source (ebox-playground--source-form))
-         (name (format "*Ebox Preview: %s*"
-                       (or (buffer-file-name) (buffer-name))))
-         (node (ebox-build source)))
-    (ebox-display-buffer name node)
-    (message "Rendered Ebox DSL into %s" name)
-    (get-buffer name)))
+  (let ((ebox-viewport-width
+         (ebox-playground--effective-viewport-width)))
+    (let* ((source (ebox-playground--source-form))
+           (name (format "*Ebox Preview: %s*"
+                         (or (buffer-file-name) (buffer-name))))
+           (node (ebox-build source)))
+      (ebox-display-buffer name node)
+      (message "Rendered Ebox DSL into %s" name)
+      (get-buffer name))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
@@ -76,6 +78,24 @@
   "Ebox DSL file rendered by `ebox-playground-open'."
   :type 'file
   :group 'ebox-playground)
+
+(defcustom ebox-playground-default-viewport-width 720
+  "Viewport width used when a caller does not provide one explicitly."
+  :type 'positive-integer
+  :group 'ebox-playground)
+
+(defun ebox-playground--effective-viewport-width ()
+  "Return the caller's viewport width or the compact playground default."
+  (if (and (numberp ebox-viewport-width)
+           (> ebox-viewport-width 0))
+      (floor ebox-viewport-width)
+    ebox-playground-default-viewport-width))
+
+(defun ebox-playground--render-node-to-buffer (buffer node)
+  "Render NODE into BUFFER using the effective playground viewport width."
+  (let ((ebox-viewport-width
+         (ebox-playground--effective-viewport-width)))
+    (ebox-render-to-buffer buffer node)))
 
 (defun ebox-playground--static-value-p (value)
   "Return non-nil when VALUE is a literal or explicitly quoted form."
@@ -138,23 +158,26 @@
 ;;;###autoload
 (defun ebox-playground-view (&optional file)
   "Build the Ebox DSL form in FILE without buffer side effects."
-  (ebox-build
-   (ebox-playground--evaluate-form
-    (ebox-playground--read-file
-     (expand-file-name (or file ebox-playground-default-file))))))
+  (let ((ebox-viewport-width
+         (ebox-playground--effective-viewport-width)))
+    (ebox-build
+     (ebox-playground--evaluate-form
+      (ebox-playground--read-file
+       (expand-file-name (or file ebox-playground-default-file)))))))
 
 ;;;###autoload
 (defun ebox-playground-open (&optional buffer-name)
   "Render the default Ebox DSL example into BUFFER-NAME and return its buffer."
   (interactive)
-  (ebox-render-to-buffer (or buffer-name ebox-playground-buffer-name)
-                         (ebox-playground-view)))
+  (ebox-playground--render-node-to-buffer
+   (or buffer-name ebox-playground-buffer-name)
+   (ebox-playground-view)))
 
 ;;;###autoload
 (defun ebox-playground-open-file (file &optional buffer-name)
   "Render Ebox DSL FILE into BUFFER-NAME and return its buffer."
   (interactive "fEbox DSL file: ")
-  (ebox-render-to-buffer
+  (ebox-playground--render-node-to-buffer
    (or buffer-name
        (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
    (ebox-playground-view file)))

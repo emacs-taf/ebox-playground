@@ -4,6 +4,8 @@
 
 画廊统一拥有一个明确的 720 px 画布，因此嵌套 Grid 不会各自重新解释外层视口宽度。只要 GUI Emacs 的正文区域不小于 760 px，它就能完整显示。高层 Component/Runtime 展示仍由独立的 `etaf-playground` 提供。
 
+独立 fixture 渲染默认也使用紧凑的 720 px 视口；如果调用方动态绑定了 `ebox-viewport-width`，则保留调用方的值。因此依赖 viewport 的参考例子也会保持在示例画布内。
+
 ```elisp
 (require 'ebox-playground)
 (ebox-playground-open)

@@ -7,7 +7,7 @@
       :bgcolor "#FFFDF8"
       :face 'bold
       :text-align 'center)
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "01  TRACK SIZING\nFixed pixels, intrinsic auto tracks, and fractional space share one definite canvas."
       :width '(720)
@@ -41,7 +41,7 @@
        :color "#28485B"
        :bgcolor "#D9EAF2"
        :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "02  TRACK FUNCTIONS\n`minmax` protects a readable minimum while `repeat` expands a compact template."
       :width '(720)
@@ -91,7 +91,7 @@
        :color "#26402F"
        :bgcolor "#D4E6D7"
        :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "03  IMPLICIT TRACKS + AUTO-FLOW\nDeclared tracks establish the map; auto rows, auto columns, and flow fill the rest."
       :width '(720)
@@ -124,7 +124,7 @@
   (box :content "AUTO ROW 2 / A" :padding '(0 (8)) :color "#203A4A" :bgcolor "#E5F2F7" :text-align 'center)
   (box :content "AUTO ROW 2 / B" :padding '(0 (8)) :color "#203A4A" :bgcolor "#D7EAF1" :text-align 'center)
   (box :content "AUTO ROW 2 / C" :padding '(0 (8)) :color "#203A4A" :bgcolor "#C8E1EB" :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
  (box :content "COLUMN FLOW  ·  :grid-auto-columns ((220))"
       :width '(720)
       :padding '(0 (12))
@@ -147,7 +147,7 @@
   (box :content "COL 1 / ROW 2" :padding '(0 (8)) :color "#203A4A" :bgcolor "#C3DFEA" :text-align 'center)
   (box :content "AUTO COL 2 / ROW 1" :padding '(0 (8)) :color "#203A4A" :bgcolor "#A9D0DE" :text-align 'center)
   (box :content "AUTO COL 2 / ROW 2" :padding '(0 (8)) :color "#203A4A" :bgcolor "#E5F2F7" :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "04  PLACEMENT + SPANS\nGrid items can target one-based rows and columns, span tracks, or fall back to auto-placement."
       :width '(720)
@@ -183,7 +183,7 @@
                   :padding '(0 (8)) :color "#332B4B" :bgcolor "#AFA3D1" :text-align 'center))
   (box :content "AUTO\nREMAINDER"
        :padding '(0 (8)) :color "#332B4B" :bgcolor "#EDE9F6" :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "05  ITEM ALIGNMENT\n`:justify-items` controls the inline axis; `:align-items` controls the block axis inside each cell."
       :width '(720)
@@ -226,7 +226,7 @@
   (box :content "END" :padding '(0 (8)) :color "#513718" :bgcolor "#F3E4C7" :text-align 'center)
   (box :content "INLINE END" :padding '(0 (8)) :color "#513718" :bgcolor "#EAD2A6" :text-align 'center)
   (box :content "BLOCK STRETCH" :padding '(0 (8)) :color "#513718" :bgcolor "#E1C18A" :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "06  CONTENT ALIGNMENT\nWhen tracks do not consume the full canvas, `:justify-content` and `:align-content` distribute the leftover space."
       :width '(720)
@@ -277,7 +277,7 @@
   (box :content "EVEN" :padding '(0 (8)) :color "#1E4148" :bgcolor "#B5DDE0" :text-align 'center)
   (box :content "LY" :padding '(0 (8)) :color "#1E4148" :bgcolor "#9ACED2" :text-align 'center)
   (box :content "TRACKS" :padding '(0 (8)) :color "#1E4148" :bgcolor "#DDF1F2" :text-align 'center))
- (spacer :height 1)
+ (spacer :width '(720) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "GRID TOOLKIT  :grid-template-columns · :grid-template-rows · :grid-auto-columns · :grid-auto-rows · :grid-auto-flow · :gap · :grid-row-gap · :grid-column-gap · :justify-items · :align-items · :justify-content · :align-content · :grid-column · :grid-row · :grid-column-span · :grid-row-span"
       :width '(720)
