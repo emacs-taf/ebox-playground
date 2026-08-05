@@ -29,6 +29,10 @@
     map)
   "Keymap used by `ebox-dsl-mode'.")
 
+(defconst ebox-playground--dsl-header-line
+  "Ebox DSL  |  C-c C-c  Render preview"
+  "Header line shown by `ebox-dsl-mode'.")
+
 (defun ebox-playground--source-form ()
   "Read the single Ebox DSL form from the current buffer."
   (ebox-playground--evaluate-form
@@ -38,6 +42,7 @@
 ;;;###autoload
 (define-derived-mode ebox-dsl-mode emacs-lisp-mode "EboxDSL"
   "Major mode for Ebox DSL source files."
+  (setq-local header-line-format ebox-playground--dsl-header-line)
   (setq-local truncate-lines nil)
   (setq-local bidi-display-reordering nil)
   (setq-local bidi-paragraph-direction 'left-to-right))
@@ -50,7 +55,7 @@
          (name (format "*Ebox Preview: %s*"
                        (or (buffer-file-name) (buffer-name))))
          (node (ebox-build source)))
-    (ebox-render-to-buffer name node)
+    (ebox-display-buffer name node)
     (message "Rendered Ebox DSL into %s" name)
     (get-buffer name)))
 

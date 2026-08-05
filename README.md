@@ -9,7 +9,7 @@ The gallery owns one definite 720 px canvas so its nested Grid examples cannot e
 (ebox-playground-open)
 ```
 
-The package also owns the `.ebox` file boundary. Visiting an Ebox DSL file selects `ebox-dsl-mode`; press `C-c C-c` to build the single DSL form and render a preview through the public Ebox API.
+The package also owns the `.ebox` file boundary. Visiting an Ebox DSL file selects `ebox-dsl-mode`; its header line shows `C-c C-c Render preview`. Press `C-c C-c` to build the single DSL form, render it through the public Ebox API, and automatically display the preview buffer.
 
 ```elisp
 (add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))

@@ -9,7 +9,7 @@
 (ebox-playground-open)
 ```
 
-这个包也拥有 `.ebox` 文件入口。访问 Ebox DSL 文件时会自动进入 `ebox-dsl-mode`；按 `C-c C-c` 会通过 Ebox 公开 API 构建单个 DSL form 并渲染预览。
+这个包也拥有 `.ebox` 文件入口。访问 Ebox DSL 文件时会自动进入 `ebox-dsl-mode`，header line 会显示 `C-c C-c Render preview`；按 `C-c C-c` 会通过 Ebox 公开 API 构建单个 DSL form、渲染并自动弹出预览 buffer。
 
 ```elisp
 (add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))

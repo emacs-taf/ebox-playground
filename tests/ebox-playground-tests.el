@@ -95,7 +95,9 @@
   (with-temp-buffer
     (setq buffer-file-name "/tmp/ebox-playground-mode-test.ebox")
     (set-auto-mode)
-    (should (eq major-mode 'ebox-dsl-mode))))
+    (should (eq major-mode 'ebox-dsl-mode))
+    (should (eq (key-binding (kbd "C-c C-c")) #'ebox-dsl-render))
+    (should (string-match-p "C-c C-c" header-line-format))))
 
 (ert-deftest ebox-playground-renders-ebox-file-mode-source ()
   "Render a file-mode buffer through the public Ebox build path."
@@ -106,6 +108,8 @@
           (insert "(box :content \"Rendered from .ebox\" :width '(240))")
           (ebox-dsl-mode)
           (ebox-dsl-render)
+          (should (eq (window-buffer (selected-window))
+                      (get-buffer preview)))
           (with-current-buffer preview
             (should (string-match-p "Rendered from .ebox" (buffer-string)))))
       (when (get-buffer preview)
