@@ -1,0 +1,98 @@
+(column
+ (box :content "Ebox Playground\nPixel-precise layout, composed only from public nodes."
+      :width (720)
+      :padding (1 (18))
+      :border "#8F432F"
+      :color "#252A2E"
+      :bgcolor "#FFFDF8"
+      :face bold
+      :text-align center)
+ (spacer :height 1)
+ (box :content "01  FIXED + FRACTIONAL\nA definite Grid width divides into one exact track and one flexible track."
+      :width (720)
+      :padding (0 (16))
+      :border "#C97252"
+      :border-bottom-p nil
+      :color "#252A2E"
+      :bgcolor "#F1D4C9"
+      :wrap-mode word)
+ (grid
+  :width (718)
+  :grid-template-columns ((220) 1fr)
+  :gap (1 (12))
+  :border "#C97252"
+  :bgcolor "#FFF9F5"
+  (box :content "FIXED TRACK\n220 px stays exact"
+       :width (220) :padding (1 0) :text-align center
+       :color "#252A2E" :bgcolor "#F1D4C9")
+  (box :content "FRACTIONAL TRACK\n1fr receives the remaining width"
+       :width (486) :padding (1 0) :text-align center
+       :color "#252A2E" :bgcolor "#F9E8E0")
+  (box :content "The Grid owns one definite width; its tracks divide that space without competing viewport calculations."
+       :grid-column (1 :span 2) :width (718) :padding (1 0)
+       :color "#663322" :bgcolor "#FFFDF8"
+       :text-align center :wrap-mode word))
+ (spacer :height 1)
+ (box :content "02  EXPLICIT PLACEMENT\nSpan columns, target cells, and leave the remaining nodes to auto placement."
+      :width (720)
+      :padding (0 (16))
+      :border "#6D8A73"
+      :border-bottom-p nil
+      :color "#252A2E"
+      :bgcolor "#DCEBDD"
+      :wrap-mode word)
+ (grid
+  :width (718)
+  :grid-template-columns ((210) (210) 1fr)
+  :gap (1 (10))
+  :border "#6D8A73"
+  :bgcolor "#F7FBF7"
+  (box :content "SPAN 1 → 3" :grid-column (1 :span 2)
+       :width (430) :padding (1 0) :text-align center
+       :color "#24422D" :bgcolor "#DCEBDD")
+  (box :content "COLUMN 3" :grid-column 3 :grid-row 1
+       :width (278) :padding (1 0) :text-align center
+       :color "#24422D" :bgcolor "#C8DDCB")
+  (box :content "ROW 2 / COL 1" :grid-column 1 :grid-row 2
+       :width (210) :padding (1 0) :text-align center
+       :color "#24422D" :bgcolor "#EDF5EE")
+  (box :content "AUTO PLACED" :width (210) :padding (1 0)
+       :text-align center :color "#24422D" :bgcolor "#E3F0E5")
+  (box :content "STABLE CELLS" :width (278) :padding (1 0)
+       :text-align center :color "#24422D" :bgcolor "#D4E6D7"))
+ (spacer :height 1)
+ (box :content "03  PUBLIC COMPOSITION\nColumn, Flex, and Grid share the same public node contract."
+      :width (720)
+      :padding (0 (16))
+      :border "#4E7890"
+      :border-bottom-p nil
+      :color "#252A2E"
+      :bgcolor "#D9EAF2"
+      :wrap-mode word)
+ (flex
+  :width (720)
+  :flex-flow (row wrap)
+  :gap (1 (12))
+  :padding (1 (12))
+  :border "#4E7890"
+  :bgcolor "#F7FAFC"
+  (box :content "COLUMN\nvertical composition"
+       :flex-grow 1 :flex-shrink 1 :flex-basis (200)
+       :min-width (180) :padding (1 (12))
+       :color "#193846" :bgcolor "#D9EAF2")
+  (box :content "FLEX\nwrap and distribute"
+       :flex-grow 1 :flex-shrink 1 :flex-basis (200)
+       :min-width (180) :padding (1 (12))
+       :color "#3F3655" :bgcolor "#E7E2F1")
+  (box :content "GRID\nplace in two dimensions"
+       :flex-grow 1 :flex-shrink 1 :flex-basis (200)
+       :min-width (180) :padding (1 (12))
+       :color "#6B3020" :bgcolor "#F1D4C9"))
+ (spacer :height 1)
+ (box :content "PUBLIC CONTRACT  ebox-create · ebox-column · ebox-flex · ebox-grid · ebox-spacer"
+      :width (720)
+      :padding (0 (16))
+      :border "#8D887F"
+      :color "#4D5651"
+      :bgcolor "#EEEAE2"
+      :wrap-mode word))

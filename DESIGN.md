@@ -3,8 +3,8 @@
 ## Source of truth
 - Status: Active
 - Last refreshed: 2026-08-05
-- Primary product surfaces: The buffer opened by `ebox-playground-open` and its public layout example tree.
-- Evidence reviewed: `ebox-playground.el`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, the rendered current example, and `../emacs-box/examples/playground/flex-reference.ebox` rendered fullscreen in GUI Emacs.
+- Primary product surfaces: The `.ebox` files under `examples/`, the buffer opened by `ebox-playground-open`, and the generic file mode.
+- Evidence reviewed: `ebox-playground.el`, `examples/public-layout-gallery.ebox`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, and the rendered current example.
 
 ## Brand
 - Personality: Precise, modern, restrained, and educational.
@@ -29,7 +29,7 @@
 ## Design principles
 - Principle 1: Mirror the Flex reference's title—explanation—example rhythm.
 - Principle 2: Use one restrained semantic accent per capability section.
-- Principle 3: Keep the example public-only and small enough to understand from one source file.
+- Principle 3: Keep the runner generic; put each concrete layout in a readable `.ebox` source file.
 - Tradeoffs: Prefer a compact representative gallery over exhaustive property coverage.
 
 ## Visual language
@@ -44,7 +44,7 @@
 - Existing components to reuse: `ebox-create`, `ebox-column`, `ebox-row`, `ebox-flex`, `ebox-grid`, and `ebox-spacer`.
 - New/changed components: Header band, capability section band, fixed/fractional track cards, placement cards, and public-contract footer.
 - Variants and states: Static semantic color families only.
-- Token/component ownership: Palette constants and example composition remain in `ebox-playground.el`; Ebox owns rendering.
+- Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering.
 
 ## Accessibility
 - Target standard: High contrast and readable labels in ordinary GUI Emacs themes.
@@ -79,4 +79,4 @@
 - Test/screenshot expectations: `make check` passes and a fullscreen one-window screenshot shows complete, unclipped labeled sections.
 
 ## Open questions
-- [ ] Add more standalone examples only when each teaches a distinct public Ebox responsibility / maintainer / prevents fixture sprawl.
+- [ ] Add more standalone `.ebox` fixtures only when each teaches a distinct public Ebox responsibility / maintainer / prevents fixture sprawl.

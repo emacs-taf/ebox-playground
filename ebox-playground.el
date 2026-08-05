@@ -9,149 +9,114 @@
 ;;; Commentary:
 
 ;; This package is intentionally small and public-only.  It demonstrates the
-;; Ebox contract without reaching into ebox-- internals.  ETAF's application
-;; examples live in the sibling `etaf-playground' package.
+;; Ebox contract without reaching into internal implementation details.  ETAF's
+;; application examples live in the sibling `etaf-playground' package.
 
 ;;; Code:
 
 (require 'ebox)
+(require 'elisp-mode)
+(require 'subr-x)
+(defvar read-eval)
 
 (defconst ebox-playground-buffer-name "*Ebox Playground*"
   "Default buffer name used by `ebox-playground-open'.")
 
-(defun ebox-playground--header ()
-  "Return the gallery header."
-  (ebox-create
-   :content "Ebox Playground\nPixel-precise layout, composed only from public nodes."
-   :width '(720)
-   :padding '(1 (18))
-   :border "#8F432F"
-   :color "#252A2E"
-   :bgcolor "#FFFDF8"
-   :face 'bold
-   :text-align 'center))
+(defvar ebox-dsl-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map emacs-lisp-mode-map)
+    (define-key map (kbd "C-c C-c") #'ebox-dsl-render)
+    map)
+  "Keymap used by `ebox-dsl-mode'.")
 
-(defun ebox-playground--section-heading
-    (number title copy border background)
-  "Return a section heading for NUMBER, TITLE, COPY, BORDER, and BACKGROUND."
-  (ebox-create
-   :content (format "%s  %s\n%s" number title copy)
-   :width '(720)
-   :padding '(0 (16))
-   :border border
-   :border-bottom-p nil
-   :color "#252A2E"
-   :bgcolor background
-   :wrap-mode 'word))
-
-(defun ebox-playground--track-grid ()
-  "Return the fixed and fractional track example."
-  (ebox-grid
-   :width '(718)
-   :grid-template-columns '((220) 1fr)
-   :gap '(1 (12))
-   :border "#C97252"
-   :bgcolor "#FFF9F5"
-   (ebox-create :content "FIXED TRACK\n220 px stays exact"
-                :width '(220) :padding '(1 0) :text-align 'center
-                :color "#252A2E" :bgcolor "#F1D4C9")
-   (ebox-create :content "FRACTIONAL TRACK\n1fr receives the remaining width"
-                :width '(486) :padding '(1 0) :text-align 'center
-                :color "#252A2E" :bgcolor "#F9E8E0")
-   (ebox-create :content "The Grid owns one definite width; its tracks divide that space without competing viewport calculations."
-                :grid-column '(1 :span 2) :width '(718) :padding '(1 0)
-                :color "#663322" :bgcolor "#FFFDF8"
-                :text-align 'center :wrap-mode 'word)))
-
-(defun ebox-playground--placement-grid ()
-  "Return the explicit Grid placement example."
-  (ebox-grid
-   :width '(718)
-   :grid-template-columns '((210) (210) 1fr)
-   :gap '(1 (10))
-   :border "#6D8A73"
-   :bgcolor "#F7FBF7"
-   (ebox-create :content "SPAN 1 → 3" :grid-column '(1 :span 2)
-                :width '(430) :padding '(1 0) :text-align 'center
-                :color "#24422D" :bgcolor "#DCEBDD")
-   (ebox-create :content "COLUMN 3" :grid-column 3 :grid-row 1
-                :width '(278) :padding '(1 0) :text-align 'center
-                :color "#24422D" :bgcolor "#C8DDCB")
-   (ebox-create :content "ROW 2 / COL 1" :grid-column 1 :grid-row 2
-                :width '(210) :padding '(1 0) :text-align 'center
-                :color "#24422D" :bgcolor "#EDF5EE")
-   (ebox-create :content "AUTO PLACED" :width '(210) :padding '(1 0)
-                :text-align 'center
-                :color "#24422D" :bgcolor "#E3F0E5")
-   (ebox-create :content "STABLE CELLS" :width '(278) :padding '(1 0)
-                :text-align 'center
-                :color "#24422D" :bgcolor "#D4E6D7")))
-
-(defun ebox-playground--composition-flex ()
-  "Return the public node composition example."
-  (ebox-flex
-   :width '(720)
-   :flex-flow '(row wrap)
-   :gap '(1 (12))
-   :padding '(1 (12))
-   :border "#4E7890"
-   :bgcolor "#F7FAFC"
-   (ebox-create :content "COLUMN\nvertical composition"
-                :flex-grow 1 :flex-shrink 1 :flex-basis '(200)
-                :min-width '(180) :padding '(1 (12))
-                :color "#193846" :bgcolor "#D9EAF2")
-   (ebox-create :content "FLEX\nwrap and distribute"
-                :flex-grow 1 :flex-shrink 1 :flex-basis '(200)
-                :min-width '(180) :padding '(1 (12))
-                :color "#3F3655" :bgcolor "#E7E2F1")
-   (ebox-create :content "GRID\nplace in two dimensions"
-                :flex-grow 1 :flex-shrink 1 :flex-basis '(200)
-                :min-width '(180) :padding '(1 (12))
-                :color "#6B3020" :bgcolor "#F1D4C9")))
-
-(defun ebox-playground--footer ()
-  "Return the public-contract footer."
-  (ebox-create
-   :content "PUBLIC CONTRACT  ebox-create · ebox-column · ebox-flex · ebox-grid · ebox-spacer"
-   :width '(720)
-   :padding '(0 (16))
-   :border "#8D887F"
-   :color "#4D5651"
-   :bgcolor "#EEEAE2"
-   :wrap-mode 'word))
+(defun ebox-playground--source-form ()
+  "Read the single Ebox DSL form from the current buffer."
+  (ebox-playground--read-form
+   (buffer-substring-no-properties (point-min) (point-max))))
 
 ;;;###autoload
-(defun ebox-playground-view ()
-  "Return a public Ebox example layout node without buffer side effects."
-  (ebox-column
-   (ebox-playground--header)
-   (ebox-spacer :height 1)
-   (ebox-playground--section-heading
-    "01" "FIXED + FRACTIONAL"
-    "A definite Grid width divides into one exact track and one flexible track."
-    "#C97252" "#F1D4C9")
-   (ebox-playground--track-grid)
-   (ebox-spacer :height 1)
-   (ebox-playground--section-heading
-    "02" "EXPLICIT PLACEMENT"
-    "Span columns, target cells, and leave the remaining nodes to auto placement."
-    "#6D8A73" "#DCEBDD")
-   (ebox-playground--placement-grid)
-   (ebox-spacer :height 1)
-   (ebox-playground--section-heading
-    "03" "PUBLIC COMPOSITION"
-    "Column, Flex, and Grid share the same public node contract."
-    "#4E7890" "#D9EAF2")
-   (ebox-playground--composition-flex)
-   (ebox-spacer :height 1)
-   (ebox-playground--footer)))
+(define-derived-mode ebox-dsl-mode emacs-lisp-mode "EboxDSL"
+  "Major mode for Ebox DSL source files."
+  (setq-local truncate-lines nil)
+  (setq-local bidi-display-reordering nil)
+  (setq-local bidi-paragraph-direction 'left-to-right))
+
+;;;###autoload
+(defun ebox-dsl-render ()
+  "Render the current Ebox DSL buffer into a preview buffer."
+  (interactive)
+  (let* ((source (ebox-playground--source-form))
+         (name (format "*Ebox Preview: %s*"
+                       (or (buffer-file-name) (buffer-name))))
+         (node (ebox-build source)))
+    (ebox-render-to-buffer name node)
+    (message "Rendered Ebox DSL into %s" name)
+    (get-buffer name)))
+
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
+
+(defgroup ebox-playground nil
+  "Run Ebox DSL examples from source files."
+  :group 'ebox)
+
+(defconst ebox-playground-directory
+  (file-name-directory (or load-file-name buffer-file-name))
+  "Directory containing the Ebox Playground package.")
+
+(defcustom ebox-playground-default-file
+  (expand-file-name "examples/public-layout-gallery.ebox"
+                    ebox-playground-directory)
+  "Ebox DSL file rendered by `ebox-playground-open'."
+  :type 'file
+  :group 'ebox-playground)
+
+(defun ebox-playground--read-form (source)
+  "Read one Ebox DSL form from SOURCE."
+  (when (string-empty-p (string-trim source))
+    (user-error "The Ebox DSL source is empty"))
+  (with-temp-buffer
+    (insert source)
+    (goto-char (point-min))
+    (let ((read-eval nil)
+          (form (read (current-buffer))))
+      (condition-case nil
+          (progn
+            (read (current-buffer))
+            (user-error "The Ebox DSL source must contain one form"))
+        (end-of-file form)))))
+
+(defun ebox-playground--read-file (file)
+  "Read one Ebox DSL form from FILE."
+  (unless (file-readable-p file)
+    (user-error "Ebox DSL file is not readable: %s" file))
+  (with-temp-buffer
+    (insert-file-contents file)
+    (ebox-playground--read-form
+     (buffer-substring-no-properties (point-min) (point-max)))))
+
+;;;###autoload
+(defun ebox-playground-view (&optional file)
+  "Build the Ebox DSL form in FILE without buffer side effects."
+  (ebox-build
+   (ebox-playground--read-file
+    (expand-file-name (or file ebox-playground-default-file)))))
 
 ;;;###autoload
 (defun ebox-playground-open (&optional buffer-name)
-  "Render the public Ebox example into BUFFER-NAME and return its buffer."
+  "Render the default Ebox DSL example into BUFFER-NAME and return its buffer."
   (interactive)
   (ebox-render-to-buffer (or buffer-name ebox-playground-buffer-name)
                          (ebox-playground-view)))
+
+;;;###autoload
+(defun ebox-playground-open-file (file &optional buffer-name)
+  "Render Ebox DSL FILE into BUFFER-NAME and return its buffer."
+  (interactive "fEbox DSL file: ")
+  (ebox-render-to-buffer
+   (or buffer-name
+       (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
+   (ebox-playground-view file)))
 
 ;;;###autoload
 (defun ebox-playground-close (&optional buffer-name)

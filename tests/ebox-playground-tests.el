@@ -12,6 +12,18 @@
                      "EXPLICIT PLACEMENT" "PUBLIC COMPOSITION"))
       (should (string-match-p (regexp-quote label) rendered)))))
 
+(ert-deftest ebox-playground-keeps-layout-in-ebox-source ()
+  "Keep concrete gallery content out of the generic Elisp runner."
+  (let ((runner (with-temp-buffer
+                  (insert-file-contents
+                   (expand-file-name "ebox-playground.el"
+                                     ebox-playground-directory))
+                  (buffer-string))))
+    (should (file-readable-p ebox-playground-default-file))
+    (should (string-suffix-p ".ebox" ebox-playground-default-file))
+    (should-not (string-match-p "FIXED TRACK" runner))
+    (should-not (string-match-p "PUBLIC COMPOSITION" runner))))
+
 (ert-deftest ebox-playground-opens-and-closes-buffer ()
   "The public open and close commands should own their buffer lifecycle."
   (let ((name " *ebox-playground-test*"))
@@ -33,6 +45,27 @@
          (maximum (apply #'max widths)))
     (should (= maximum gallery-width))
     (should (<= gallery-width 760))))
+
+(ert-deftest ebox-playground-registers-ebox-file-mode ()
+  "Open Ebox DSL files in the package-owned major mode."
+  (with-temp-buffer
+    (setq buffer-file-name "/tmp/ebox-playground-mode-test.ebox")
+    (set-auto-mode)
+    (should (eq major-mode 'ebox-dsl-mode))))
+
+(ert-deftest ebox-playground-renders-ebox-file-mode-source ()
+  "Render a file-mode buffer through the public Ebox build path."
+  (let ((preview "*Ebox Preview: /tmp/ebox-playground-render-test.ebox*"))
+    (unwind-protect
+        (with-temp-buffer
+          (setq buffer-file-name "/tmp/ebox-playground-render-test.ebox")
+          (insert "(box :content \"Rendered from .ebox\" :width (240))")
+          (ebox-dsl-mode)
+          (ebox-dsl-render)
+          (with-current-buffer preview
+            (should (string-match-p "Rendered from .ebox" (buffer-string)))))
+      (when (get-buffer preview)
+        (kill-buffer preview)))))
 
 (provide 'ebox-playground-tests)
 
