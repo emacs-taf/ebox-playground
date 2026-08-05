@@ -31,8 +31,9 @@
 
 (defun ebox-playground--source-form ()
   "Read the single Ebox DSL form from the current buffer."
-  (ebox-playground--read-form
-   (buffer-substring-no-properties (point-min) (point-max))))
+  (ebox-playground--evaluate-form
+   (ebox-playground--read-form
+    (buffer-substring-no-properties (point-min) (point-max)))))
 
 ;;;###autoload
 (define-derived-mode ebox-dsl-mode emacs-lisp-mode "EboxDSL"
@@ -71,6 +72,40 @@
   :type 'file
   :group 'ebox-playground)
 
+(defun ebox-playground--static-value-p (value)
+  "Return non-nil when VALUE is a literal or explicitly quoted form."
+  (or (null value) (numberp value) (stringp value) (characterp value)
+      (keywordp value) (eq value t)
+      (and (consp value) (memq (car value) '(quote function)))))
+
+(defun ebox-playground--evaluate-value (value)
+  "Evaluate executable DSL VALUE while preserving literal data values."
+  (if (ebox-playground--static-value-p value)
+      (if (and (consp value) (memq (car value) '(quote function)))
+          (eval value nil)
+        value)
+    (eval value nil)))
+
+(defun ebox-playground--evaluate-items (items)
+  "Evaluate property values and recurse into child forms in ITEMS."
+  (let (result)
+    (while items
+      (let ((item (pop items)))
+        (if (keywordp item)
+            (progn
+              (unless items
+                    (error "Ebox playground: missing value for %S" item))
+              (push item result)
+              (push (ebox-playground--evaluate-value (pop items)) result))
+          (push (ebox-playground--evaluate-form item) result))))
+    (nreverse result)))
+
+(defun ebox-playground--evaluate-form (form)
+  "Evaluate property expressions in one structural DSL FORM."
+  (if (and (consp form) (symbolp (car form)))
+      (cons (car form) (ebox-playground--evaluate-items (cdr form)))
+    form))
+
 (defun ebox-playground--read-form (source)
   "Read one Ebox DSL form from SOURCE."
   (when (string-empty-p (string-trim source))
@@ -99,8 +134,9 @@
 (defun ebox-playground-view (&optional file)
   "Build the Ebox DSL form in FILE without buffer side effects."
   (ebox-build
-   (ebox-playground--read-file
-    (expand-file-name (or file ebox-playground-default-file)))))
+   (ebox-playground--evaluate-form
+    (ebox-playground--read-file
+     (expand-file-name (or file ebox-playground-default-file))))))
 
 ;;;###autoload
 (defun ebox-playground-open (&optional buffer-name)

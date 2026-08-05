@@ -4,7 +4,7 @@
 - Status: Active
 - Last refreshed: 2026-08-05
 - Primary product surfaces: The `.ebox` files under `examples/`, the buffer opened by `ebox-playground-open`, and the generic file mode.
-- Evidence reviewed: `ebox-playground.el`, `examples/public-layout-gallery.ebox`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, and the rendered current example.
+- Evidence reviewed: `ebox-playground.el`, the `.ebox` fixtures under `examples/`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, and rendered gallery/reference previews.
 
 ## Brand
 - Personality: Precise, modern, restrained, and educational.
@@ -44,7 +44,7 @@
 - Existing components to reuse: `ebox-create`, `ebox-column`, `ebox-row`, `ebox-flex`, `ebox-grid`, and `ebox-spacer`.
 - New/changed components: Header band, capability section band, fixed/fractional track cards, placement cards, and public-contract footer.
 - Variants and states: Static semantic color families only.
-- Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering.
+- Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering. The migrated references remain data files, so adding a layout does not add a fixture-specific Elisp branch.
 
 ## Accessibility
 - Target standard: High contrast and readable labels in ordinary GUI Emacs themes.

@@ -4,7 +4,7 @@
 - 状态：有效
 - 最近更新：2026-08-05
 - 主要产品界面：`examples/` 下的 `.ebox` 文件、`ebox-playground-open` 打开的缓冲区，以及通用文件模式。
-- 已审阅证据：`ebox-playground.el`、`examples/public-layout-gallery.ebox`、`tests/ebox-playground-tests.el`、`README.md`、`README.zh-CN.md` 和当前示例的实际渲染。
+- 已审阅证据：`ebox-playground.el`、`examples/` 下的 `.ebox` fixture、`tests/ebox-playground-tests.el`、`README.md`、`README.zh-CN.md` 以及画廊/参考文件的实际渲染。
 
 ## 品牌
 - 个性：精确、现代、克制、适合教学。
@@ -44,7 +44,7 @@
 - 复用的现有组件：`ebox-create`、`ebox-column`、`ebox-row`、`ebox-flex`、`ebox-grid` 和 `ebox-spacer`。
 - 新增/调整的组件：标题带、能力分区标题带、固定/分数轨道卡片、放置卡片和公开契约页脚。
 - 变体与状态：仅使用静态语义色组。
-- Token/组件归属：配色值和示例组合放在 `.ebox` fixture 中；运行器只负责解析和渲染。
+- Token/组件归属：配色值和示例组合放在 `.ebox` fixture 中；运行器只负责解析和渲染。迁移来的参考仍然是数据文件，新增布局不需要在 Elisp 中增加针对 fixture 的分支。
 
 ## 无障碍
 - 目标标准：在常见 GUI Emacs 主题下保持高对比度和标签可读性。

@@ -1,7 +1,21 @@
 ;;; ebox-playground-tests.el --- Public Ebox example tests -*- lexical-binding: t; -*-
 
 (require 'ert)
+(require 'cl-lib)
 (require 'ebox-playground)
+
+(defconst ebox-playground-test--fixtures
+  '("basic.ebox" "comprehensive.ebox" "flex-reference.ebox"
+    "responsive-reference.ebox" "grid-reference.ebox")
+  "Migrated and maintained `.ebox' fixtures in the playground package.")
+
+(defun ebox-playground-test--dynamic-width ()
+  "Return a list-valued width from executable DSL property code."
+  '(240))
+
+(defun ebox-playground-test--dynamic-color ()
+  "Return a color from executable DSL property code."
+  "#123456")
 
 (ert-deftest ebox-playground-uses-only-public-layout-apis ()
   "The example should build and render through the public Ebox entry point."
@@ -22,7 +36,37 @@
     (should (file-readable-p ebox-playground-default-file))
     (should (string-suffix-p ".ebox" ebox-playground-default-file))
     (should-not (string-match-p "FIXED TRACK" runner))
-    (should-not (string-match-p "PUBLIC COMPOSITION" runner))))
+    (should-not (string-match-p "PUBLIC COMPOSITION" runner))
+    (should-not (string-match-p "GRID TOOLKIT" runner))))
+
+(ert-deftest ebox-playground-migrated-fixtures-render-at-the-canvas-width ()
+  "Every migrated fixture should render through the generic file boundary."
+  (let ((ebox-viewport-width 720))
+    (dolist (file ebox-playground-test--fixtures)
+      (let* ((path (expand-file-name (concat "examples/" file)
+                                     ebox-playground-directory))
+             (text (substring-no-properties
+                    (ebox-render (ebox-playground-view path))))
+             (widths (mapcar #'ebox-string-pixel-width
+                             (ebox-string-lines text))))
+        (should (file-readable-p path))
+        (should (stringp text))
+        (should (cl-every (lambda (width) (<= width 720)) widths))))))
+
+(ert-deftest ebox-playground-grid-reference-covers-public-properties ()
+  "The Grid reference should name every public Grid property in the fixture."
+  (let ((source (with-temp-buffer
+                  (insert-file-contents
+                   (expand-file-name "examples/grid-reference.ebox"
+                                     ebox-playground-directory))
+                  (buffer-string))))
+    (dolist (property '(:grid-template-columns :grid-template-rows
+                        :grid-auto-columns :grid-auto-rows :grid-auto-flow
+                        :grid-row-gap :grid-column-gap :gap
+                        :justify-items :align-items :justify-content
+                        :align-content :grid-column :grid-row
+                        :grid-column-span :grid-row-span))
+      (should (string-match-p (regexp-quote (symbol-name property)) source)))))
 
 (ert-deftest ebox-playground-opens-and-closes-buffer ()
   "The public open and close commands should own their buffer lifecycle."
@@ -59,13 +103,27 @@
     (unwind-protect
         (with-temp-buffer
           (setq buffer-file-name "/tmp/ebox-playground-render-test.ebox")
-          (insert "(box :content \"Rendered from .ebox\" :width (240))")
+          (insert "(box :content \"Rendered from .ebox\" :width '(240))")
           (ebox-dsl-mode)
           (ebox-dsl-render)
           (with-current-buffer preview
             (should (string-match-p "Rendered from .ebox" (buffer-string)))))
       (when (get-buffer preview)
         (kill-buffer preview)))))
+
+(ert-deftest ebox-playground-evaluates-property-expressions ()
+  "Evaluate executable property values while preserving quoted constants."
+  (let* ((form (ebox-playground--evaluate-form
+                '(box :content "Dynamic property values"
+                      :width (ebox-playground-test--dynamic-width)
+                      :color (ebox-playground-test--dynamic-color)
+                      :padding '(0 (4))
+                      :text-align 'center)))
+         (node (ebox-build form)))
+    (should (equal (plist-get node :width) 240))
+    (should (equal (plist-get node :color) "#123456"))
+    (should (equal (plist-get node :padding-left-pixel) 4))
+    (should (eq (plist-get node :text-align) 'center))))
 
 (provide 'ebox-playground-tests)
 
