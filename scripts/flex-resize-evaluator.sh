@@ -15,7 +15,7 @@ trap cleanup EXIT INT TERM
 # that directly affect this render path.  Loading the complete user init would
 # add unrelated packages, timers, and UI state to the performance gate.
 "$emacs" -Q --daemon="$server" \
-    -L "$root" -L "$root/../ebox" -L "$root/../new-architecture/ecss" \
+    -L "$root" -L "$root/../ebox" -L "$root/../ecss" \
     -L "$root/../tp" \
     --eval '(setq load-prefer-newer t
                   gc-cons-threshold most-positive-fixnum

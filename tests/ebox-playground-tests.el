@@ -305,8 +305,7 @@
 (ert-deftest ebox-playground-preview-resizes-through-ebox-viewport-update ()
   "A preview resize should publish an incremental Ebox viewport update."
   (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-resize.ebox*")
-        (window-width 987)
-        (ebox-viewport-resize-delay 0))
+        (window-width 987))
     (unwind-protect
         (cl-letf (((symbol-function 'window-body-width)
                    (lambda (&optional _window _pixelwise) window-width))
@@ -323,16 +322,7 @@
                 (should (memq #'ebox--window-size-change
                               window-size-change-functions))
                 (let ((noninteractive nil))
-                  (ebox--window-size-change (window-frame window)))
-                ;; Batch Emacs does not service idle timers from `sit-for'.
-                (let ((pending
-                       (gethash (current-buffer)
-                                ebox--viewport-resize-pending-table)))
-                  (should pending)
-                  (when (timerp (aref pending 4))
-                    (cancel-timer (aref pending 4)))
-                  (ebox--viewport-resize-apply
-                   (current-buffer) (aref pending 0)))))
+                  (ebox--window-size-change (window-frame window)))))
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))

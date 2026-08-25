@@ -3,7 +3,7 @@ ECSS_DIR ?= ../ecss
 TP_DIR ?= ../tp
 LOAD_PATH = -L . -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
 
-.PHONY: all compile test check checkdoc load clean
+.PHONY: all compile test check checkdoc load performance-evaluator clean
 
 all: check
 
@@ -20,6 +20,9 @@ test: compile
 load: compile
 	$(EMACS) -Q --batch $(LOAD_PATH) --eval '(require (quote ebox-playground))' \
 		--eval '(princ "ebox-playground load OK\n")'
+
+performance-evaluator:
+	EMACS="$(EMACS)" ./scripts/flex-resize-evaluator.sh
 
 checkdoc:
 	$(EMACS) -Q --batch --eval '(progn (require (quote checkdoc)) (dolist (file (directory-files "." t)) (when (string-suffix-p ".el" file) (checkdoc-file file))))'

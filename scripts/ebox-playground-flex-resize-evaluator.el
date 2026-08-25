@@ -6,7 +6,8 @@
 
 ;; This evaluator exercises the public playground path used by an interactive
 ;; `.ebox' preview: source buffer on the left, rendered buffer on the right,
-;; and a real window resize that reaches `window-size-change-functions'.
+;; and a sustained window-resize burst that reaches
+;; `window-size-change-functions'.
 
 ;;; Code:
 
@@ -20,6 +21,16 @@
 
 (defcustom ebox-playground-flex-resize-evaluator-max-seconds 0.5
   "Maximum allowed end-to-end time for one settled preview resize."
+  :type 'number
+  :group 'ebox-playground)
+
+(defcustom ebox-playground-flex-resize-evaluator-max-update-seconds 0.05
+  "Maximum allowed time for one published viewport update."
+  :type 'number
+  :group 'ebox-playground)
+
+(defcustom ebox-playground-flex-resize-evaluator-max-gap-seconds 0.08
+  "Maximum allowed completion gap during the resize burst."
   :type 'number
   :group 'ebox-playground)
 
@@ -87,14 +98,14 @@ than charging initial frame settling to resize."
 (defun ebox-playground-flex-resize-evaluator-run ()
   "Run the real GUI flex preview resize evaluator.
 
-The function returns non-nil only when one splitter resize schedules exactly
-one Ebox viewport update, publishes valid output, and stays under the timing
-threshold.  It leaves the normal idle-prewarm configuration untouched; the
-daemon evaluator does not enable background prewarm, keeping the measured
-action free of concurrent cache-warming CPU work."
+The function returns non-nil only when a sustained splitter resize burst uses
+Ebox's immediate serialized viewport hook, publishes every intermediate and
+final result through the retained path, and stays under the timing threshold.
+It leaves the normal idle prewarm configuration untouched; the daemon evaluator
+does not enable background prewarm, keeping the measured action free of
+concurrent cache warming CPU work."
   (let ((ebox-render-gc-cons-threshold nil)
         (ebox-render-gc-cons-percentage nil)
-        (ebox-viewport-resize-delay 0.05)
         (source nil)
         (preview nil)
         (preview-window nil)
@@ -102,6 +113,10 @@ action free of concurrent cache-warming CPU work."
         (resize-count 0)
         (resize-elapsed 0.0)
         (resize-finished nil)
+        (action-start nil)
+        (last-event-elapsed nil)
+        (resize-publications nil)
+        (resize-durations nil)
         (completed-without-error nil)
         (ebox-playground-flex-resize-evaluator--output-lines nil)
         (checks nil))
@@ -130,22 +145,40 @@ action free of concurrent cache-warming CPU work."
                   (let ((start (float-time)))
                     (unwind-protect
                         (apply original arguments)
-                      (setq resize-elapsed
-                            (+ resize-elapsed (- (float-time) start)))
+                      (let ((duration (- (float-time) start)))
+                        (setq resize-elapsed (+ resize-elapsed duration))
+                        (push duration resize-durations))
+                      (when action-start
+                        (push (- (float-time) action-start)
+                              resize-publications))
                       (setq resize-finished t)))))
           (advice-add 'ebox-rerender-buffer-with-context
                       :around resize-advice)
           (let* ((start (float-time))
                  (old-width
-                  (ebox-playground--window-viewport-width preview-window))
-                 (delta -10)
-                 (deadline (+ start 15.0)))
-            (window-resize preview-window delta t)
-            (while (and (not resize-finished)
-                        (< (float-time) deadline))
+                  (ebox-playground--window-viewport-width preview-window)))
+            (setq action-start start)
+            (dolist (delta '(-4 2 -4 2 -4 2))
+              (setq last-event-elapsed (- (float-time) start))
+              (window-resize preview-window delta t)
               (redisplay t)
-              (sleep-for 0.01))
+              (sleep-for 0.02))
             (let* ((elapsed (- (float-time) start))
+                   (publication-times
+                    (sort (copy-sequence resize-publications) #'<))
+                   (publication-gaps
+                    (cl-loop for tail on publication-times
+                             while (cdr tail)
+                             collect (- (cadr tail) (car tail))))
+                   (first-publication (car publication-times))
+                   (last-publication (car (last publication-times)))
+                   (max-publication
+                    (if resize-durations (apply #'max resize-durations) 0.0))
+                   (max-gap
+                    (if publication-gaps (apply #'max publication-gaps) 0.0))
+                   (final-latency
+                    (and last-publication
+                         (- last-publication last-event-elapsed)))
                    (viewport-width
                     (ebox-playground--window-viewport-width preview-window))
                    (report (ebox-buffer-update-report preview))
@@ -203,10 +236,39 @@ action free of concurrent cache-warming CPU work."
                            (window-live-p preview-window))
                       (format "source=%S preview=%S" source preview))
                      (ebox-playground-flex-resize-evaluator--check
-                      "one resize update"
-                      (= resize-count 1)
-                      (format "ebox-rerender-buffer-with-context=%d"
-                              resize-count))
+                      "intermediate resize updates"
+                      (and (>= resize-count 4)
+                           first-publication
+                           (<= first-publication
+                               ebox-playground-flex-resize-evaluator-max-update-seconds)
+                           (< first-publication last-event-elapsed))
+                      (format "updates=%d first=%.6fs last-event=%.6fs"
+                              resize-count
+                              (or first-publication 0.0)
+                              last-event-elapsed))
+                     (ebox-playground-flex-resize-evaluator--check
+                      "per-update resize budget"
+                      (<= max-publication
+                          ebox-playground-flex-resize-evaluator-max-update-seconds)
+                      (format "max=%.6fs threshold=%.6fs"
+                              max-publication
+                              ebox-playground-flex-resize-evaluator-max-update-seconds))
+                     (ebox-playground-flex-resize-evaluator--check
+                      "continuous resize cadence"
+                      (<= max-gap
+                          ebox-playground-flex-resize-evaluator-max-gap-seconds)
+                      (format "max-gap=%.6fs threshold=%.6fs"
+                              max-gap
+                              ebox-playground-flex-resize-evaluator-max-gap-seconds))
+                     (ebox-playground-flex-resize-evaluator--check
+                      "final resize latency"
+                      (and final-latency
+                           (>= final-latency 0)
+                           (<= final-latency
+                               ebox-playground-flex-resize-evaluator-max-update-seconds))
+                      (format "final=%.6fs threshold=%.6fs"
+                              (or final-latency -1.0)
+                              ebox-playground-flex-resize-evaluator-max-update-seconds))
                      (ebox-playground-flex-resize-evaluator--check
                       "resize completed"
                       resize-finished
@@ -249,8 +311,10 @@ action free of concurrent cache-warming CPU work."
                               elapsed
                               ebox-playground-flex-resize-evaluator-max-seconds))))
               (push (format
-                     "RESIZE old-viewport-px=%S new-viewport-px=%S total=%.6fs rerender=%.6fs strategy=%S projection=%S axes=%S reconciled=%S native-flex=%S tp-ops=%S cache-hits=%S cache-misses=%S"
+                     "RESIZE old-viewport-px=%S new-viewport-px=%S total=%.6fs rerender=%.6fs first=%.6fs max-update=%.6fs max-gap=%.6fs final=%.6fs strategy=%S projection=%S axes=%S reconciled=%S native-flex=%S tp-ops=%S cache-hits=%S cache-misses=%S"
                      old-width viewport-width elapsed resize-elapsed
+                     (or first-publication 0.0) max-publication max-gap
+                     (or final-latency -1.0)
                      (plist-get report :strategy) projection-kind
                      (plist-get report :viewport-axes)
                      (plist-get report :reconciled-objects)
