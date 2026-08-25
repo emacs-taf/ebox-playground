@@ -3,7 +3,7 @@
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Author: Ebox contributors
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (ebox "1.0.1"))
+;; Package-Requires: ((emacs "29.1") (ebox "2.0.0"))
 ;; URL: https://github.com/ginqi7/ebox-playground
 
 ;;; Commentary:
@@ -15,9 +15,22 @@
 ;;; Code:
 
 (require 'ebox)
+(require 'cl-lib)
 (require 'elisp-mode)
 (require 'subr-x)
 (defvar read-eval)
+
+(defvar-local ebox-playground--resize-timer nil
+  "Pending idle timer for the current preview buffer.")
+
+(defvar-local ebox-playground--preview-viewport-width nil
+  "Last viewport width published for the current preview buffer.")
+
+(defvar-local ebox-playground--preview-auto-resize-p nil
+  "Non-nil when the current preview follows its displaying window.")
+
+(defvar ebox-playground--tracked-preview-buffers (make-hash-table :test 'eq)
+  "Preview buffers whose windows should drive viewport updates.")
 
 (defconst ebox-playground-buffer-name "*Ebox Playground*"
   "Default buffer name used by `ebox-playground-open'.")
@@ -49,17 +62,37 @@
 
 ;;;###autoload
 (defun ebox-dsl-render ()
-  "Render the current Ebox DSL buffer into a preview buffer."
+  "Render the current DSL buffer beside its right-hand preview."
   (interactive)
-  (let ((ebox-viewport-width
-         (ebox-playground--effective-viewport-width)))
-    (let* ((source (ebox-playground--source-form))
-           (name (format "*Ebox Preview: %s*"
-                         (or (buffer-file-name) (buffer-name))))
-           (node (ebox-build source)))
-      (ebox-display-buffer name node)
-      (message "Rendered Ebox DSL into %s" name)
-      (get-buffer name))))
+  (delete-other-windows)
+  (let* ((window-min-height 1)
+         (window-min-width 1)
+         (source-window (selected-window))
+         (preview-window (split-window-right))
+         (preview-width
+          (ebox-playground--window-viewport-width preview-window))
+         (bound-width (and (numberp ebox-viewport-width)
+                           (> ebox-viewport-width 0)
+                           (floor ebox-viewport-width)))
+         (viewport-width
+          (or bound-width preview-width
+              ebox-playground-default-viewport-width))
+         (auto-resize-p (and (null bound-width) (numberp preview-width)))
+         (ebox-viewport-width viewport-width)
+         (source-buffer (current-buffer))
+         (source-form (ebox-playground--source-form))
+         (name (format "*Ebox Preview: %s*"
+                       (or (buffer-file-name) (buffer-name))))
+         (node (ebox-build source-form))
+         (buffer (ebox-playground--render-to-preview-buffer name node)))
+    (set-window-buffer source-window source-buffer)
+    (set-window-buffer preview-window buffer)
+    (select-window source-window)
+    (ebox-playground--track-preview-buffer
+     buffer viewport-width auto-resize-p
+     (plist-get node :bgcolor))
+    (message "Rendered Ebox DSL into %s" name)
+    buffer))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
@@ -67,6 +100,11 @@
 (defgroup ebox-playground nil
   "Run Ebox DSL examples from source files."
   :group 'ebox)
+
+(defcustom ebox-playground-resize-idle-delay 0.05
+  "Seconds to wait before publishing a settled preview window width."
+  :type 'number
+  :group 'ebox-playground)
 
 (defconst ebox-playground-directory
   (file-name-directory (or load-file-name buffer-file-name))
@@ -84,18 +122,171 @@
   :type 'positive-integer
   :group 'ebox-playground)
 
-(defun ebox-playground--effective-viewport-width ()
-  "Return the caller's viewport width or the compact playground default."
-  (if (and (numberp ebox-viewport-width)
-           (> ebox-viewport-width 0))
-      (floor ebox-viewport-width)
-    ebox-playground-default-viewport-width))
+(defun ebox-playground--window-viewport-width (&optional window)
+  "Return WINDOW's display-safe viewport width in pixels, or nil when unavailable."
+  (when (window-live-p window)
+    (let ((width (window-body-width window t)))
+      (and (numberp width)
+           (> width 0)
+           (max 1 (- (floor width)
+                     (max 1 (frame-char-width (window-frame window)))))))))
 
-(defun ebox-playground--render-node-to-buffer (buffer node)
-  "Render NODE into BUFFER using the effective playground viewport width."
-  (let ((ebox-viewport-width
-         (ebox-playground--effective-viewport-width)))
-    (ebox-render-to-buffer buffer node)))
+(defun ebox-playground--effective-viewport-width (&optional window)
+  "Return the caller's width, WINDOW's text width, or the compact default."
+  (cond
+   ((and (numberp ebox-viewport-width)
+         (> ebox-viewport-width 0))
+    (floor ebox-viewport-width))
+   ((ebox-playground--window-viewport-width window))
+   (t ebox-playground-default-viewport-width)))
+
+(defun ebox-playground--cancel-resize-timer ()
+  "Cancel the current preview's pending resize publication."
+  (when (timerp ebox-playground--resize-timer)
+    (cancel-timer ebox-playground--resize-timer))
+  (setq ebox-playground--resize-timer nil))
+
+(defun ebox-playground--apply-preview-display-settings (&optional canvas-background)
+  "Apply canvas redisplay settings to the current preview buffer.
+CANVAS-BACKGROUND fills display space outside generated root lines."
+  (setq-local truncate-lines t)
+  (setq-local header-line-format nil)
+  (setq-local mode-line-format nil)
+  (setq-local auto-hscroll-mode t)
+  (setq-local fringe-indicator-alist
+              (cl-remove-if
+               (lambda (entry)
+                 (memq (car-safe entry) '(truncation continuation)))
+               (copy-tree fringe-indicator-alist)))
+  (setq-local bidi-display-reordering nil)
+  (setq-local bidi-paragraph-direction 'left-to-right)
+  (setq-local bidi-inhibit-bpa t)
+  (setq-local face-remapping-alist
+              (when (stringp canvas-background)
+                (list (list 'default (list :background canvas-background))))))
+
+(defconst ebox-playground--preview-display-variables
+  '(truncate-lines header-line-format mode-line-format auto-hscroll-mode
+    fringe-indicator-alist bidi-display-reordering bidi-paragraph-direction
+    bidi-inhibit-bpa face-remapping-alist)
+  "Buffer-local display variables owned by a playground preview.")
+
+(defun ebox-playground--preview-display-snapshot ()
+  "Return the current values and locality of preview display variables."
+  (mapcar
+   (lambda (variable)
+     (list variable
+           (local-variable-p variable)
+           (and (boundp variable) (symbol-value variable))))
+   ebox-playground--preview-display-variables))
+
+(defun ebox-playground--restore-preview-display-snapshot (snapshot)
+  "Restore preview display variable SNAPSHOT in the current buffer."
+  (dolist (entry snapshot)
+    (let ((variable (nth 0 entry))
+          (was-local-p (nth 1 entry))
+          (value (nth 2 entry)))
+      (if was-local-p
+          (set (make-local-variable variable) value)
+        (kill-local-variable variable)))))
+
+(defun ebox-playground--render-to-preview-buffer (buffer node)
+  "Render NODE into BUFFER with transactional preview display settings."
+  (with-current-buffer (get-buffer-create buffer)
+    (let ((snapshot (ebox-playground--preview-display-snapshot))
+          (published-p nil))
+      (unwind-protect
+          (prog1
+              (progn
+                (ebox-playground--apply-preview-display-settings
+                 (and (consp node) (plist-get node :bgcolor)))
+                (ebox-render-to-buffer buffer node))
+            (setq published-p t))
+        (unless published-p
+          (ebox-playground--restore-preview-display-snapshot snapshot))))))
+
+(defun ebox-playground--resize-preview (buffer window)
+  "Publish BUFFER's current WINDOW viewport after a resize settles."
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (setq-local ebox-playground--resize-timer nil)
+      (when (and ebox-playground--preview-auto-resize-p
+                 (window-live-p window)
+                 (eq (window-buffer window) buffer))
+        (let ((width (ebox-playground--window-viewport-width window)))
+          (when (and width
+                     (/= width
+                         (or ebox-playground--preview-viewport-width 0)))
+            (let ((report (ebox-rerender-buffer-with-context buffer width)))
+              ;; Keep the last published width as the retry key.  A failed
+              ;; candidate must not make a later identical resize look like a
+              ;; successful no-op.
+              (when (plist-get report :runtime-published)
+                (setq-local ebox-playground--preview-viewport-width width)))))))))
+
+(defun ebox-playground--window-size-change (frame)
+  "Schedule a viewport update after a size change in FRAME.
+The default `window-size-change-functions' dispatcher passes a frame, so the
+preview window must be resolved from that frame before its viewport is read."
+  (when (frame-live-p frame)
+    (dolist (window (window-list frame 'no-minibuf))
+      (let ((buffer (window-buffer window)))
+        (when (and (buffer-live-p buffer)
+                   (gethash buffer ebox-playground--tracked-preview-buffers))
+          (with-current-buffer buffer
+            (let ((width (ebox-playground--window-viewport-width window)))
+              (when (and width
+                         (/= width
+                             (or ebox-playground--preview-viewport-width 0)))
+                (ebox-playground--cancel-resize-timer)
+                (setq-local ebox-playground--resize-timer
+                            (run-with-idle-timer
+                             (max 0 ebox-playground-resize-idle-delay)
+                             nil #'ebox-playground--resize-preview
+                             buffer window))))))))))
+
+(defun ebox-playground--untrack-preview-buffer (buffer)
+  "Stop tracking BUFFER and remove the shared window hook when unused."
+  (remhash buffer ebox-playground--tracked-preview-buffers)
+  (when (= (hash-table-count ebox-playground--tracked-preview-buffers) 0)
+    (remove-hook 'window-size-change-functions
+                 #'ebox-playground--window-size-change)))
+
+(defun ebox-playground--cleanup-preview ()
+  "Release resize state owned by the current preview buffer."
+  (ebox-playground--cancel-resize-timer)
+  (ebox-playground--untrack-preview-buffer (current-buffer)))
+
+(defun ebox-playground--track-preview-buffer
+    (buffer viewport-width &optional auto-resize-p canvas-background)
+  "Track BUFFER at VIEWPORT-WIDTH and optionally follow its display window.
+AUTO-RESIZE-P enables following the display window.  CANVAS-BACKGROUND fills
+display space outside generated root lines."
+  (ebox-playground--untrack-preview-buffer buffer)
+  (with-current-buffer buffer
+    (ebox-playground--cancel-resize-timer)
+    (ebox-playground--apply-preview-display-settings canvas-background)
+    (setq-local ebox-playground--preview-viewport-width viewport-width)
+    (setq-local ebox-playground--preview-auto-resize-p auto-resize-p)
+    (add-hook 'kill-buffer-hook #'ebox-playground--cleanup-preview nil t))
+  (when auto-resize-p
+    (puthash buffer t ebox-playground--tracked-preview-buffers)
+    (add-hook 'window-size-change-functions
+              #'ebox-playground--window-size-change))
+  buffer)
+
+(defun ebox-playground--render-node-to-buffer
+    (buffer node viewport-width &optional auto-resize-p)
+  "Render NODE into BUFFER using VIEWPORT-WIDTH.
+AUTO-RESIZE-P enables following the display window."
+  (let* ((ebox-viewport-width
+          (or viewport-width
+              (ebox-playground--effective-viewport-width)))
+         (target buffer))
+    (ebox-playground--track-preview-buffer
+     (ebox-playground--render-to-preview-buffer target node)
+     ebox-viewport-width auto-resize-p
+     (and (consp node) (plist-get node :bgcolor)))))
 
 (defun ebox-playground--static-value-p (value)
   "Return non-nil when VALUE is a literal or explicitly quoted form."
@@ -156,10 +347,10 @@
      (buffer-substring-no-properties (point-min) (point-max)))))
 
 ;;;###autoload
-(defun ebox-playground-view (&optional file)
-  "Build the Ebox DSL form in FILE without buffer side effects."
+(defun ebox-playground-view (&optional file viewport-width)
+  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without buffer side effects."
   (let ((ebox-viewport-width
-         (ebox-playground--effective-viewport-width)))
+         (or viewport-width (ebox-playground--effective-viewport-width))))
     (ebox-build
      (ebox-playground--evaluate-form
       (ebox-playground--read-file
@@ -169,18 +360,22 @@
 (defun ebox-playground-open (&optional buffer-name)
   "Render the default Ebox DSL example into BUFFER-NAME and return its buffer."
   (interactive)
-  (ebox-playground--render-node-to-buffer
-   (or buffer-name ebox-playground-buffer-name)
-   (ebox-playground-view)))
+  (let ((viewport-width (ebox-playground--effective-viewport-width)))
+    (ebox-playground--render-node-to-buffer
+     (or buffer-name ebox-playground-buffer-name)
+     (ebox-playground-view nil viewport-width)
+     viewport-width)))
 
 ;;;###autoload
 (defun ebox-playground-open-file (file &optional buffer-name)
   "Render Ebox DSL FILE into BUFFER-NAME and return its buffer."
   (interactive "fEbox DSL file: ")
-  (ebox-playground--render-node-to-buffer
-   (or buffer-name
-       (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
-   (ebox-playground-view file)))
+  (let ((viewport-width (ebox-playground--effective-viewport-width)))
+    (ebox-playground--render-node-to-buffer
+     (or buffer-name
+         (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
+     (ebox-playground-view file viewport-width)
+     viewport-width)))
 
 ;;;###autoload
 (defun ebox-playground-close (&optional buffer-name)

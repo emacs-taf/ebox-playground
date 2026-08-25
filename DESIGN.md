@@ -18,19 +18,19 @@
 
 ## Personas and jobs
 - Primary personas: Ebox authors and maintainers.
-- User jobs: Open one buffer, understand the public node contract, and see fixed/fractional tracks, placement, and composition rendered attractively.
+- User jobs: Open one buffer, understand the public node contract, and see the complete supported Grid property/value set rendered attractively.
 - Key contexts of use: GUI Emacs, fullscreen demonstrations, and ERT rendering checks.
 
 ## Information architecture
 - Primary navigation: None; this is one self-contained reference surface.
-- Core routes/screens: One header and three capability sections.
+- Core routes/screens: One header, grouped property sections, and one public-contract footer.
 - Content hierarchy: Title and description, labeled capability bands, then small contrasting examples.
 
 ## Design principles
 - Principle 1: Mirror the Flex reference's title—explanation—example rhythm.
 - Principle 2: Use one restrained semantic accent per capability section.
 - Principle 3: Keep the runner generic; put each concrete layout in a readable `.ebox` source file.
-- Tradeoffs: Prefer a compact representative gallery over exhaustive property coverage.
+- Tradeoffs: Cover the complete public Grid property/value surface while keeping each example compact and grouped by responsibility.
 
 ## Visual language
 - Color: Warm paper canvas with terracotta, sage, slate blue, and violet section families; explicit dark ink or white text according to contrast.
@@ -42,7 +42,7 @@
 
 ## Components
 - Existing components to reuse: `ebox-create`, `ebox-column`, `ebox-row`, `ebox-flex`, `ebox-grid`, and `ebox-spacer`.
-- New/changed components: Header band, capability section band, fixed/fractional track cards, placement cards, and public-contract footer.
+- New/changed components: Header band, property section bands, track-function cards, implicit-track/flow cards, gap/placement cards, alignment cards, and public-contract footer.
 - Variants and states: Static semantic color families only.
 - Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering. The migrated references remain data files, so adding a layout does not add a fixture-specific Elisp branch.
 
@@ -54,8 +54,8 @@
 - Reduced motion and sensory considerations: No motion.
 
 ## Responsive behavior
-- Supported breakpoints/devices: GUI Emacs windows with at least 760 px of body width, from compact frames to fullscreen desktop widths.
-- Layout adaptations: The gallery owns one fixed 720 px content canvas; nested Grid and Flex sections divide that width through public Ebox layout behavior instead of reading the viewport independently.
+- Supported breakpoints/devices: GUI Emacs windows from compact split previews to fullscreen desktop widths.
+- Layout adaptations: Standalone gallery entry points default to a 720 px content canvas; split-window `.ebox` previews bind `(viewport)` to the preview pane's display-safe width so viewport-based sections fit the active pane.
 - Touch/hover differences: None.
 
 ## Interaction states
@@ -74,7 +74,7 @@
 ## Implementation constraints
 - Framework/styling system: Emacs 29.1+ and public Ebox constructors/properties only.
 - Design-token constraints: Reuse the Flex reference's restrained color families without introducing a theme package.
-- Performance constraints: One synchronous render, no timers or background work.
+- Performance constraints: One synchronous initial render; window resizing uses one bounded idle debounce and Ebox's incremental viewport update path.
 - Compatibility constraints: No ETAF dependency and no `ebox--*` calls.
 - Test/screenshot expectations: `make check` passes and a fullscreen one-window screenshot shows complete, unclipped labeled sections.
 

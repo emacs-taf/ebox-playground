@@ -1,5 +1,7 @@
 EMACS ?= emacs
-LOAD_PATH = -L . -L ../ebox
+ECSS_DIR ?= ../ecss
+TP_DIR ?= ../tp
+LOAD_PATH = -L . -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
 
 .PHONY: all compile test check checkdoc load clean
 
