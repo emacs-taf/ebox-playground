@@ -6,7 +6,7 @@ ECSS 0.1.0 and TP 1.0.0 are independent packages and may be installed in either 
 
 Standalone gallery entry points default to a definite 720 px canvas so nested examples have stable space in batch renders and one-window demos. Split-window `.ebox` previews instead bind `(viewport)` to the preview window's display-safe width, so viewport-based separators and sections fit the right-hand pane. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 
-Standalone and batch fixture renders use the same compact 720 px default viewport unless the caller dynamically binds `ebox-viewport-width`; viewport-based references therefore stay inside the example canvas. When `C-c C-c` renders an `.ebox` source buffer, the command keeps the source on the left, opens the preview on the right, and binds `(viewport)` to the preview window's display-safe width. The preview then debounces window-size changes and republishes the width through Ebox's incremental viewport update path.
+Standalone and batch fixture renders use the same compact 720 px default viewport unless the caller dynamically binds `ebox-viewport-width`; viewport-based references therefore stay inside the example canvas. When `C-c C-c` renders an `.ebox` source buffer, the command keeps the source on the left, opens the preview on the right, and binds `(viewport)` to Ebox's shared display-safe window width. Continuous window changes are coalesced by Ebox's single viewport controller; the Playground owns no second resize hook or timer.
 
 ```elisp
 (require 'ebox-playground)

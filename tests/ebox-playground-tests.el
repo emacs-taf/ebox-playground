@@ -214,14 +214,12 @@
                (lambda (&optional _frame) 8)))
       (should (= (ebox-playground--effective-viewport-width
                   (selected-window))
-                 979)))))
+                 971)))))
 
-(ert-deftest ebox-playground-window-viewport-leaves-display-reserve ()
-  "A preview viewport should leave one character column for redisplay."
-  (cl-letf (((symbol-function 'window-body-width)
-             (lambda (&optional _window _pixelwise) 987))
-            ((symbol-function 'frame-char-width)
-             (lambda (&optional _frame) 8)))
+(ert-deftest ebox-playground-window-viewport-uses-ebox-sampler ()
+  "A preview and the Ebox resize controller share one viewport sample."
+  (cl-letf (((symbol-function 'ebox-viewport-window-width)
+             (lambda (_window) 979)))
     (should (= (ebox-playground--window-viewport-width (selected-window))
                979))))
 
@@ -242,7 +240,7 @@
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
-                         (- window-width 8))))))
+                         (- window-width 16))))))
       (when (get-buffer preview)
         (kill-buffer preview)))))
 
@@ -252,12 +250,12 @@
                                  ebox-playground-directory))
          (preview (format "*Ebox Preview: %s*" path))
          (window-width 699)
-         (viewport 691))
+         (viewport 683))
     (unwind-protect
         (cl-letf (((symbol-function 'window-body-width)
                    (lambda (&optional _window _pixelwise) window-width))
                   ((symbol-function 'frame-char-width)
-                   (lambda (&optional _frame) (- window-width viewport))))
+                   (lambda (&optional _frame) 8)))
           (delete-other-windows)
           (with-temp-buffer
             (setq buffer-file-name path)
@@ -265,7 +263,6 @@
             (ebox-dsl-mode)
             (ebox-dsl-render)
             (with-current-buffer preview
-              (should (= ebox-playground--preview-viewport-width viewport))
               (should (cl-every
                        (lambda (width) (<= width viewport))
                        (ebox-playground-test--line-widths
@@ -309,7 +306,7 @@
   "A preview resize should publish an incremental Ebox viewport update."
   (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-resize.ebox*")
         (window-width 987)
-        (ebox-playground-resize-idle-delay 0))
+        (ebox-viewport-resize-delay 0))
     (unwind-protect
         (cl-letf (((symbol-function 'window-body-width)
                    (lambda (&optional _window _pixelwise) window-width))
@@ -323,16 +320,23 @@
             (setq window-width 1234)
             (with-current-buffer preview
               (let ((window (get-buffer-window (current-buffer))))
-                (should (memq #'ebox-playground--window-size-change
+                (should (memq #'ebox--window-size-change
                               window-size-change-functions))
-                (ebox-playground--window-size-change (window-frame window))
-                (should (timerp ebox-playground--resize-timer))
+                (let ((noninteractive nil))
+                  (ebox--window-size-change (window-frame window)))
                 ;; Batch Emacs does not service idle timers from `sit-for'.
-                (ebox-playground--resize-preview (current-buffer) window)))
+                (let ((pending
+                       (gethash (current-buffer)
+                                ebox--viewport-resize-pending-table)))
+                  (should pending)
+                  (when (timerp (aref pending 4))
+                    (cancel-timer (aref pending 4)))
+                  (ebox--viewport-resize-apply
+                   (current-buffer) (aref pending 0)))))
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
-                         (- window-width 8)))
+                         (- window-width 16)))
               (let ((report (ebox-buffer-update-report (current-buffer))))
                 (should (eq (plist-get report :constraint-source) 'viewport))
                 (should (eq (plist-get report :strategy) 'owner-rerender))))))

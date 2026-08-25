@@ -20,18 +20,6 @@
 (require 'subr-x)
 (defvar read-eval)
 
-(defvar-local ebox-playground--resize-timer nil
-  "Pending idle timer for the current preview buffer.")
-
-(defvar-local ebox-playground--preview-viewport-width nil
-  "Last viewport width published for the current preview buffer.")
-
-(defvar-local ebox-playground--preview-auto-resize-p nil
-  "Non-nil when the current preview follows its displaying window.")
-
-(defvar ebox-playground--tracked-preview-buffers (make-hash-table :test 'eq)
-  "Preview buffers whose windows should drive viewport updates.")
-
 (defconst ebox-playground-buffer-name "*Ebox Playground*"
   "Default buffer name used by `ebox-playground-open'.")
 
@@ -77,7 +65,6 @@
          (viewport-width
           (or bound-width preview-width
               ebox-playground-default-viewport-width))
-         (auto-resize-p (and (null bound-width) (numberp preview-width)))
          (ebox-viewport-width viewport-width)
          (source-buffer (current-buffer))
          (source-form (ebox-playground--source-form))
@@ -88,9 +75,6 @@
     (set-window-buffer source-window source-buffer)
     (set-window-buffer preview-window buffer)
     (select-window source-window)
-    (ebox-playground--track-preview-buffer
-     buffer viewport-width auto-resize-p
-     (plist-get node :bgcolor))
     (message "Rendered Ebox DSL into %s" name)
     buffer))
 
@@ -100,11 +84,6 @@
 (defgroup ebox-playground nil
   "Run Ebox DSL examples from source files."
   :group 'ebox)
-
-(defcustom ebox-playground-resize-idle-delay 0.05
-  "Seconds to wait before publishing a settled preview window width."
-  :type 'number
-  :group 'ebox-playground)
 
 (defconst ebox-playground-directory
   (file-name-directory (or load-file-name buffer-file-name))
@@ -123,13 +102,8 @@
   :group 'ebox-playground)
 
 (defun ebox-playground--window-viewport-width (&optional window)
-  "Return WINDOW's display-safe viewport width in pixels, or nil when unavailable."
-  (when (window-live-p window)
-    (let ((width (window-body-width window t)))
-      (and (numberp width)
-           (> width 0)
-           (max 1 (- (floor width)
-                     (max 1 (frame-char-width (window-frame window)))))))))
+  "Return Ebox's shared display-safe viewport width for WINDOW."
+  (ebox-viewport-window-width window))
 
 (defun ebox-playground--effective-viewport-width (&optional window)
   "Return the caller's width, WINDOW's text width, or the compact default."
@@ -139,12 +113,6 @@
     (floor ebox-viewport-width))
    ((ebox-playground--window-viewport-width window))
    (t ebox-playground-default-viewport-width)))
-
-(defun ebox-playground--cancel-resize-timer ()
-  "Cancel the current preview's pending resize publication."
-  (when (timerp ebox-playground--resize-timer)
-    (cancel-timer ebox-playground--resize-timer))
-  (setq ebox-playground--resize-timer nil))
 
 (defun ebox-playground--apply-preview-display-settings (&optional canvas-background)
   "Apply canvas redisplay settings to the current preview buffer.
@@ -205,88 +173,13 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
         (unless published-p
           (ebox-playground--restore-preview-display-snapshot snapshot))))))
 
-(defun ebox-playground--resize-preview (buffer window)
-  "Publish BUFFER's current WINDOW viewport after a resize settles."
-  (when (buffer-live-p buffer)
-    (with-current-buffer buffer
-      (setq-local ebox-playground--resize-timer nil)
-      (when (and ebox-playground--preview-auto-resize-p
-                 (window-live-p window)
-                 (eq (window-buffer window) buffer))
-        (let ((width (ebox-playground--window-viewport-width window)))
-          (when (and width
-                     (/= width
-                         (or ebox-playground--preview-viewport-width 0)))
-            (let ((report (ebox-rerender-buffer-with-context buffer width)))
-              ;; Keep the last published width as the retry key.  A failed
-              ;; candidate must not make a later identical resize look like a
-              ;; successful no-op.
-              (when (plist-get report :runtime-published)
-                (setq-local ebox-playground--preview-viewport-width width)))))))))
-
-(defun ebox-playground--window-size-change (frame)
-  "Schedule a viewport update after a size change in FRAME.
-The default `window-size-change-functions' dispatcher passes a frame, so the
-preview window must be resolved from that frame before its viewport is read."
-  (when (frame-live-p frame)
-    (dolist (window (window-list frame 'no-minibuf))
-      (let ((buffer (window-buffer window)))
-        (when (and (buffer-live-p buffer)
-                   (gethash buffer ebox-playground--tracked-preview-buffers))
-          (with-current-buffer buffer
-            (let ((width (ebox-playground--window-viewport-width window)))
-              (when (and width
-                         (/= width
-                             (or ebox-playground--preview-viewport-width 0)))
-                (ebox-playground--cancel-resize-timer)
-                (setq-local ebox-playground--resize-timer
-                            (run-with-idle-timer
-                             (max 0 ebox-playground-resize-idle-delay)
-                             nil #'ebox-playground--resize-preview
-                             buffer window))))))))))
-
-(defun ebox-playground--untrack-preview-buffer (buffer)
-  "Stop tracking BUFFER and remove the shared window hook when unused."
-  (remhash buffer ebox-playground--tracked-preview-buffers)
-  (when (= (hash-table-count ebox-playground--tracked-preview-buffers) 0)
-    (remove-hook 'window-size-change-functions
-                 #'ebox-playground--window-size-change)))
-
-(defun ebox-playground--cleanup-preview ()
-  "Release resize state owned by the current preview buffer."
-  (ebox-playground--cancel-resize-timer)
-  (ebox-playground--untrack-preview-buffer (current-buffer)))
-
-(defun ebox-playground--track-preview-buffer
-    (buffer viewport-width &optional auto-resize-p canvas-background)
-  "Track BUFFER at VIEWPORT-WIDTH and optionally follow its display window.
-AUTO-RESIZE-P enables following the display window.  CANVAS-BACKGROUND fills
-display space outside generated root lines."
-  (ebox-playground--untrack-preview-buffer buffer)
-  (with-current-buffer buffer
-    (ebox-playground--cancel-resize-timer)
-    (ebox-playground--apply-preview-display-settings canvas-background)
-    (setq-local ebox-playground--preview-viewport-width viewport-width)
-    (setq-local ebox-playground--preview-auto-resize-p auto-resize-p)
-    (add-hook 'kill-buffer-hook #'ebox-playground--cleanup-preview nil t))
-  (when auto-resize-p
-    (puthash buffer t ebox-playground--tracked-preview-buffers)
-    (add-hook 'window-size-change-functions
-              #'ebox-playground--window-size-change))
-  buffer)
-
-(defun ebox-playground--render-node-to-buffer
-    (buffer node viewport-width &optional auto-resize-p)
+(defun ebox-playground--render-node-to-buffer (buffer node viewport-width)
   "Render NODE into BUFFER using VIEWPORT-WIDTH.
-AUTO-RESIZE-P enables following the display window."
-  (let* ((ebox-viewport-width
-          (or viewport-width
-              (ebox-playground--effective-viewport-width)))
-         (target buffer))
-    (ebox-playground--track-preview-buffer
-     (ebox-playground--render-to-preview-buffer target node)
-     ebox-viewport-width auto-resize-p
-     (and (consp node) (plist-get node :bgcolor)))))
+Visible mounted buffers follow their window through Ebox's viewport controller."
+  (let ((ebox-viewport-width
+         (or viewport-width
+             (ebox-playground--effective-viewport-width))))
+    (ebox-playground--render-to-preview-buffer buffer node)))
 
 (defun ebox-playground--static-value-p (value)
   "Return non-nil when VALUE is a literal or explicitly quoted form."

@@ -6,7 +6,7 @@ ECSS 0.1.0 与 TP 1.0.0 是互相独立的包，安装顺序任意；两者都�
 
 独立画廊入口默认使用明确的 720 px 画布，因此 batch 渲染和单窗口演示里的嵌套示例有稳定空间。分屏 `.ebox` 预览则会把 `(viewport)` 绑定为右侧预览窗口的显示安全宽度，所以依赖 viewport 的分隔条和区块会适配右侧窗格。高层 Component/Runtime 展示仍由独立的 `etaf-playground` 提供。
 
-独立和 batch fixture 渲染默认也使用紧凑的 720 px 视口；如果调用方动态绑定了 `ebox-viewport-width`，则保留调用方的值。因此依赖 viewport 的参考例子也会保持在示例画布内。通过 `C-c C-c` 渲染 `.ebox` 源文件时，命令会把源文件保留在左侧、在右侧打开预览，并将 `(viewport)` 绑定为预览窗口的显示安全像素宽度；预览随后会合并连续的 window-size 变化，并通过 Ebox 已有的 viewport 增量更新路径发布宽度。
+独立和 batch fixture 渲染默认也使用紧凑的 720 px 视口；如果调用方动态绑定了 `ebox-viewport-width`，则保留调用方的值。因此依赖 viewport 的参考例子也会保持在示例画布内。通过 `C-c C-c` 渲染 `.ebox` 源文件时，命令会把源文件保留在左侧、在右侧打开预览，并将 `(viewport)` 绑定为 Ebox 统一计算的显示安全宽度；连续 window-size 变化由 Ebox 唯一的 viewport controller 合并，Playground 不再拥有第二套 resize hook 或 timer。
 
 ```elisp
 (require 'ebox-playground)

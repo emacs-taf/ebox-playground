@@ -74,7 +74,7 @@
 ## Implementation constraints
 - Framework/styling system: Emacs 29.1+ and public Ebox constructors/properties only.
 - Design-token constraints: Reuse the Flex reference's restrained color families without introducing a theme package.
-- Performance constraints: One synchronous initial render; window resizing uses one bounded idle debounce and Ebox's incremental viewport update path.
+- Performance constraints: One synchronous initial render; window resizing delegates to Ebox's single bounded viewport controller and incremental update path.
 - Compatibility constraints: No ETAF dependency and no `ebox--*` calls.
 - Test/screenshot expectations: `make check` passes and a fullscreen one-window screenshot shows complete, unclipped labeled sections.
 

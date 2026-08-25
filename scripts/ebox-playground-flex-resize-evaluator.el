@@ -82,8 +82,6 @@ than charging initial frame settling to resize."
       (let ((report (ebox-rerender-buffer-with-context preview width)))
         (unless (plist-get report :runtime-published)
           (error "flex preview initial viewport was not published"))))
-    (with-current-buffer preview
-      (setq-local ebox-playground--preview-viewport-width width))
     width))
 
 (defun ebox-playground-flex-resize-evaluator-run ()
@@ -96,7 +94,7 @@ daemon evaluator does not enable background prewarm, keeping the measured
 action free of concurrent cache-warming CPU work."
   (let ((ebox-render-gc-cons-threshold nil)
         (ebox-render-gc-cons-percentage nil)
-        (ebox-playground-resize-idle-delay 0.05)
+        (ebox-viewport-resize-delay 0.05)
         (source nil)
         (preview nil)
         (preview-window nil)
