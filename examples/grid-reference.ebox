@@ -403,7 +403,7 @@
                           :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
-               (box :content "direct child placement\n:grid-item is only a convenience" :padding '(0 (6))
+               (box :content "direct child placement\nitem is a parent-child role" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
