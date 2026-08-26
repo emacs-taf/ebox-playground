@@ -463,17 +463,20 @@
     (should (cl-every (lambda (width) (<= width viewport))
                       (ebox-playground-test--line-widths text)))))
 
-(ert-deftest ebox-playground-grid-reference-spacers-paint-the-viewport ()
-  "Grid reference separators should fill the active viewport canvas."
+(ert-deftest ebox-playground-grid-reference-separators-paint-the-viewport ()
+  "Grid reference separator Boxes should fill the active viewport canvas."
   (let ((path (expand-file-name "examples/grid-reference.ebox"
                                 ebox-playground-directory)))
-    (let ((spacers (ebox-playground-test--forms-named
-                    'spacer (ebox-playground--read-file path))))
-      (should (= (length spacers) 11))
-      (dolist (spacer spacers)
-        (should (equal (plist-get (cdr spacer) :width)
-                       '(quote (viewport))))
-        (should (equal (plist-get (cdr spacer) :bgcolor) "#FAF7F0"))))
+    (let ((separators
+           (cl-remove-if-not
+            (lambda (form)
+              (and (equal (plist-get (cdr form) :width)
+                          '(quote (viewport)))
+                   (equal (plist-get (cdr form) :height) 1)
+                   (equal (plist-get (cdr form) :bgcolor) "#FAF7F0")))
+            (ebox-playground-test--forms-named
+             'box (ebox-playground--read-file path)))))
+      (should (= (length separators) 11)))
     (dolist (viewport '(691 720))
       (let* ((ebox-viewport-width viewport)
              (lines (ebox-string-lines

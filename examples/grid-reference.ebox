@@ -1,4 +1,4 @@
-(column
+(box :layout 'column
  :height '(viewport-height)
  :width '(viewport)
  (box :content "Ebox CSS Grid Reference\nA complete, self-explaining gallery of the public Ebox Grid properties and value forms."
@@ -6,60 +6,60 @@
       :color "#20252B" :bgcolor "#FFFDF8"
       :face 'bold :text-align 'center)
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :grid-template-columns\nTrack sizing accepts fixed sizes, auto, fractional tracks, minmax, and repeat."
       :padding '(0 (18)) :border "#B85C3C"
       :bgcolor "#F1D4C9" :color "#4C271D" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#B85C3C" :border-top-p nil
        :bgcolor "#FFF9F4"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fixed\n:((120) (74))" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (2))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (2))
                      :grid-template-columns '((120) (74)) :grid-template-rows '(2)
                      :gap '(0 (6)) :border "#B85C3C" :bgcolor "#FFF8F2"
                      (box :content "120 PX" :bgcolor "#F1D0AF" :color "#3D2B1F" :text-align 'center)
                      (box :content "74 PX" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto\nauto tracks use intrinsic content" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (6))
                      :grid-template-columns '(auto auto) :grid-template-rows '(2)
                      :gap '(0 (6)) :border "#B85C3C" :bgcolor "#FFF8F2"
                      (box :content "intrinsic" :bgcolor "#F1D0AF" :color "#3D2B1F" :text-align 'center)
                      (box :content "content" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fractional symbols\n1fr distributes by weight" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (6))
                      :grid-template-columns '(1fr 2fr) :grid-template-rows '(2)
                      :gap '(0 (6)) :border "#B85C3C" :bgcolor "#FFF8F2"
                      (box :content "1FR" :bgcolor "#F1D0AF" :color "#3D2B1F" :text-align 'center)
                      (box :content "2FR" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fractional forms\n(fr FACTOR) is equivalent to NFR" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (6))
                      :grid-template-columns '((fr 1) (fr 2)) :grid-template-rows '(2)
                      :gap '(0 (6)) :border "#B85C3C" :bgcolor "#FFF8F2"
                      (box :content "(fr 1)" :bgcolor "#F1D0AF" :color "#3D2B1F" :text-align 'center)
                      (box :content "(fr 2)" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "minmax\nminimum protects a readable track" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (6))
                      :grid-template-columns '((minmax (74) (120)) (74))
                      :grid-template-rows '(2) :gap '(0 (6))
                      :border "#B85C3C" :bgcolor "#FFF8F2"
                      (box :content "74 → 120" :bgcolor "#F1D0AF" :color "#3D2B1F" :text-align 'center)
                      (box :content "fixed" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "repeat\nrepeat 2 visibly expands the template" :padding '(0 (6))
                     :border "#B85C3C" :bgcolor "#F7C8B3" :color "#3D2B1F" :text-align 'center)
-               (grid :width '(206) :height 3 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 3 :padding '(0 (6))
                      :grid-template-columns '((repeat 2 (62)) (fr 1))
                      :grid-template-rows '(2) :gap '(0 (6))
                      :border "#B85C3C" :bgcolor "#FFF8F2"
@@ -67,60 +67,60 @@
                      (box :content "REPEAT B" :bgcolor "#D9AD83" :color "#3D2B1F" :text-align 'center)
                      (box :content "FR" :bgcolor "#BF7F63" :color "#FFFFFF" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :grid-template-rows\nThe same track grammar works on the block axis; fixed lines, auto sizing, fractions, minmax, and repeat are shown independently."
       :padding '(0 (18)) :border "#537A63"
       :bgcolor "#DCEBDD" :color "#26402F" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#537A63" :border-top-p nil
        :bgcolor "#F7FBF7"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fixed rows\n(1 2)" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 5 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 5 :padding '(0 (6))
                      :grid-template-columns '((192)) :grid-template-rows '(1 2)
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
                      (box :content "ROW 1" :bgcolor "#DCEBDD" :color "#26402F" :text-align 'center)
                      (box :content "ROW 2" :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto rows\nintrinsic line heights" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 5 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 5 :padding '(0 (6))
                      :grid-template-columns '((192)) :grid-template-rows '(auto auto)
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
                      (box :content "short" :height 1 :bgcolor "#DCEBDD" :color "#26402F" :text-align 'center)
                      (box :content "tall\ncontent" :height 2 :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fractional rows\n1fr / 2fr" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 6 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 6 :padding '(0 (6))
                      :grid-template-columns '((192)) :grid-template-rows '(1fr 2fr)
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
                      (box :content "1FR" :bgcolor "#DCEBDD" :color "#26402F" :text-align 'center)
                      (box :content "2FR" :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "fractional row forms\n(fr 1) / (fr 2)" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 6 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 6 :padding '(0 (6))
                      :grid-template-columns '((192)) :grid-template-rows '((fr 1) (fr 2))
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
                      (box :content "(fr 1)" :bgcolor "#DCEBDD" :color "#26402F" :text-align 'center)
                      (box :content "(fr 2)" :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "minmax rows\n(min 1 / max 3)" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 6 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 6 :padding '(0 (6))
                      :grid-template-columns '((192))
                      :grid-template-rows '((minmax (1) (3)) 1)
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
                      (box :content "MINMAX" :bgcolor "#DCEBDD" :color "#26402F" :text-align 'center)
                      (box :content "FIXED" :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "repeat rows\nrepeat 3 expands lines" :padding '(0 (6))
                     :border "#537A63" :bgcolor "#C8DDCB" :color "#26402F" :text-align 'center)
-               (grid :width '(206) :height 6 :padding '(0 (6))
+               (box :layout 'grid :width '(206) :height 6 :padding '(0 (6))
                      :grid-template-columns '((192))
                      :grid-template-rows '((repeat 3 (1)))
                      :gap '(0 (6)) :border "#537A63" :bgcolor "#F8FCF8"
@@ -128,49 +128,49 @@
                      (box :content "ROW B" :bgcolor "#A6C6AB" :color "#26402F" :text-align 'center)
                      (box :content "ROW C" :bgcolor "#7EA887" :color "#FFFFFF" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container properties: :grid-auto-columns and :grid-auto-rows\nImplicit tracks use the same fixed, auto, fractional, and minmax track forms. Ebox resolves one normalized implicit track at a time."
       :padding '(0 (18)) :border "#416E8A"
       :bgcolor "#D9EAF2" :color "#203A4A" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#416E8A" :border-top-p nil
        :bgcolor "#F6FBFD"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-columns · fixed\n:grid-auto-columns ((64))" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((64))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((64))
                      :grid-template-rows '(1 1) :grid-auto-columns '((64))
                      :grid-auto-flow 'column :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "C" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-columns · auto\nintrinsic implicit width" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((64))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((64))
                      :grid-template-rows '(1 1) :grid-auto-columns 'auto
                      :grid-auto-flow 'column :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "LONG C" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)
                      (box :content "C" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-columns · 1fr\nimplicit remainder" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((64))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((64))
                      :grid-template-rows '(1 1) :grid-auto-columns '1fr
                      :grid-auto-flow 'column :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "1FR" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)
                      (box :content "C" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-columns · minmax\nminimum implicit width" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((64))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((64))
                      :grid-template-rows '(1 1)
                      :grid-auto-columns '((minmax (64) (120)))
                      :grid-auto-flow 'column :gap '(0 (6))
@@ -178,37 +178,37 @@
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "MINMAX" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)
                      (box :content "C" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-rows · fixed\n:grid-auto-rows 2" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1) :grid-auto-rows 2 :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "AUTO ROW" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-rows · auto\nintrinsic implicit height" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1) :grid-auto-rows 'auto :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "TALL\nAUTO ROW" :height 2 :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-rows · 1fr\nimplicit remainder" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 6 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 6 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1) :grid-auto-rows '1fr :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "1FR ROW" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "auto-rows · minmax\nbounded implicit height" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 6 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 6 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1)
                      :grid-auto-rows '((minmax (1) (3))) :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
@@ -216,29 +216,29 @@
                      (box :content "B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "MINMAX ROW" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :grid-auto-flow\nAutomatic placement is row-major or column-major. Ebox intentionally supports row and column, not the browser dense variants."
       :padding '(0 (18)) :border "#416E8A"
       :bgcolor "#D9EAF2" :color "#203A4A" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#416E8A" :border-top-p nil
        :bgcolor "#F6FBFD"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "row\nfills each row before creating the next" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1 1) :grid-auto-flow 'row :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
                      (box :content "1A" :bgcolor "#D9EAF2" :color "#203A4A" :text-align 'center)
                      (box :content "1B" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
                      (box :content "2A" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)
                      (box :content "2B" :bgcolor "#8DBDCE" :color "#203A4A" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "column\nfills each column before creating the next" :padding '(0 (6))
                     :border "#416E8A" :bgcolor "#C3DFEA" :color "#203A4A" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94))
                      :grid-template-rows '(1 1) :grid-auto-columns '((94))
                      :grid-auto-flow 'column :gap '(0 (6))
                      :border "#416E8A" :bgcolor "#F8FCFE"
@@ -247,64 +247,64 @@
                      (box :content "C2/R1" :bgcolor "#A9D0DE" :color "#203A4A" :text-align 'center)
                      (box :content "C2/R2" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container properties: :gap, :row-gap, :column-gap\nThe shorthand accepts one shared value or a row/column pair. Longhands override the matching side; grid-row-gap and grid-column-gap remain public aliases."
       :padding '(0 (18)) :border "#3D7068"
       :bgcolor "#CDEBE5" :color "#1D3935" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#3D7068" :border-top-p nil
        :bgcolor "#F7FCFB"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "gap scalar\n:gap 1" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1 1) :gap 1
                      :border "#3D7068" :bgcolor "#F7FCFB"
                      (box :content "A" :bgcolor "#CDEBE5" :color "#1D3935" :text-align 'center)
                      (box :content "B" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "C" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "gap pair\n:gap (1 (14))" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1 1) :gap '(1 (14))
                      :border "#3D7068" :bgcolor "#F7FCFB"
                      (box :content "ROW GAP" :bgcolor "#CDEBE5" :color "#1D3935" :text-align 'center)
                      (box :content "COLUMN GAP" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "PAIR" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "row-gap\n:row-gap 2" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((94) (94))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((94) (94))
                      :grid-template-rows '(1 1) :row-gap 2 :column-gap '(8)
                      :border "#3D7068" :bgcolor "#F7FCFB"
                      (box :content "A" :bgcolor "#CDEBE5" :color "#1D3935" :text-align 'center)
                      (box :content "B" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "ROW 2" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "column-gap\n:column-gap (28)" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((88) (88))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((88) (88))
                      :grid-template-rows '(1 1) :row-gap 1 :column-gap '(28)
                      :border "#3D7068" :bgcolor "#F7FCFB"
                      (box :content "LEFT" :bgcolor "#CDEBE5" :color "#1D3935" :text-align 'center)
                      (box :content "RIGHT" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "LONG GAP" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "aliases\n:grid-row-gap / :grid-column-gap" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((88) (88))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((88) (88))
                      :grid-template-rows '(1 1) :grid-row-gap 2 :grid-column-gap '(28)
                      :border "#3D7068" :bgcolor "#F7FCFB"
                      (box :content "ROW ALIAS" :bgcolor "#CDEBE5" :color "#1D3935" :text-align 'center)
                      (box :content "COLUMN ALIAS" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "OVERRIDE" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "override\nexplicit sides win over :gap" :padding '(0 (6))
                     :border "#3D7068" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((88) (88))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((88) (88))
                      :grid-template-rows '(1 1) :gap '(1 (8))
                      :row-gap 2 :column-gap '(28)
                      :border "#3D7068" :bgcolor "#F7FCFB"
@@ -312,361 +312,361 @@
                      (box :content "OVERRIDDEN" :bgcolor "#9FD5CB" :color "#1D3935" :text-align 'center)
                      (box :content "SIDES" :bgcolor "#71BDB0" :color "#FFFFFF" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Item properties: :grid-column, :grid-row, :grid-column-span, :grid-row-span\nPlacement is one-based. A property accepts a start number, (start :span count), or (start end); span longhands work with automatic placement too."
       :padding '(0 (18)) :border "#6A5C8B"
       :bgcolor "#E7E2F1" :color "#332B4B" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#6A5C8B" :border-top-p nil
        :bgcolor "#FBF9FF"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "automatic placement\nno item coordinates" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (box :content "A" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)
                      (box :content "B" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "C" :bgcolor "#AFA3D1" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-column 2\none column start" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-column 2
                                 (box :content "C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "AUTO" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-row 2\none row start" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-row 2
                                 (box :content "R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "AUTO" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-column (1 :span 2)\nspan in the column value" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-column '(1 :span 2)
                                 (box :content "C1–C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-row (1 :span 2)\nspan in the row value" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-row '(1 :span 2)
                                 (box :content "R1–R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-column (1 3)\nexplicit end line" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-column '(1 3)
                                 (box :content "C1→C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-row (1 3)\nexplicit end line" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-row '(1 3)
                                 (box :content "R1→R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-column-span 2\nlonghand span" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-column-span 2
                                 (box :content "C1–C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content ":grid-row-span 2\nlonghand span" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (grid-item :grid-row-span 2
                                 (box :content "R1–R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "direct child placement\n:grid-item is only a convenience" :padding '(0 (6))
                     :border "#6A5C8B" :bgcolor "#D8D0E8" :color "#332B4B" :text-align 'center)
-               (grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
+               (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
                      (box :grid-column 2 :grid-row 2 :content "DIRECT\nC2/R2"
                           :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "AUTO" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :justify-items\nInline-axis item alignment supports start, center, end, stretch, and normal. Fixed-size items make the first three positions visible."
       :padding '(0 (18)) :border "#B07836"
       :bgcolor "#F3E4C7" :color "#513718" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#B07836" :border-top-p nil
        :bgcolor "#FFF9ED"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((194))
                      :grid-template-rows '(3) :justify-items 'start :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(72) :content "START" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "center" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((194))
                      :grid-template-rows '(3) :justify-items 'center :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(72) :content "CENTER" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "end" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((194))
                      :grid-template-rows '(3) :justify-items 'end :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(72) :content "END" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "stretch" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((194))
                      :grid-template-rows '(3) :justify-items 'stretch :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :content "AUTO WIDTH\nSTRETCH" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "normal" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((194))
                      :grid-template-rows '(3) :justify-items 'normal :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :content "AUTO WIDTH\nNORMAL" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :align-items\nBlock-axis item alignment supports start, center, end, stretch, and normal. The fixed row height exposes the vertical offset."
       :padding '(0 (18)) :border "#B07836"
       :bgcolor "#F3E4C7" :color "#513718" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#B07836" :border-top-p nil
        :bgcolor "#FFF9ED"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((194))
                      :grid-template-rows '(5) :justify-items 'center :align-items 'start
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(82) :height 1 :content "START" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "center" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((194))
                      :grid-template-rows '(5) :justify-items 'center :align-items 'center
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(82) :height 1 :content "CENTER" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "end" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((194))
                      :grid-template-rows '(5) :justify-items 'center :align-items 'end
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :width '(82) :height 1 :content "END" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "stretch" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((194))
                      :grid-template-rows '(5) :justify-items 'center :align-items 'stretch
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :content "AUTO HEIGHT\nSTRETCH" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "normal" :padding '(0 (6))
                     :border "#B07836" :bgcolor "#EAD2A6" :color "#513718" :text-align 'center)
-               (grid :width '(206) :height 5 :grid-template-columns '((194))
+               (box :layout 'grid :width '(206) :height 5 :grid-template-columns '((194))
                      :grid-template-rows '(5) :justify-items 'center :align-items 'normal
                      :border "#B07836" :bgcolor "#FFF9ED"
                      (box :content "NORMAL" :bgcolor "#F3E4C7" :color "#513718" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :justify-content\nInline-axis track packing supports start, center, end, space-between, space-around, space-evenly, stretch, and normal."
       :padding '(0 (18)) :border "#2F7180"
       :bgcolor "#CFE8EA" :color "#1E4148" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#2F7180" :border-top-p nil
        :bgcolor "#F6FCFC"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'start
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "center" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'center
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "end" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'end
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-between" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'space-between
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-around" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'space-around
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-evenly" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'space-evenly
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "stretch" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'stretch
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "normal" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 3 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 3 :grid-template-columns '((60) (60))
                      :grid-template-rows '(2) :gap '(0 (6)) :justify-content 'normal
                      :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "Container property: :align-content\nBlock-axis track packing mirrors justify-content: start, center, end, space-between, space-around, space-evenly, stretch, and normal."
       :padding '(0 (18)) :border "#2F7180"
       :bgcolor "#CFE8EA" :color "#1E4148" :wrap-mode 'word)
- (grid :grid-template-columns '((206) (206) (206))
+ (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
        :padding '(0 (12)) :border "#2F7180" :border-top-p nil
        :bgcolor "#F6FCFC"
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'start
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "center" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'center
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "end" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'end
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-between" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'space-between
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-around" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'space-around
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "space-evenly" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'space-evenly
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "stretch" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'stretch
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
                      (box :content "A" :bgcolor "#CFE8EA" :color "#1E4148" :text-align 'center)
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center)))
-       (column :width '(206)
+       (box :layout 'column :width '(206)
                (box :content "normal" :padding '(0 (6))
                     :border "#2F7180" :bgcolor "#B5DDE0" :color "#1E4148" :text-align 'center)
-               (grid :width '(206) :height 7 :grid-template-columns '((60) (60))
+               (box :layout 'grid :width '(206) :height 7 :grid-template-columns '((60) (60))
                      :grid-template-rows '(1 1) :gap '(0 (6)) :align-content 'normal
                      :justify-content 'center :justify-items 'center :align-items 'center
                      :border "#2F7180" :bgcolor "#F6FCFC"
@@ -674,7 +674,7 @@
                      (box :content "B" :bgcolor "#9ACED2" :color "#1E4148" :text-align 'center)
                      (box :content "C" :bgcolor "#8DBDCE" :color "#FFFFFF" :text-align 'center))))
 
- (spacer :width '(viewport) :height 1 :bgcolor "#FAF7F0")
+ (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
  (box :content "GRID TOOLKIT\n:grid-template-columns · :grid-template-rows · :grid-auto-columns · :grid-auto-rows · :grid-auto-flow · :gap · :row-gap · :column-gap · :grid-row-gap · :grid-column-gap · :justify-items · :align-items · :justify-content · :align-content · :grid-column · :grid-row · :grid-column-span · :grid-row-span\nTrack forms: fixed · auto · (fr FACTOR) · NFR · minmax · repeat. Placement forms: start · (start :span count) · (start end)."
       :padding '(1 (16)) :border "#2E3740"

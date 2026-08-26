@@ -1,17 +1,17 @@
-(column
+(box :layout 'column
  (box :content "Ebox comprehensive DSL showcase\nThe outer sections omit :width so Playground viewport sizing drives the layout."
       :padding '(1 (16)) :border "#334155"
       :bgcolor "#F8FAFC" :color "#0F172A" :text-align 'center)
 
- (spacer :width '(viewport) :height 1 :bgcolor "#F8FAFC")
+ (box :width '(viewport) :height 1 :bgcolor "#F8FAFC")
 
  (box :content "Width rule in this file\nContainer sections use auto width. Fixed widths remain only where the example demonstrates exact item sizing, basis, min-width, or max-width."
       :padding '(0 (14)) :border "#64748B"
       :bgcolor "#F8FAFC" :color "#111827" :wrap-mode 'word)
 
- (spacer :width '(viewport) :height 1 :bgcolor "#F8FAFC")
+ (box :width '(viewport) :height 1 :bgcolor "#F8FAFC")
 
- (flex
+ (box :layout 'flex
   :margin '(1 0 0 1) :padding '(1 (8))
   :border "#475569" :bgcolor "#F8FAFC"
   :flex-flow '(row wrap)
