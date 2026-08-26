@@ -19,36 +19,36 @@
         (box :layout 'flex :width '(220) :height 4 :padding '(0 (8)) :border "#D97757"
               :border-top-p nil
               :bgcolor "#FFF8F2" :flex-direction 'row :column-gap '(10) :align-items 'center
-              (item (box :content "A" :width '(42) :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(42) :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(42) :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(42) :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(42) :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(42) :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "row-reverse" :width '(220) :padding '(0 (10)) :border "#D97757"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :width '(220) :height 4 :padding '(0 (8)) :border "#D97757"
               :border-top-p nil
               :bgcolor "#FFF8F2" :flex-direction 'row-reverse :column-gap '(10) :align-items 'center
-              (item (box :content "A" :width '(42) :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(42) :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(42) :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(42) :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(42) :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(42) :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "column" :width '(220) :padding '(0 (10)) :border "#D97757"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :width '(220) :height 6 :padding '(0 (8)) :border "#D97757"
               :border-top-p nil
               :bgcolor "#FFF8F2" :flex-direction 'column :row-gap 1 :align-items 'stretch
-              (item (box :content "A" :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center)
+              (box :content "B" :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center)
+              (box :content "C" :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "column-reverse" :width '(220) :padding '(0 (10)) :border "#D97757"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :width '(220) :height 6 :padding '(0 (8)) :border "#D97757"
               :border-top-p nil
               :bgcolor "#FFF8F2" :flex-direction 'column-reverse :row-gap 1 :align-items 'stretch
-              (item (box :content "A" :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center)))))
+              (box :content "A" :height 1 :bgcolor "#F7C8B3" :color "#1F2328" :text-align 'center)
+              (box :content "B" :height 1 :bgcolor "#F0A88F" :color "#1F2328" :text-align 'center)
+              (box :content "C" :height 1 :bgcolor "#D97757" :color "#1F2328" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -64,27 +64,27 @@
         (box :layout 'flex :max-width '(293) :padding '(0 (8)) :border "#5E7F6A"
               :border-top-p nil
               :bgcolor "#F8FCF8" :flex-wrap 'nowrap :column-gap '(8) :align-items 'center
-              (item :flex-shrink 1 (box :content "A" :width '(92) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 1 (box :content "B" :width '(92) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 1 (box :content "C" :width '(92) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center))))
+              (box :flex-shrink 1 :content "A" :width '(92) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 1 :content "B" :width '(92) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 1 :content "C" :width '(92) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "wrap" :max-width '(293) :padding '(0 (10)) :border "#5E7F6A"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :max-width '(293) :padding '(0 (8)) :border "#5E7F6A"
               :border-top-p nil
               :bgcolor "#F8FCF8" :flex-wrap 'wrap :column-gap '(8) :row-gap 1
-              (item :flex-shrink 0 (box :content "A 118" :width '(118) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 0 (box :content "B 118" :width '(118) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 0 (box :content "C 118" :width '(118) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center))))
+              (box :flex-shrink 0 :content "A 118" :width '(118) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 0 :content "B 118" :width '(118) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 0 :content "C 118" :width '(118) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "wrap-reverse" :max-width '(293) :padding '(0 (10)) :border "#5E7F6A"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :max-width '(293) :padding '(0 (8)) :border "#5E7F6A"
               :border-top-p nil
               :bgcolor "#F8FCF8" :flex-wrap 'wrap-reverse :column-gap '(8) :row-gap 1
-              (item :flex-shrink 0 (box :content "A 118" :width '(118) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 0 (box :content "B 118" :width '(118) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center))
-              (item :flex-shrink 0 (box :content "C 118" :width '(118) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center)))))
+              (box :flex-shrink 0 :content "A 118" :width '(118) :height 1 :bgcolor "#DCEBDD" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 0 :content "B 118" :width '(118) :height 1 :bgcolor "#BFD6C2" :color "#1F2328" :text-align 'center)
+              (box :flex-shrink 0 :content "C 118" :width '(118) :height 1 :bgcolor "#8FAF95" :color "#1F2328" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -100,18 +100,18 @@
         (box :layout 'flex :max-width '(440) :padding '(0 (8)) :border "#6F6A95"
               :border-top-p nil
               :bgcolor "#FBF9FF" :flex-flow '(row wrap) :gap '(1 (12))
-              (item (box :content "A" :width '(170) :height 1 :bgcolor "#E4DEF4" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(170) :height 1 :bgcolor "#CBC2E3" :color "#1F2328" :text-align 'center))
-              (item (box :content "C wraps" :width '(170) :height 1 :bgcolor "#AFA3D1" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(170) :height 1 :bgcolor "#E4DEF4" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(170) :height 1 :bgcolor "#CBC2E3" :color "#1F2328" :text-align 'center)
+              (box :content "C wraps" :width '(170) :height 1 :bgcolor "#AFA3D1" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content ":flex-flow (column wrap)" :max-width '(440) :padding '(0 (10))
              :border "#6F6A95" :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :max-width '(440) :padding '(0 (8)) :border "#6F6A95"
               :border-top-p nil
               :bgcolor "#FBF9FF" :flex-flow '(column wrap) :gap '(1 (12))
-              (item (box :content "A" :width '(140) :height 1 :bgcolor "#E4DEF4" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(140) :height 1 :bgcolor "#CBC2E3" :color "#1F2328" :text-align 'center))
-              (item (box :content "C new column" :width '(140) :height 1 :bgcolor "#AFA3D1" :color "#1F2328" :text-align 'center)))))
+              (box :content "A" :width '(140) :height 1 :bgcolor "#E4DEF4" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(140) :height 1 :bgcolor "#CBC2E3" :color "#1F2328" :text-align 'center)
+              (box :content "C new column" :width '(140) :height 1 :bgcolor "#AFA3D1" :color "#1F2328" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -124,53 +124,53 @@
        (box :layout 'column
         (box :content "flex-start" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'flex-start
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "center" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'center
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "flex-end" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'flex-end
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-between" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'space-between
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-around" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'space-around
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-evenly" :width '(146) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'space-evenly
-              (item (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(28) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(28) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "start" :width '(176) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'start
-              (item (box :content "start" :width '(70) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center))))
+              (box :content "start" :width '(70) :height 1 :bgcolor "#CAE6F0" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "end" :width '(176) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'end
-              (item (box :content "end" :width '(70) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center))))
+              (box :content "end" :width '(70) :height 1 :bgcolor "#A8D2E2" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "left" :width '(176) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'left
-              (item (box :content "left" :width '(70) :height 1 :bgcolor "#7DB8CE" :color "#1F2328" :text-align 'center))))
+              (box :content "left" :width '(70) :height 1 :bgcolor "#7DB8CE" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "right" :width '(176) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'right
-              (item (box :content "right" :width '(70) :height 1 :bgcolor "#5F9CB5" :color "#1F2328" :text-align 'center))))
+              (box :content "right" :width '(70) :height 1 :bgcolor "#5F9CB5" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "normal" :width '(176) :padding '(0 (4)) :border "#3F6D88" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :border "#3F6D88" :border-top-p nil :bgcolor "#F6FBFD" :justify-content 'normal
-              (item (box :content "normal" :width '(70) :height 1 :bgcolor "#3F6D88" :color "#FFFFFF" :text-align 'center)))))
+              (box :content "normal" :width '(70) :height 1 :bgcolor "#3F6D88" :color "#FFFFFF" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -183,47 +183,47 @@
        (box :layout 'column
         (box :content "flex-start" :width '(176) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 5 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'flex-start
-              (item (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center))
-              (item (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center))))
+              (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center)
+              (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "center" :width '(176) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 5 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'center
-              (item (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center))
-              (item (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center))))
+              (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center)
+              (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "flex-end" :width '(176) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 5 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'flex-end
-              (item (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center))
-              (item (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center))))
+              (box :content "short" :width '(68) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center)
+              (box :content "tall\nitem\nsets line" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "stretch" :width '(176) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 5 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'stretch
-              (item (box :content "auto height stretches" :width '(72) :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center))
-              (item (box :content "line height" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center))))
+              (box :content "auto height stretches" :width '(72) :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center)
+              (box :content "line height" :width '(78) :height 3 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "baseline" :width '(176) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 5 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'baseline
-              (item (box :content "baseline" :width '(90) :height 1 :bgcolor "#BA8456" :color "#1F2328" :text-align 'center))))
+              (box :content "baseline" :width '(90) :height 1 :bgcolor "#BA8456" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "start" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :height 4 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'start
-              (item (box :content "start" :width '(62) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center))))
+              (box :content "start" :width '(62) :height 1 :bgcolor "#F1D0AF" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "end" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :height 4 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'end
-              (item (box :content "end" :width '(62) :height 1 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center))))
+              (box :content "end" :width '(62) :height 1 :bgcolor "#D9AD83" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "self-start" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :height 4 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'self-start
-              (item (box :content "self-start" :width '(78) :height 1 :bgcolor "#BA8456" :color "#1F2328" :text-align 'center))))
+              (box :content "self-start" :width '(78) :height 1 :bgcolor "#BA8456" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "self-end" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :height 4 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'self-end
-              (item (box :content "self-end" :width '(70) :height 1 :bgcolor "#9A6B43" :color "#FFFFFF" :text-align 'center))))
+              (box :content "self-end" :width '(70) :height 1 :bgcolor "#9A6B43" :color "#FFFFFF" :text-align 'center)))
        (box :layout 'column
         (box :content "normal" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(146) :height 4 :border "#9A6B43" :border-top-p nil :bgcolor "#FFFAF5" :align-items 'normal
-              (item (box :content "normal" :width '(62) :bgcolor "#7A5132" :color "#FFFFFF" :text-align 'center))))
+              (box :content "normal" :width '(62) :bgcolor "#7A5132" :color "#FFFFFF" :text-align 'center)))
        (box :layout 'column
         (box :content "stretch note" :width '(146) :padding '(0 (4)) :border "#9A6B43" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :content "normal behaves stretch-like for auto cross size in this DSL." :width '(146)
@@ -242,84 +242,84 @@
         (box :content "flex-start" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'flex-start :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "center" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'center :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "flex-end" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'flex-end :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-between" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'space-between :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-around" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'space-around :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "space-evenly" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'space-evenly :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "stretch" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'stretch :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "start" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'start :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "end" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'end :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "baseline" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'baseline :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "normal" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'wrap :align-content 'normal :row-gap 1 :column-gap '(8)
-              (item (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(78) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(78) :height 1 :bgcolor "#D9C46D" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(78) :height 1 :bgcolor "#B89B3D" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content "nowrap note" :width '(176) :padding '(0 (4)) :border "#7C6A2F" :bgcolor "#FFFDF8" :color "#1F2328" :text-align 'center)
         (box :layout 'flex :width '(176) :height 7 :border "#7C6A2F" :border-top-p nil :bgcolor "#FFFDF0"
               :flex-wrap 'nowrap :align-content 'normal :row-gap 1 :column-gap '(8)
-              (item (box :content "single line" :width '(96) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center)))))
+              (box :content "single line" :width '(96) :height 1 :bgcolor "#EEE1A8" :color "#1F2328" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -335,25 +335,25 @@
         (box :layout 'flex :max-width '(293)
               :border "#3D7068" :border-top-p nil :bgcolor "#F7FCFB"
               :flex-wrap 'wrap :gap '(1 (14))
-              (item (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content ":row-gap 2" :max-width '(293) :padding '(0 (10)) :border "#3D7068"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :max-width '(293) :border "#3D7068" :border-top-p nil :bgcolor "#F7FCFB"
               :flex-wrap 'wrap :row-gap 2 :column-gap '(8)
-              (item (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center))))
+              (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center)))
        (box :layout 'column
         (box :content ":column-gap (32)" :max-width '(293) :padding '(0 (10)) :border "#3D7068"
              :bgcolor "#FFFDF8" :color "#3D3A35" :text-align 'center)
         (box :layout 'flex :max-width '(293) :border "#3D7068" :border-top-p nil :bgcolor "#F7FCFB"
               :flex-wrap 'wrap :row-gap 1 :column-gap '(32)
-              (item (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center))
-              (item (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center))
-              (item (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center)))))
+              (box :content "A" :width '(104) :height 1 :bgcolor "#CDEBE5" :color "#1F2328" :text-align 'center)
+              (box :content "B" :width '(104) :height 1 :bgcolor "#9FD5CB" :color "#1F2328" :text-align 'center)
+              (box :content "C" :width '(104) :height 1 :bgcolor "#71BDB0" :color "#1F2328" :text-align 'center))))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -363,10 +363,10 @@
  (box :layout 'flex :height 5 :padding '(0 (12)) :border "#8E4A63"
        :border-top-p nil
        :bgcolor "#FFF8FA" :column-gap '(12) :align-items 'center
-       (item :order 3 (box :content "source 1\n:order 3" :width '(150) :height 2 :bgcolor "#F2C4D2" :color "#1F2328" :text-align 'center))
-       (item :order 1 (box :content "source 2\n:order 1" :width '(150) :height 2 :bgcolor "#DEA4B7" :color "#1F2328" :text-align 'center))
-       (item :order 2 (box :content "source 3\n:order 2" :width '(150) :height 2 :bgcolor "#C87F9A" :color "#1F2328" :text-align 'center))
-       (item :order 1 (box :content "source 4\nsame order" :width '(150) :height 2 :bgcolor "#A95F7C" :color "#FFFFFF" :text-align 'center)))
+       (box :order 3 :content "source 1\n:order 3" :width '(150) :height 2 :bgcolor "#F2C4D2" :color "#1F2328" :text-align 'center)
+       (box :order 1 :content "source 2\n:order 1" :width '(150) :height 2 :bgcolor "#DEA4B7" :color "#1F2328" :text-align 'center)
+       (box :order 2 :content "source 3\n:order 2" :width '(150) :height 2 :bgcolor "#C87F9A" :color "#1F2328" :text-align 'center)
+       (box :order 1 :content "source 4\nsame order" :width '(150) :height 2 :bgcolor "#A95F7C" :color "#FFFFFF" :text-align 'center))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -380,9 +380,9 @@
   (box :layout 'flex :padding '(0 (12)) :border "#2F5F7C"
         :border-top-p nil
         :bgcolor "#F8FCFE" :column-gap '(10)
-        (item :flex-grow 1 :flex-basis '(120) (box :content "grow 1\nbasis 120" :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center))
-        (item :flex-grow 2 :flex-basis '(120) (box :content "grow 2\nbasis 120" :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center))
-        (item :flex-grow 3 :flex-basis '(120) (box :content "grow 3\nbasis 120" :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center))))
+        (box :flex-grow 1 :flex-basis '(120) :content "grow 1\nbasis 120" :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center)
+        (box :flex-grow 2 :flex-basis '(120) :content "grow 2\nbasis 120" :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center)
+        (box :flex-grow 3 :flex-basis '(120) :content "grow 3\nbasis 120" :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center)))
  (box :layout 'column
   (box :content "Shrink factors: overflowing bases lose space by weighted shrink."
        :padding '(0 (12)) :border "#2F5F7C" :border-top-p nil
@@ -390,9 +390,9 @@
   (box :layout 'flex :padding '(0 (12)) :border "#2F5F7C"
         :border-top-p nil
         :bgcolor "#F8FCFE" :column-gap '(10)
-        (item :flex-shrink 1 :flex-basis '(320) (box :content "shrink 1\nbasis 320" :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center))
-        (item :flex-shrink 3 :flex-basis '(320) (box :content "shrink 3\nbasis 320" :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center))
-        (item :flex-shrink 5 :flex-basis '(320) (box :content "shrink 5\nbasis 320" :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center))))
+        (box :flex-shrink 1 :flex-basis '(320) :content "shrink 1\nbasis 320" :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center)
+        (box :flex-shrink 3 :flex-basis '(320) :content "shrink 3\nbasis 320" :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center)
+        (box :flex-shrink 5 :flex-basis '(320) :content "shrink 5\nbasis 320" :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center)))
  (box :layout 'column
   (box :content "Basis versus width: explicit basis overrides width; auto basis uses width/content."
        :padding '(0 (12)) :border "#2F5F7C" :border-top-p nil
@@ -400,9 +400,9 @@
   (box :layout 'flex :padding '(0 (12)) :border "#2F5F7C"
         :border-top-p nil
         :bgcolor "#F8FCFE" :column-gap '(10)
-        (item :flex-basis '(120) (box :content "basis 120\nwidth 240" :width '(240) :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center))
-        (item :flex-basis 'auto (box :content "basis auto\nwidth 240" :width '(240) :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center))
-        (item :flex '(1 1 (160)) (box :content "flex tuple\nbasis 160" :width '(240) :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center))))
+        (box :flex-basis '(120) :content "basis 120\nwidth 240" :width '(240) :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center)
+        (box :flex-basis 'auto :content "basis auto\nwidth 240" :width '(240) :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center)
+        (box :flex '(1 1 (160)) :content "flex tuple\nbasis 160" :width '(240) :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center)))
  (box :layout 'column
   (box :content "Intrinsic basis keywords: content, min-content, and max-content derive size from text."
        :padding '(0 (12)) :border "#2F5F7C" :border-top-p nil
@@ -410,12 +410,12 @@
   (box :layout 'flex :padding '(0 (12)) :border "#2F5F7C"
         :border-top-p nil
         :bgcolor "#F8FCFE" :flex-wrap 'wrap :row-gap 1 :column-gap '(10)
-        (item :flex-shrink 0 :flex-basis 'content
-              (box :content "content\nnatural text" :width '(180) :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center))
-        (item :flex-shrink 0 :flex-basis 'min-content
-              (box :content "min-content\nwrap choices" :width '(180) :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center))
-        (item :flex-shrink 0 :flex-basis 'max-content
-              (box :content "max-content\nkeeps phrase width" :width '(180) :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center))))
+        (box :flex-shrink 0 :flex-basis 'content
+             :content "content\nnatural text" :width '(180) :height 2 :bgcolor "#C7E3F0" :color "#1F2328" :text-align 'center)
+        (box :flex-shrink 0 :flex-basis 'min-content
+             :content "min-content\nwrap choices" :width '(180) :height 2 :bgcolor "#96C7DD" :color "#1F2328" :text-align 'center)
+        (box :flex-shrink 0 :flex-basis 'max-content
+             :content "max-content\nkeeps phrase width" :width '(180) :height 2 :bgcolor "#5FA4C2" :color "#1F2328" :text-align 'center)))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -425,12 +425,12 @@
  (box :layout 'flex :height 7 :padding '(0 (12)) :border "#52612F"
        :border-top-p nil
        :bgcolor "#FCFDF6" :flex-wrap 'wrap :row-gap 1 :column-gap '(8) :align-items 'center
-       (item :flex 1 (box :content ":flex 1\n= 1 1 0" :bgcolor "#DDE8B2" :color "#1F2328" :text-align 'center))
-       (item :flex 'none (box :content ":flex none\n= 0 0 auto" :width '(140) :bgcolor "#C5D681" :color "#1F2328" :text-align 'center))
-       (item :flex 'auto (box :content ":flex auto\n= 1 1 auto" :width '(140) :bgcolor "#AABE59" :color "#1F2328" :text-align 'center))
-       (item :flex 'initial (box :content ":flex initial\n= 0 1 auto" :width '(140) :bgcolor "#8D9E3C" :color "#1F2328" :text-align 'center))
-       (item :flex '(2 1 (120)) :flex-basis '(160)
-             (box :content ":flex (2 1 120)\nthen basis 160" :bgcolor "#66762D" :color "#FFFFFF" :text-align 'center)))
+       (box :flex 1 :content ":flex 1\n= 1 1 0" :bgcolor "#DDE8B2" :color "#1F2328" :text-align 'center)
+       (box :flex 'none :content ":flex none\n= 0 0 auto" :width '(140) :bgcolor "#C5D681" :color "#1F2328" :text-align 'center)
+       (box :flex 'auto :content ":flex auto\n= 1 1 auto" :width '(140) :bgcolor "#AABE59" :color "#1F2328" :text-align 'center)
+       (box :flex 'initial :content ":flex initial\n= 0 1 auto" :width '(140) :bgcolor "#8D9E3C" :color "#1F2328" :text-align 'center)
+       (box :flex '(2 1 (120)) :flex-basis '(160)
+            :content ":flex (2 1 120)\nthen basis 160" :bgcolor "#66762D" :color "#FFFFFF" :text-align 'center))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 
@@ -441,21 +441,21 @@
        :border-top-p nil
        :bgcolor "#FFFAF7" :align-items 'flex-start
        :flex-wrap 'wrap :row-gap 1 :column-gap '(10)
-       (item :align-self 'auto (box :content "auto\ninherits start" :width '(118) :height 2 :bgcolor "#EFC7B6" :color "#1F2328" :text-align 'center))
-       (item :align-self 'flex-start (box :content "flex-start" :width '(118) :height 2 :bgcolor "#DBA58D" :color "#1F2328" :text-align 'center))
-       (item :align-self 'center (box :content "center" :width '(118) :height 2 :bgcolor "#BF7F63" :color "#1F2328" :text-align 'center))
-       (item :align-self 'flex-end (box :content "flex-end" :width '(118) :height 2 :bgcolor "#9D6048" :color "#FFFFFF" :text-align 'center))
-       (item :align-self 'stretch (box :content "stretch\nauto cross" :width '(118) :bgcolor "#7B4D38" :color "#FFFFFF" :text-align 'center))
-       (item :align-self 'normal (box :content "normal\nstretch-like" :width '(118) :bgcolor "#5D3929" :color "#FFFFFF" :text-align 'center)))
+       (box :align-self 'auto :content "auto\ninherits start" :width '(118) :height 2 :bgcolor "#EFC7B6" :color "#1F2328" :text-align 'center)
+       (box :align-self 'flex-start :content "flex-start" :width '(118) :height 2 :bgcolor "#DBA58D" :color "#1F2328" :text-align 'center)
+       (box :align-self 'center :content "center" :width '(118) :height 2 :bgcolor "#BF7F63" :color "#1F2328" :text-align 'center)
+       (box :align-self 'flex-end :content "flex-end" :width '(118) :height 2 :bgcolor "#9D6048" :color "#FFFFFF" :text-align 'center)
+       (box :align-self 'stretch :content "stretch\nauto cross" :width '(118) :bgcolor "#7B4D38" :color "#FFFFFF" :text-align 'center)
+       (box :align-self 'normal :content "normal\nstretch-like" :width '(118) :bgcolor "#5D3929" :color "#FFFFFF" :text-align 'center))
  (box :layout 'flex :height 6 :padding '(0 (12)) :border "#7B4D38"
        :border-top-p nil
        :bgcolor "#FFFAF7" :align-items 'flex-start
        :flex-wrap 'wrap :row-gap 1 :column-gap '(10)
-       (item :align-self 'start (box :content "start" :width '(118) :height 2 :bgcolor "#EFC7B6" :color "#1F2328" :text-align 'center))
-       (item :align-self 'end (box :content "end" :width '(118) :height 2 :bgcolor "#DBA58D" :color "#1F2328" :text-align 'center))
-       (item :align-self 'self-start (box :content "self-start" :width '(118) :height 2 :bgcolor "#BF7F63" :color "#1F2328" :text-align 'center))
-       (item :align-self 'self-end (box :content "self-end" :width '(118) :height 2 :bgcolor "#9D6048" :color "#FFFFFF" :text-align 'center))
-       (item :align-self 'baseline (box :content "baseline" :width '(118) :height 2 :bgcolor "#7B4D38" :color "#FFFFFF" :text-align 'center)))
+       (box :align-self 'start :content "start" :width '(118) :height 2 :bgcolor "#EFC7B6" :color "#1F2328" :text-align 'center)
+       (box :align-self 'end :content "end" :width '(118) :height 2 :bgcolor "#DBA58D" :color "#1F2328" :text-align 'center)
+       (box :align-self 'self-start :content "self-start" :width '(118) :height 2 :bgcolor "#BF7F63" :color "#1F2328" :text-align 'center)
+       (box :align-self 'self-end :content "self-end" :width '(118) :height 2 :bgcolor "#9D6048" :color "#FFFFFF" :text-align 'center)
+       (box :align-self 'baseline :content "baseline" :width '(118) :height 2 :bgcolor "#7B4D38" :color "#FFFFFF" :text-align 'center))
 
  (box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
 

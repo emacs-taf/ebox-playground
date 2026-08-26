@@ -336,8 +336,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-column 2
-                                (box :content "C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-column 2 :content "C2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "AUTO" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-row 2\none row start" :padding '(0 (6))
@@ -345,8 +345,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-row 2
-                                (box :content "R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-row 2 :content "R2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "AUTO" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-column (1 :span 2)\nspan in the column value" :padding '(0 (6))
@@ -354,8 +354,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-column '(1 :span 2)
-                                (box :content "C1–C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-column '(1 :span 2) :content "C1–C2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-row (1 :span 2)\nspan in the row value" :padding '(0 (6))
@@ -363,8 +363,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-row '(1 :span 2)
-                                (box :content "R1–R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-row '(1 :span 2) :content "R1–R2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-column (1 3)\nexplicit end line" :padding '(0 (6))
@@ -372,8 +372,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-column '(1 3)
-                                (box :content "C1→C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-column '(1 3) :content "C1→C2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-row (1 3)\nexplicit end line" :padding '(0 (6))
@@ -381,8 +381,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-row '(1 3)
-                                (box :content "R1→R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-row '(1 3) :content "R1→R2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-column-span 2\nlonghand span" :padding '(0 (6))
@@ -390,8 +390,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-column-span 2
-                                (box :content "C1–C2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-column-span 2 :content "C1–C2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "C3" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content ":grid-row-span 2\nlonghand span" :padding '(0 (6))
@@ -399,8 +399,8 @@
                (box :layout 'grid :width '(206) :height 4 :grid-template-columns '((58) (58) (58))
                      :grid-template-rows '(1 1) :gap '(0 (4))
                      :border "#6A5C8B" :bgcolor "#FBF9FF"
-                     (grid-item :grid-row-span 2
-                                (box :content "R1–R2" :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center))
+                     (box :grid-row-span 2 :content "R1–R2"
+                          :bgcolor "#CBC2E3" :color "#332B4B" :text-align 'center)
                      (box :content "OTHER" :bgcolor "#E7E2F1" :color "#332B4B" :text-align 'center)))
        (box :layout 'column :width '(206)
                (box :content "direct child placement\n:grid-item is only a convenience" :padding '(0 (6))

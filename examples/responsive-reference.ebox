@@ -38,26 +38,26 @@
  (box :layout 'flex :flex-flow '(row wrap) :column-gap '(12) :row-gap 1
        :padding '(1 (8)) :border "#93C5FD" :bgcolor "#F8FBFF"
        :justify-content 'center
-       (item :flex '(1 1 (210))
-             (box :content "Overview\nThe row uses the current preview width automatically."
-                  :min-width '(180) :max-width '(280)
-                  :padding '(0 (10)) ;; :border "#2563EB"
-                  :bgcolor "#DBEAFE" :color "#111827" :wrap-mode 'word))
-       (item :flex '(1 1 (210))
-             (box :content "Editor\nDrag slowly or quickly; resize rendering is debounced."
-                  :min-width '(180) :max-width '(300)
-                  :padding '(0 (10)) ;; :border "#4F46E5"
-                  :bgcolor "#E0E7FF" :color "#111827" :wrap-mode 'word))
-       (item :flex '(1 1 (210))
-             (box :content "Preview\nThe preview buffer rerenders after the viewport settles."
-                  :min-width '(180) :max-width '(320)
-                  :padding '(0 (10)) ;; :border "#7C3AED"
-                  :bgcolor "#EDE9FE" :color "#111827" :wrap-mode 'word))
-       (item :flex '(1 1 (210))
-             (box :content "Flow\nCards keep readable widths instead of overflowing."
-                  :min-width '(180) :max-width '(280)
-                  :padding '(0 (10)) ;; :border "#0891B2"
-                  :bgcolor "#CFFAFE" :color "#164E63" :wrap-mode 'word)))
+       (box :flex '(1 1 (210))
+            :content "Overview\nThe row uses the current preview width automatically."
+            :min-width '(180) :max-width '(280)
+            :padding '(0 (10)) ;; :border "#2563EB"
+            :bgcolor "#DBEAFE" :color "#111827" :wrap-mode 'word)
+       (box :flex '(1 1 (210))
+            :content "Editor\nDrag slowly or quickly; resize rendering follows the viewport."
+            :min-width '(180) :max-width '(300)
+            :padding '(0 (10)) ;; :border "#4F46E5"
+            :bgcolor "#E0E7FF" :color "#111827" :wrap-mode 'word)
+       (box :flex '(1 1 (210))
+            :content "Preview\nThe preview updates from the current viewport width."
+            :min-width '(180) :max-width '(320)
+            :padding '(0 (10)) ;; :border "#7C3AED"
+            :bgcolor "#EDE9FE" :color "#111827" :wrap-mode 'word)
+       (box :flex '(1 1 (210))
+            :content "Flow\nCards keep readable widths instead of overflowing."
+            :min-width '(180) :max-width '(280)
+            :padding '(0 (10)) ;; :border "#0891B2"
+            :bgcolor "#CFFAFE" :color "#164E63" :wrap-mode 'word))
  (box :height 1)
 
  (box :content "What to watch\nNarrow preview: cards stack and text wraps. Wide preview: cards share a row and expand up to max-width. The source/preview split is preserved."
