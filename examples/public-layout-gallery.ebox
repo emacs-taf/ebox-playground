@@ -12,7 +12,7 @@
       :width '(720)
       :padding '(0 (16))
       :border "#C97252"
-      :border-bottom-p nil
+      :border-bottom 'none
       :color "#252A2E"
       :bgcolor "#F1D4C9"
       :wrap-mode 'word)
@@ -37,7 +37,7 @@
       :width '(720)
       :padding '(0 (16))
       :border "#6D8A73"
-      :border-bottom-p nil
+      :border-bottom 'none
       :color "#252A2E"
       :bgcolor "#DCEBDD"
       :wrap-mode 'word)
@@ -65,7 +65,7 @@
       :width '(720)
       :padding '(0 (16))
       :border "#4E7890"
-      :border-bottom-p nil
+      :border-bottom 'none
       :color "#252A2E"
       :bgcolor "#D9EAF2"
       :wrap-mode 'word)

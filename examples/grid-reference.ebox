@@ -13,7 +13,7 @@
       :bgcolor "#F1D4C9" :color "#4C271D" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#B85C3C" :border-top-p nil
+       :padding '(0 (12)) :border "#B85C3C" :border-top 'none
        :bgcolor "#FFF9F4"
        (box :layout 'column :width '(206)
                (box :content "fixed\n:((120) (74))" :padding '(0 (6))
@@ -74,7 +74,7 @@
       :bgcolor "#DCEBDD" :color "#26402F" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#537A63" :border-top-p nil
+       :padding '(0 (12)) :border "#537A63" :border-top 'none
        :bgcolor "#F7FBF7"
        (box :layout 'column :width '(206)
                (box :content "fixed rows\n(1 2)" :padding '(0 (6))
@@ -135,7 +135,7 @@
       :bgcolor "#D9EAF2" :color "#203A4A" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#416E8A" :border-top-p nil
+       :padding '(0 (12)) :border "#416E8A" :border-top 'none
        :bgcolor "#F6FBFD"
        (box :layout 'column :width '(206)
                (box :content "auto-columns · fixed\n:grid-auto-columns ((64))" :padding '(0 (6))
@@ -223,7 +223,7 @@
       :bgcolor "#D9EAF2" :color "#203A4A" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#416E8A" :border-top-p nil
+       :padding '(0 (12)) :border "#416E8A" :border-top 'none
        :bgcolor "#F6FBFD"
        (box :layout 'column :width '(206)
                (box :content "row\nfills each row before creating the next" :padding '(0 (6))
@@ -254,7 +254,7 @@
       :bgcolor "#CDEBE5" :color "#1D3935" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#3D7068" :border-top-p nil
+       :padding '(0 (12)) :border "#3D7068" :border-top 'none
        :bgcolor "#F7FCFB"
        (box :layout 'column :width '(206)
                (box :content "gap scalar\n:gap 1" :padding '(0 (6))
@@ -319,7 +319,7 @@
       :bgcolor "#E7E2F1" :color "#332B4B" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#6A5C8B" :border-top-p nil
+       :padding '(0 (12)) :border "#6A5C8B" :border-top 'none
        :bgcolor "#FBF9FF"
        (box :layout 'column :width '(206)
                (box :content "automatic placement\nno item coordinates" :padding '(0 (6))
@@ -419,7 +419,7 @@
       :bgcolor "#F3E4C7" :color "#513718" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#B07836" :border-top-p nil
+       :padding '(0 (12)) :border "#B07836" :border-top 'none
        :bgcolor "#FFF9ED"
        (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
@@ -464,7 +464,7 @@
       :bgcolor "#F3E4C7" :color "#513718" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#B07836" :border-top-p nil
+       :padding '(0 (12)) :border "#B07836" :border-top 'none
        :bgcolor "#FFF9ED"
        (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
@@ -509,7 +509,7 @@
       :bgcolor "#CFE8EA" :color "#1E4148" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#2F7180" :border-top-p nil
+       :padding '(0 (12)) :border "#2F7180" :border-top 'none
        :bgcolor "#F6FCFC"
        (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
@@ -591,7 +591,7 @@
       :bgcolor "#CFE8EA" :color "#1E4148" :wrap-mode 'word)
  (box :layout 'grid :grid-template-columns '((206) (206) (206))
        :grid-auto-rows 'auto :gap '(1 (10)) :justify-content 'space-between
-       :padding '(0 (12)) :border "#2F7180" :border-top-p nil
+       :padding '(0 (12)) :border "#2F7180" :border-top 'none
        :bgcolor "#F6FCFC"
        (box :layout 'column :width '(206)
                (box :content "start" :padding '(0 (6))
