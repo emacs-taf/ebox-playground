@@ -137,6 +137,36 @@
                      "EXPLICIT PLACEMENT" "PUBLIC COMPOSITION"))
       (should (string-match-p (regexp-quote label) rendered)))))
 
+(ert-deftest ebox-playground-flex-evaluator-uses-public-observation ()
+  "Keep the Flex resize gate on public Ebox reports without advice."
+  (let ((source (with-temp-buffer
+                  (insert-file-contents
+                   (expand-file-name
+                    "scripts/ebox-playground-flex-resize-evaluator.el"
+                    ebox-playground-directory))
+                  (buffer-string)))
+        (runner (with-temp-buffer
+                  (insert-file-contents
+                   (expand-file-name "scripts/flex-resize-evaluator.sh"
+                                     ebox-playground-directory))
+                  (buffer-string)))
+        (makefile (with-temp-buffer
+                    (insert-file-contents
+                     (expand-file-name "Makefile" ebox-playground-directory))
+                    (buffer-string))))
+    (should (string-match-p "ebox-buffer-set-observer" source))
+    (should (string-match-p "evaluator-warmup-count 5" source))
+    (should (string-match-p "evaluator-sample-count 30" source))
+    (should (string-match-p "per-update p95 budget" source))
+    (should (string-match-p "EBOX_PLAYGROUND_FLEX_FIXTURE" runner))
+    (should (string-match-p "show HEAD:examples/flex-reference.ebox" runner))
+    (should (string-match-p "performance-prepare:" makefile))
+    (should (string-match-p "native-build" makefile))
+    (should-not (string-match-p "-l \"\$root/ebox-playground.el\"" runner))
+    (dolist (private '("ebox--" "advice-add" "advice-remove"
+                       "ebox-native-reflow--"))
+      (should-not (string-match-p (regexp-quote private) source)))))
+
 (ert-deftest ebox-playground-keeps-layout-in-ebox-source ()
   "Keep concrete gallery content out of the generic Elisp runner."
   (let ((runner (with-temp-buffer

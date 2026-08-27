@@ -13,14 +13,21 @@
 
 (require 'cl-lib)
 (require 'ebox-playground)
+(require 'ebox-native-reflow)
 
-(defconst ebox-playground-flex-resize-evaluator--fixture
-  (expand-file-name "examples/flex-reference.ebox"
-                    ebox-playground-directory)
-  "Flex fixture used by the performance evaluator.")
+(defcustom ebox-playground-flex-resize-evaluator-fixture
+  (or (getenv "EBOX_PLAYGROUND_FLEX_FIXTURE")
+      (expand-file-name "examples/flex-reference.ebox"
+                        ebox-playground-directory))
+  "Read-only Flex fixture used by the performance evaluator."
+  :type 'file
+  :group 'ebox-playground)
 
-(defcustom ebox-playground-flex-resize-evaluator-max-seconds 0.5
-  "Maximum allowed end-to-end time for one settled preview resize."
+(defconst ebox-playground-flex-resize-evaluator-warmup-count 5)
+(defconst ebox-playground-flex-resize-evaluator-sample-count 30)
+
+(defcustom ebox-playground-flex-resize-evaluator-max-seconds 2.0
+  "Maximum allowed end-to-end time for the measured resize burst."
   :type 'number
   :group 'ebox-playground)
 
@@ -37,17 +44,20 @@
 (defvar ebox-playground-flex-resize-evaluator--output-lines nil
   "Report lines collected during one evaluator run.")
 
+(defun ebox-playground-flex-resize-evaluator--percentile
+    (samples percentile)
+  "Return nearest-rank PERCENTILE from numeric SAMPLES."
+  (unless samples
+    (error "Flex evaluator cannot summarize empty samples"))
+  (let* ((ordered (sort (copy-sequence samples) #'<))
+         (rank (max 1 (ceiling (* percentile (length ordered))))))
+    (nth (1- rank) ordered)))
+
 (defconst ebox-playground-flex-resize-evaluator--runtime-properties
   (delete-dups
    (append (mapcar #'cdr ebox-region-types)
            '(ebox-content-idx ebox-content-owners ebox-scroll-window)))
   "Ebox identity properties omitted from fresh-render comparison.")
-
-(defun ebox-playground-flex-resize-evaluator--preview-buffer ()
-  "Return the preview buffer for the fixed flex fixture."
-  (get-buffer
-   (format "*Ebox Preview: %s*"
-           ebox-playground-flex-resize-evaluator--fixture)))
 
 (defun ebox-playground-flex-resize-evaluator--line-widths (buffer)
   "Return pixel widths for every rendered line in BUFFER."
@@ -84,9 +94,10 @@ mounted the split.  This setup publication is outside the measured splitter
 action, so the action starts from a self-consistent runtime generation rather
 than charging initial frame settling to resize."
   (let* ((width (ebox-playground--window-viewport-width preview-window))
-         (state (and (buffer-live-p preview)
-                     (ebox--buffer-render-state preview)))
-         (published-width (and state (plist-get state :viewport-width))))
+         (report (ebox-buffer-update-report preview))
+         (published-width (and report
+                               (or (plist-get report :target-viewport-width)
+                                   (plist-get report :viewport-width)))))
     (unless (numberp width)
       (error "flex preview has no settled viewport width"))
     (when (not (equal width published-width))
@@ -109,26 +120,37 @@ concurrent cache warming CPU work."
         (source nil)
         (preview nil)
         (preview-window nil)
-        (resize-advice nil)
+        (warmup-publications 0)
         (resize-count 0)
-        (resize-elapsed 0.0)
         (resize-finished nil)
         (action-start nil)
         (last-event-elapsed nil)
         (resize-publications nil)
-        (resize-durations nil)
+        (publication-durations nil)
+        (requested-widths nil)
+        (accepted-widths nil)
+        (observer nil)
+        (native-report nil)
+        (playground-library (symbol-file 'ebox-playground-open 'defun))
+        (evaluator-library
+         (symbol-file 'ebox-playground-flex-resize-evaluator-run 'defun))
         (completed-without-error nil)
         (ebox-playground-flex-resize-evaluator--output-lines nil)
         (checks nil))
     (condition-case-unless-debug error-data
         (progn
           (delete-other-windows)
+          (setq native-report (ebox-native-reflow-runtime-report))
+          (unless (plist-get native-report :layout-ready-p)
+            (error "Flex evaluator requires the prepared native layout module"))
+          (unless (file-readable-p
+                   ebox-playground-flex-resize-evaluator-fixture)
+            (error "Flex evaluator fixture is not readable: %s"
+                   ebox-playground-flex-resize-evaluator-fixture))
           (setq source
-                (find-file ebox-playground-flex-resize-evaluator--fixture))
+                (find-file ebox-playground-flex-resize-evaluator-fixture))
           (ebox-dsl-mode)
-          (ebox-dsl-render)
-          (setq preview
-                (ebox-playground-flex-resize-evaluator--preview-buffer)
+          (setq preview (ebox-dsl-render)
                 preview-window (get-buffer-window preview (selected-frame)))
           (unless (and (buffer-live-p preview)
                        (window-live-p preview-window))
@@ -139,30 +161,52 @@ concurrent cache warming CPU work."
            preview preview-window)
           (redisplay t)
           (sleep-for 0.2)
-          (setq resize-advice
-                (lambda (original &rest arguments)
-                  (setq resize-count (1+ resize-count))
-                  (let ((start (float-time)))
-                    (unwind-protect
-                        (apply original arguments)
-                      (let ((duration (- (float-time) start)))
-                        (setq resize-elapsed (+ resize-elapsed duration))
-                        (push duration resize-durations))
-                      (when action-start
-                        (push (- (float-time) action-start)
-                              resize-publications))
-                      (setq resize-finished t)))))
-          (advice-add 'ebox-rerender-buffer-with-context
-                      :around resize-advice)
+          ;; Observe only accepted, completed Ebox publications.  TP emits its
+          ;; paired report first; filtering by provider keeps this evaluator on
+          ;; the public Ebox boundary and avoids timing/advising the rerender
+          ;; implementation itself.
+          (setq observer
+                (lambda (_buffer report)
+                  (when (and (eq (plist-get report :provider) 'ebox)
+                             (eq (plist-get report :stage) 'viewport))
+                    (setq resize-count (1+ resize-count)
+                          resize-finished t)
+                    (when action-start
+                      (push (- (float-time) action-start)
+                            resize-publications))
+                    (push (/ (or (plist-get report :duration-ms) 0.0)
+                             1000.0)
+                          publication-durations)
+                    (push (or (plist-get report :target-viewport-width)
+                              (plist-get report :viewport-width))
+                          accepted-widths))))
+          (ebox-buffer-set-observer preview observer)
+          (dotimes (index ebox-playground-flex-resize-evaluator-warmup-count)
+            (window-resize preview-window (if (zerop (% index 2)) -1 1) t)
+            (redisplay t)
+            (sleep-for 0.01))
+          (setq warmup-publications resize-count
+                resize-count 0
+                resize-finished nil
+                resize-publications nil
+                publication-durations nil
+                requested-widths nil
+                accepted-widths nil)
           (let* ((start (float-time))
                  (old-width
                   (ebox-playground--window-viewport-width preview-window)))
             (setq action-start start)
-            (dolist (delta '(-4 2 -4 2 -4 2))
-              (setq last-event-elapsed (- (float-time) start))
-              (window-resize preview-window delta t)
-              (redisplay t)
-              (sleep-for 0.02))
+            (dotimes (index ebox-playground-flex-resize-evaluator-sample-count)
+              (let ((delta
+                     (if (< index 28)
+                         (if (zerop (% index 2)) -1 1)
+                       -1)))
+                (setq last-event-elapsed (- (float-time) start))
+                (window-resize preview-window delta t)
+                (push (ebox-playground--window-viewport-width preview-window)
+                      requested-widths)
+                (redisplay t)
+                (sleep-for 0.01)))
             (let* ((elapsed (- (float-time) start))
                    (publication-times
                     (sort (copy-sequence resize-publications) #'<))
@@ -173,7 +217,14 @@ concurrent cache warming CPU work."
                    (first-publication (car publication-times))
                    (last-publication (car (last publication-times)))
                    (max-publication
-                    (if resize-durations (apply #'max resize-durations) 0.0))
+                    (if publication-durations
+                        (apply #'max publication-durations)
+                      0.0))
+                   (p95-publication
+                    (if publication-durations
+                        (ebox-playground-flex-resize-evaluator--percentile
+                         publication-durations 0.95)
+                      0.0))
                    (max-gap
                     (if publication-gaps (apply #'max publication-gaps) 0.0))
                    (final-latency
@@ -183,10 +234,8 @@ concurrent cache warming CPU work."
                     (ebox-playground--window-viewport-width preview-window))
                    (report (ebox-buffer-update-report preview))
                    (projection-kind (plist-get report :projection-kind))
-                   (native-flex-calls
-                    (and (boundp
-                          'ebox-native-reflow--flex-geometry-call-count)
-                         ebox-native-reflow--flex-geometry-call-count))
+                   (expected-widths (nreverse requested-widths))
+                   (published-widths (nreverse accepted-widths))
                    (line-widths
                     (ebox-playground-flex-resize-evaluator--line-widths
                      preview))
@@ -202,16 +251,14 @@ concurrent cache warming CPU work."
                                ;; Compare the published visible scroll
                                ;; window with a fresh render at the same
                                ;; viewport height.  Omitting this binding
-                               ;; rendered the entire lazy document and made
-                               ;; every correct retained resize look unequal.
                                (ebox-viewport-height
-                                (or (plist-get
-                                     (ebox--buffer-render-state preview)
-                                     :viewport-height)
+                                (or (plist-get report
+                                               :target-viewport-height)
+                                    (plist-get report :viewport-height)
                                     36)))
                            (ebox-render
                             (ebox-playground-view
-                             ebox-playground-flex-resize-evaluator--fixture
+                             ebox-playground-flex-resize-evaluator-fixture
                              viewport-width)))))
                    (fresh-render-matches-p
                     (and (stringp fresh-rendered)
@@ -231,23 +278,54 @@ concurrent cache warming CPU work."
               (setq checks
                     (list
                      (ebox-playground-flex-resize-evaluator--check
+                      "compiled evaluator artifacts"
+                      (and (stringp playground-library)
+                           (string-suffix-p ".elc" playground-library)
+                           (stringp evaluator-library)
+                           (string-suffix-p ".elc" evaluator-library))
+                      (format "playground=%S evaluator=%S"
+                              playground-library evaluator-library))
+                     (ebox-playground-flex-resize-evaluator--check
+                      "native module prepared"
+                      (plist-get native-report :layout-ready-p)
+                      (format "path=%S hash=%S"
+                              (plist-get native-report :loaded-module-path)
+                              (plist-get native-report :loaded-module-hash)))
+                     (ebox-playground-flex-resize-evaluator--check
                       "preview mounted"
                       (and (buffer-live-p preview)
                            (window-live-p preview-window))
                       (format "source=%S preview=%S" source preview))
                      (ebox-playground-flex-resize-evaluator--check
+                      "warmup publications"
+                      (= warmup-publications
+                         ebox-playground-flex-resize-evaluator-warmup-count)
+                      (format "warmups=%d expected=%d"
+                              warmup-publications
+                              ebox-playground-flex-resize-evaluator-warmup-count))
+                     (ebox-playground-flex-resize-evaluator--check
                       "intermediate resize updates"
-                      (and (>= resize-count 4)
+                      (and (= resize-count
+                              ebox-playground-flex-resize-evaluator-sample-count)
+                           (= resize-count (length expected-widths))
                            first-publication
                            (<= first-publication
                                ebox-playground-flex-resize-evaluator-max-update-seconds)
                            (< first-publication last-event-elapsed))
-                      (format "updates=%d first=%.6fs last-event=%.6fs"
+                      (format "updates=%d samples=%d first=%.6fs last-event=%.6fs"
                               resize-count
+                              ebox-playground-flex-resize-evaluator-sample-count
                               (or first-publication 0.0)
                               last-event-elapsed))
                      (ebox-playground-flex-resize-evaluator--check
-                      "per-update resize budget"
+                      "per-update p95 budget"
+                      (<= p95-publication
+                          ebox-playground-flex-resize-evaluator-max-update-seconds)
+                      (format "p95=%.6fs threshold=%.6fs"
+                              p95-publication
+                              ebox-playground-flex-resize-evaluator-max-update-seconds))
+                     (ebox-playground-flex-resize-evaluator--check
+                      "per-update max budget"
                       (<= max-publication
                           ebox-playground-flex-resize-evaluator-max-update-seconds)
                       (format "max=%.6fs threshold=%.6fs"
@@ -277,11 +355,15 @@ concurrent cache warming CPU work."
                       "viewport was published"
                       (and (numberp viewport-width)
                            (not (equal old-width viewport-width))
+                           (cl-every #'numberp published-widths)
+                           (equal expected-widths published-widths)
+                           (equal viewport-width (car (last published-widths)))
                            (eq (plist-get report :constraint-source)
                                'viewport)
                            (plist-get report :runtime-published))
-                      (format "viewport=%S strategy=%S"
-                              viewport-width (plist-get report :strategy)))
+                      (format "viewport=%S expected=%S accepted=%S strategy=%S"
+                              viewport-width expected-widths published-widths
+                              (plist-get report :strategy)))
                      (ebox-playground-flex-resize-evaluator--check
                       "retained viewport projection"
                       projection-retained-p
@@ -304,21 +386,22 @@ concurrent cache warming CPU work."
                              '((default (:background "#FAF7F0"))) )
                       (format "face-remapping=%S" background))
                      (ebox-playground-flex-resize-evaluator--check
-                      "resize is millisecond-scale"
+                      "bounded resize burst"
                       (<= elapsed
                           ebox-playground-flex-resize-evaluator-max-seconds)
                       (format "elapsed=%.6fs threshold=%.6fs"
                               elapsed
                               ebox-playground-flex-resize-evaluator-max-seconds))))
               (push (format
-                     "RESIZE old-viewport-px=%S new-viewport-px=%S total=%.6fs rerender=%.6fs first=%.6fs max-update=%.6fs max-gap=%.6fs final=%.6fs strategy=%S projection=%S axes=%S reconciled=%S native-flex=%S tp-ops=%S cache-hits=%S cache-misses=%S"
-                     old-width viewport-width elapsed resize-elapsed
-                     (or first-publication 0.0) max-publication max-gap
+                     "RESIZE warmups=%d samples=%d old-viewport-px=%S new-viewport-px=%S total=%.6fs p95-update=%.6fs max-update=%.6fs first=%.6fs max-gap=%.6fs final=%.6fs strategy=%S projection=%S axes=%S reconciled=%S tp-ops=%S cache-hits=%S cache-misses=%S"
+                     warmup-publications resize-count old-width viewport-width
+                     elapsed p95-publication max-publication
+                     (or first-publication 0.0) max-gap
                      (or final-latency -1.0)
                      (plist-get report :strategy) projection-kind
                      (plist-get report :viewport-axes)
                      (plist-get report :reconciled-objects)
-                     native-flex-calls tp-operations
+                     tp-operations
                      (plist-get report :cache-hit-count)
                      (plist-get report :cache-miss-count))
                     ebox-playground-flex-resize-evaluator--output-lines)
@@ -333,8 +416,8 @@ concurrent cache warming CPU work."
        (push "FAIL evaluator interrupted"
              ebox-playground-flex-resize-evaluator--output-lines)
        nil))
-    (when resize-advice
-      (advice-remove 'ebox-rerender-buffer-with-context resize-advice))
+    (when (and (buffer-live-p preview) observer)
+      (ebox-buffer-set-observer preview nil))
     (when (buffer-live-p preview)
       (kill-buffer preview))
     (when (buffer-live-p source)

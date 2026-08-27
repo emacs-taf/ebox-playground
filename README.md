@@ -28,3 +28,12 @@ The reference fixtures live directly under `examples/`. For example:
 ```
 
 Run `make check EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` from this directory.
+
+Run `make performance` for the committed Flex resize gate.  It prepares ECSS,
+TP, Ebox, Playground bytecode, and the Rust module, then renders a read-only
+`HEAD:examples/flex-reference.ebox` snapshot without touching the working-tree
+fixture.  The GUI driver performs five warmups followed by 30 accepted viewport
+updates; requested and published widths must match exactly, and both p95 and max
+must remain at or below 50ms.  For uncontaminated repeated samples, run
+`make performance-prepare`, let compilation activity settle, then run
+`make performance-evaluator` without rebuilding.
