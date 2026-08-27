@@ -41,7 +41,7 @@
 - 图像与图标：纯文本。
 
 ## 组件
-- 复用的现有组件：`ebox-create`、`ebox-column`、`ebox-row`、`ebox-flex`、`ebox-grid` 和 `ebox-spacer`。
+- 复用的作者 form：String、`text`、`box`、`row`、`column`、`flex` 和 `grid`。空 `box` 直接表达间距，不再引入另一个公共 form。
 - 新增/调整的组件：标题带、能力分区标题带、固定/分数轨道卡片、放置卡片和公开契约页脚。
 - 变体与状态：仅使用静态语义色组。
 - Token/组件归属：配色值和示例组合放在 `.ebox` fixture 中；运行器只负责解析和渲染。迁移来的参考仍然是数据文件，新增布局不需要在 Elisp 中增加针对 fixture 的分支。

@@ -41,7 +41,7 @@
 - Imagery/iconography: Text-only.
 
 ## Components
-- Existing components to reuse: `ebox-create`, `ebox-column`, `ebox-row`, `ebox-flex`, `ebox-grid`, and `ebox-spacer`.
+- Author forms to reuse: String, `text`, `box`, `row`, `column`, `flex`, and `grid`. Empty `box` nodes express spacing directly without another public form.
 - New/changed components: Header band, property section bands, track-function cards, implicit-track/flow cards, gap/placement cards, alignment cards, and public-contract footer.
 - Variants and states: Static semantic color families only.
 - Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering. The migrated references remain data files, so adding a layout does not add a fixture-specific Elisp branch.

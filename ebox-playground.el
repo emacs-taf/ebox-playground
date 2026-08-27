@@ -167,7 +167,9 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
           (prog1
               (progn
                 (ebox-playground--apply-preview-display-settings
-                 (and (consp node) (plist-get node :bgcolor)))
+                 (and (consp node)
+                      (ebox-style-node-specified-value
+                       node :background-color)))
                 (ebox-render-to-buffer buffer node))
             (setq published-p t))
         (unless published-p

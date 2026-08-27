@@ -120,7 +120,7 @@ concurrent cache warming CPU work."
         (completed-without-error nil)
         (ebox-playground-flex-resize-evaluator--output-lines nil)
         (checks nil))
-    (condition-case error-data
+    (condition-case-unless-debug error-data
         (progn
           (delete-other-windows)
           (setq source

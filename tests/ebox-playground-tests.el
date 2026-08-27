@@ -33,6 +33,13 @@
                          (ebox-playground-test--forms-named name child))
                        form))))
 
+(defun ebox-playground-test--form-children (form)
+  "Return canonical author children from DSL FORM."
+  (let ((items (cdr form)))
+    (while (keywordp (car items))
+      (setq items (cddr items)))
+    items))
+
 (defun ebox-playground-test--line-widths (text)
   "Return rendered pixel widths for every line in TEXT."
   (mapcar #'ebox-string-pixel-width
@@ -115,15 +122,17 @@
                                    ebox-playground-directory))))
       (dolist (box (ebox-playground-test--boxes form))
         (let ((properties (cdr box)))
-          (when (and (memq :content properties)
+          (when (and (cl-some #'stringp
+                              (ebox-playground-test--form-children box))
                      (memq :bgcolor properties))
             (should (memq :color properties))))))))
 
 (ert-deftest ebox-playground-uses-only-public-layout-apis ()
   "The example should build and render through the public Ebox entry point."
-  (let* ((node (ebox-playground-view))
+  (let* ((source (ebox-playground--read-file ebox-playground-default-file))
+         (node (ebox-playground-view))
          (rendered (substring-no-properties (ebox-render node))))
-    (should (eq (plist-get node :ebox-type) 'stack))
+    (should (eq (car source) 'column))
     (dolist (label '("Ebox Playground" "FIXED + FRACTIONAL"
                      "EXPLICIT PLACEMENT" "PUBLIC COMPOSITION"))
       (should (string-match-p (regexp-quote label) rendered)))))
@@ -234,7 +243,7 @@
                    (lambda (&optional _frame) 8)))
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-render.ebox")
-            (insert "(box :content \"viewport\" :width '(viewport) :height 1)")
+            (insert "(box :width '(viewport) :height 1 \"viewport\")")
             (ebox-dsl-mode)
             (ebox-dsl-render)
             (with-current-buffer preview
@@ -281,7 +290,7 @@
           (with-temp-buffer
             (setq source (current-buffer)
                   buffer-file-name "/tmp/ebox-playground-two-window.ebox")
-            (insert "(box :content \"two windows\" :width '(viewport) :height 1)")
+            (insert "(box :width '(viewport) :height 1 \"two windows\")")
             (ebox-dsl-mode)
             (cl-letf (((symbol-function 'window-body-width)
                        (lambda (&optional _window _pixelwise) 987))
@@ -313,7 +322,7 @@
                    (lambda (&optional _frame) 8)))
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-resize.ebox")
-            (insert "(box :content \"viewport\" :width '(viewport) :height 1)")
+            (insert "(box :width '(viewport) :height 1 \"viewport\")")
             (ebox-dsl-mode)
             (ebox-dsl-render)
             (setq window-width 1234)
@@ -417,7 +426,7 @@
                        (error "Injected preview render failure"))))
             (should-error
              (ebox-playground--render-to-preview-buffer
-              preview (ebox-create :content "rollback"))))
+              preview (ebox-build '(box "rollback")))))
           (with-current-buffer preview
             (should-not truncate-lines)
             (should (equal face-remapping-alist
@@ -481,21 +490,21 @@
       (let* ((ebox-viewport-width viewport)
              (lines (ebox-string-lines
                      (ebox-render (ebox-playground-view path viewport))))
-             (spacer-lines
+             (separator-lines
               (cl-remove-if-not
                (lambda (line)
                  (equal (get-text-property 0 'display line)
                         `(space :width (,viewport))))
                lines)))
-        (should (= (length spacer-lines) 11))
-        (dolist (line spacer-lines)
+        (should (= (length separator-lines) 11))
+        (dolist (line separator-lines)
           (should (equal (get-text-property 0 'display line)
                          `(space :width (,viewport))))
           (should (= (ebox-string-pixel-width line) viewport))
           (should (equal (get-text-property 0 'face line)
                          '(:background "#FAF7F0"))))))))
 
-(ert-deftest ebox-playground-public-layout-gallery-fixed-spacers-paint-the-canvas ()
+(ert-deftest ebox-playground-public-layout-gallery-fixed-separators-paint-the-canvas ()
   "The default public gallery fixed separators should keep canvas coverage."
   (let* ((path (expand-file-name "examples/public-layout-gallery.ebox"
                                  ebox-playground-directory))
@@ -512,11 +521,11 @@
 
 (ert-deftest ebox-playground-grid-reference-covers-public-properties ()
   "The Grid reference should cover every public property and supported value form."
-  (let ((source (with-temp-buffer
-                  (insert-file-contents
-                   (expand-file-name "examples/grid-reference.ebox"
-                                     ebox-playground-directory))
-                  (buffer-string))))
+  (let ((source
+         (prin1-to-string
+          (ebox-playground--read-file
+           (expand-file-name "examples/grid-reference.ebox"
+                             ebox-playground-directory)))))
     (dolist (property '(:grid-template-columns :grid-template-rows
                         :grid-auto-columns :grid-auto-rows :grid-auto-flow
                         :grid-row-gap :grid-column-gap :gap :row-gap
@@ -565,7 +574,7 @@
     (unwind-protect
         (with-temp-buffer
           (setq buffer-file-name "/tmp/ebox-playground-render-test.ebox")
-          (insert "(box :content \"Rendered from .ebox\" :width '(240))")
+          (insert "(box :width '(240) \"Rendered from .ebox\")")
           (ebox-dsl-mode)
           (ebox-dsl-render)
           (should (eq (window-buffer (selected-window)) (current-buffer)))
@@ -578,16 +587,19 @@
 (ert-deftest ebox-playground-evaluates-property-expressions ()
   "Evaluate executable property values while preserving quoted constants."
   (let* ((form (ebox-playground--evaluate-form
-                '(box :content "Dynamic property values"
-                      :width (ebox-playground-test--dynamic-width)
+                '(box :width (ebox-playground-test--dynamic-width)
                       :color (ebox-playground-test--dynamic-color)
                       :padding '(0 (4))
-                      :text-align 'center)))
+                      :text-align 'center
+                      "Dynamic property values")))
          (node (ebox-build form)))
-    (should (equal (plist-get node :width) 240))
-    (should (equal (plist-get node :color) "#123456"))
-    (should (equal (plist-get node :padding-left-pixel) 4))
-    (should (eq (plist-get node :text-align) 'center))))
+    (should (equal (ebox-style-node-specified-value node :width) '(240)))
+    (should (equal (ebox-style-node-specified-value node :color) "#123456"))
+    (should (equal
+             (ebox-style-node-specified-value node :padding-left)
+             '(4)))
+    (should (eq (ebox-style-node-specified-value node :text-align)
+                'center))))
 
 (provide 'ebox-playground-tests)
 
