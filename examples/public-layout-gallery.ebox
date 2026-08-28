@@ -3,11 +3,12 @@
       "#252A2E" :bgcolor "#FFFDF8" :font-weight 'bold :text-align 'center
       "Ebox Playground\nPixel-precise layout, composed only from public nodes.")
  (box :width '(720) :height 1 :bgcolor "#FAF7F0")
- (box :width '(720) :padding '(0 (16)) :border "#C97252"
-      :border-bottom 'none :color "#252A2E" :bgcolor "#F1D4C9"
+ (box :width '(720) :padding '(0 (16)) :border-top "#C97252"
+      :border-right "#C97252" :border-left "#C97252"
+      :color "#252A2E" :bgcolor "#F1D4C9"
       :wrap-mode 'word
       "01  FIXED + FRACTIONAL\nA definite Grid width divides into one exact track and one flexible track.")
- (grid :width '(720) :grid-template-columns '((220) 1fr) :gap
+ (grid :width '(720) :grid-template-columns '((220) (fr 1)) :gap
        '(1 (12)) :border "#C97252" :bgcolor "#FFF9F5"
        (box :width '(220) :padding '(1 0) :text-align 'center :color
 	    "#252A2E" :bgcolor "#F1D4C9"
@@ -20,11 +21,12 @@
 	    :wrap-mode 'word
 	    "The Grid owns one definite width; its tracks divide that space without competing viewport calculations."))
  (box :width '(720) :height 1 :bgcolor "#FAF7F0")
- (box :width '(720) :padding '(0 (16)) :border "#6D8A73"
-      :border-bottom 'none :color "#252A2E" :bgcolor "#DCEBDD"
+ (box :width '(720) :padding '(0 (16)) :border-top "#6D8A73"
+      :border-right "#6D8A73" :border-left "#6D8A73"
+      :color "#252A2E" :bgcolor "#DCEBDD"
       :wrap-mode 'word
       "02  EXPLICIT PLACEMENT\nSpan columns, target cells, and leave the remaining nodes to auto placement.")
- (grid :width '(720) :grid-template-columns '((210) (210) 1fr) :gap
+ (grid :width '(720) :grid-template-columns '((210) (210) (fr 1)) :gap
        '(1 (10)) :border "#6D8A73" :bgcolor "#F7FBF7"
        (box :grid-column '(1 :span 2) :width '(430) :padding '(1 0)
 	    :text-align 'center :color "#24422D" :bgcolor "#DCEBDD"
@@ -40,8 +42,9 @@
        (box :width '(278) :padding '(1 0) :text-align 'center :color
 	    "#24422D" :bgcolor "#D4E6D7" "STABLE CELLS"))
  (box :width '(720) :height 1 :bgcolor "#FAF7F0")
- (box :width '(720) :padding '(0 (16)) :border "#4E7890"
-      :border-bottom 'none :color "#252A2E" :bgcolor "#D9EAF2"
+ (box :width '(720) :padding '(0 (16)) :border-top "#4E7890"
+      :border-right "#4E7890" :border-left "#4E7890"
+      :color "#252A2E" :bgcolor "#D9EAF2"
       :wrap-mode 'word
       "03  PUBLIC COMPOSITION\nColumn, Flex, and Grid share the same public node contract.")
  (flex :width '(720) :flex-flow '(row wrap) :gap '(1 (12)) :padding

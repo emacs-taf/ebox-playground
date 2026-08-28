@@ -8,7 +8,8 @@
 	     :color "#134E4A" :wrap-mode 'word
 	     "No explicit viewport width here\nThis page mostly omits :width. The Playground binds the current preview width while rendering, so auto width behaves like a responsive container.")
 	(box :height 1)
-	(box :padding '(0 (16)) :border "#EA580C" :border-bottom 'none
+	(box :padding '(0 (16)) :border-top "#EA580C"
+	     :border-right "#EA580C" :border-left "#EA580C"
 	     :bgcolor "#FFF7ED" :color "#431407" :wrap-mode 'word
 	     "Adaptive toolbar\nButtons below keep stable sizes. The row packs as many as fit and then wraps.")
 	(flex :flex-flow '(row wrap) :column-gap '(8) :row-gap 1
@@ -29,7 +30,8 @@
 		   :bgcolor "#F3E8FF" :color "#3B0764" :text-align
 		   'center "Write"))
 	(box :height 1)
-	(box :padding '(0 (16)) :border "#2563EB" :border-bottom 'none
+	(box :padding '(0 (16)) :border-top "#2563EB"
+	     :border-right "#2563EB" :border-left "#2563EB"
 	     :bgcolor "#EFF6FF" :color "#1E3A8A" :wrap-mode 'word
 	     "Responsive cards\nEach card starts from a flex-basis, grows when space is available, and wraps to new rows when the preview becomes narrow.")
 	(flex :flex-flow '(row wrap) :column-gap '(12) :row-gap 1

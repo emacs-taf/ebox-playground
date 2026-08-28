@@ -51,23 +51,23 @@
 
 (defconst ebox-playground-test--grid-value-forms
   '(":grid-template-columns '(auto auto)"
+    ":grid-template-columns '(min-content max-content)"
     ":grid-template-columns '((120) (74))"
     ":padding '(0 (2))"
     ":grid-template-columns '((192))"
     ":grid-template-columns '((88) (88))"
-    ":grid-template-columns '(1fr 2fr)"
-    ":grid-template-columns '((fr 1) (fr 2))"
+	":grid-template-columns '((fr 1) (fr 2))"
     ":grid-template-columns '((minmax"
     ":grid-template-columns '((repeat"
     ":grid-template-rows '(auto auto)"
-    ":grid-template-rows '(1fr 2fr)"
+	":grid-template-rows '((fr 1) (fr 2))"
     ":grid-auto-columns '((64))"
     ":grid-auto-columns 'auto"
-    ":grid-auto-columns '1fr"
+	":grid-auto-columns '(fr 1)"
     ":grid-auto-columns '((minmax"
     ":grid-auto-rows 2"
     ":grid-auto-rows 'auto"
-    ":grid-auto-rows '1fr"
+	":grid-auto-rows '(fr 1)"
     ":grid-auto-rows '((minmax"
     ":grid-auto-flow 'row"
     ":grid-auto-flow 'column"
@@ -75,8 +75,6 @@
     ":gap '(1 (14))"
     ":row-gap 2"
     ":column-gap '(28)"
-    ":grid-row-gap 2"
-    ":grid-column-gap '(28)"
     ":grid-column 2"
     ":grid-row 2"
     ":grid-column '(1 :span 2)"
@@ -89,7 +87,6 @@
     ":justify-items 'center"
     ":justify-items 'end"
     ":justify-items 'stretch"
-    ":justify-items 'normal"
     ":align-items 'start"
     ":align-items 'center"
     ":align-items 'end"
@@ -559,8 +556,7 @@
                              ebox-playground-directory)))))
     (dolist (property '(:grid-template-columns :grid-template-rows
                         :grid-auto-columns :grid-auto-rows :grid-auto-flow
-                        :grid-row-gap :grid-column-gap :gap :row-gap
-                        :column-gap
+                        :gap :row-gap :column-gap
                         :justify-items :align-items :justify-content
                         :align-content :grid-column :grid-row
                         :grid-column-span :grid-row-span))
@@ -629,7 +625,7 @@
     (should (equal (ebox-style-node-specified-value node :width) '(240)))
     (should (equal (ebox-style-node-specified-value node :color) "#123456"))
     (should (equal
-             (ebox-style-node-specified-value node :padding-left)
+             (ebox-style-node-specified-value node :padding-inline-start)
              '(4)))
     (should (eq (ebox-style-node-specified-value node :text-align)
                 'center))))
