@@ -158,8 +158,10 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
           (set (make-local-variable variable) value)
         (kill-local-variable variable)))))
 
-(defun ebox-playground--render-to-preview-buffer (buffer node)
-  "Render NODE into BUFFER with transactional preview display settings."
+(defun ebox-playground--render-to-preview-buffer (buffer input)
+  "Render canonical INPUT into BUFFER with transactional display settings."
+  (unless (ebox-canonical-input-p input)
+    (signal 'wrong-type-argument (list 'ebox-canonical-input-p input)))
   (with-current-buffer (get-buffer-create buffer)
     (let ((snapshot (ebox-playground--preview-display-snapshot))
           (published-p nil))
@@ -167,21 +169,20 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
           (prog1
               (progn
                 (ebox-playground--apply-preview-display-settings
-                 (and (consp node)
-                      (ebox-style-node-specified-value
-                       node :background-color)))
-                (ebox-render-to-buffer buffer node))
+                 (ebox-style-node-specified-value
+                  input :background-color))
+                (ebox-render-to-buffer buffer input))
             (setq published-p t))
         (unless published-p
           (ebox-playground--restore-preview-display-snapshot snapshot))))))
 
-(defun ebox-playground--render-node-to-buffer (buffer node viewport-width)
-  "Render NODE into BUFFER using VIEWPORT-WIDTH.
+(defun ebox-playground--render-input-to-buffer (buffer input viewport-width)
+  "Render canonical INPUT into BUFFER using VIEWPORT-WIDTH.
 Visible mounted buffers follow their window through Ebox's viewport controller."
   (let ((ebox-viewport-width
          (or viewport-width
              (ebox-playground--effective-viewport-width))))
-    (ebox-playground--render-to-preview-buffer buffer node)))
+    (ebox-playground--render-to-preview-buffer buffer input)))
 
 (defun ebox-playground--static-value-p (value)
   "Return non-nil when VALUE is a literal or explicitly quoted form."
@@ -256,7 +257,7 @@ Visible mounted buffers follow their window through Ebox's viewport controller."
   "Render the default Ebox DSL example into BUFFER-NAME and return its buffer."
   (interactive)
   (let ((viewport-width (ebox-playground--effective-viewport-width)))
-    (ebox-playground--render-node-to-buffer
+    (ebox-playground--render-input-to-buffer
      (or buffer-name ebox-playground-buffer-name)
      (ebox-playground-view nil viewport-width)
      viewport-width)))
@@ -266,7 +267,7 @@ Visible mounted buffers follow their window through Ebox's viewport controller."
   "Render Ebox DSL FILE into BUFFER-NAME and return its buffer."
   (interactive "fEbox DSL file: ")
   (let ((viewport-width (ebox-playground--effective-viewport-width)))
-    (ebox-playground--render-node-to-buffer
+    (ebox-playground--render-input-to-buffer
      (or buffer-name
          (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
      (ebox-playground-view file viewport-width)

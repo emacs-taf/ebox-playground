@@ -432,7 +432,8 @@
   (let ((preview " *ebox-playground-preview-settings-test*"))
     (unwind-protect
         (progn
-          (ebox-playground--render-node-to-buffer preview "preview" 240)
+          (ebox-playground--render-input-to-buffer
+           preview (ebox-build '(box "preview")) 240)
           (with-current-buffer preview
             (should truncate-lines)
             (should-not (assq 'truncation fringe-indicator-alist))
@@ -471,7 +472,7 @@
                                ebox-playground-directory)))
     (unwind-protect
         (progn
-          (ebox-playground--render-node-to-buffer
+          (ebox-playground--render-input-to-buffer
            preview (ebox-playground-view path 720) 720)
           (with-current-buffer preview
             (should (equal face-remapping-alist
@@ -580,9 +581,11 @@
 
 (ert-deftest ebox-playground-fits-a-compact-gui-window ()
   "Keep the gallery wide enough to teach Grid without crossing 800 px frames."
-  (let* ((node (ebox-playground-view))
-         (gallery-width (plist-get (car (plist-get node :children)) :width))
-         (rendered (ebox-render node))
+  (let* ((input (ebox-playground-view))
+         (root (car (ebox-canonical-input-roots input)))
+         (gallery-width
+          (plist-get (car (ebox-box-node-children root)) :width))
+         (rendered (ebox-render input))
          (widths (mapcar #'ebox-string-pixel-width
                          (ebox-string-lines rendered)))
          (maximum (apply #'max widths)))
