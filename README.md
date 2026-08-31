@@ -2,7 +2,7 @@
 
 `ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. The migrated low-level fixtures include the original Basic, Comprehensive, Flex, and Responsive references, while `grid-reference.ebox` provides a complete public Grid property/value gallery with the same restrained terracotta, sage, blue, violet, ochre, and teal visual language.
 
-ECSS 0.1.0 and TP 1.0.0 are independent packages and may be installed in either order. Install both before Ebox 2.0.0, then install this package. `ebox-playground` never reaches into those packages' private APIs.
+ECSS 0.1.0 and TP 1.0.1 are independent packages and may be installed in either order. Install both before Ebox 2.0.1, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
 
 Standalone gallery entry points default to a definite 720 px canvas so nested examples have stable space in batch renders and one-window demos. Split-window `.ebox` previews instead bind `(viewport)` to the preview window's display-safe width, so viewport-based separators and sections fit the right-hand pane. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 

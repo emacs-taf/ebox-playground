@@ -2,7 +2,7 @@
 
 `ebox-playground` 是 Ebox DSL 的独立通用文件运行器，只使用 Ebox 公共 API；具体布局都放在 `examples/` 下易读的 `.ebox` fixture 中。迁移后的低层 fixture 包含原有的 Basic、Comprehensive、Flex 和 Responsive 参考；`grid-reference.ebox` 则用同一套克制的陶土色、鼠尾草绿、蓝色、赭石色和青绿色视觉语言，完整展示 Grid 公共属性及其值形式。
 
-ECSS 0.1.0 与 TP 1.0.0 是互相独立的包，安装顺序任意；两者都安装后再安装 Ebox 2.0.0，最后安装本包。`ebox-playground` 不调用这些依赖的私有 API。
+ECSS 0.1.0 与 TP 1.0.1 是互相独立的包，安装顺序任意；两者都安装后再安装 Ebox 2.0.1，最后安装 Ebox Playground 0.1.1。`ebox-playground` 不调用这些依赖的私有 API。
 
 独立画廊入口默认使用明确的 720 px 画布，因此 batch 渲染和单窗口演示里的嵌套示例有稳定空间。分屏 `.ebox` 预览则会把 `(viewport)` 绑定为右侧预览窗口的显示安全宽度，所以依赖 viewport 的分隔条和区块会适配右侧窗格。高层 Component/Runtime 展示仍由独立的 `etaf-playground` 提供。
 
