@@ -3,29 +3,159 @@
   `(column
     :width (vw 100) :height (vh 100)
     :padding ((lh 1) (ch 2))
-    :background-color "#F4F3ED" :color "#273B42"
-    (box :padding ((lh 1) (ch 2)) :background-color "#153F4A" :color "#FFFFFF"
-         "EBOX / LAYER LAB\nRetained content, opaque overlap, native interaction.")
+    :background-color "#101117" :color "#DCE0EC"
+    (flex :flex-wrap wrap :gap ((lh 0) (ch 2)) :padding-bottom (lh 1)
+          (box :padding-inline (ch 1) :background-color "#D7FA73"
+               :color "#151A0C" :font-weight bold "ORBIT / CREATIVE OS")
+          (box :color "#A99BFF" "VOL. 007  /  SPATIAL EDITION"))
+    (box :padding ((lh 1) (ch 2)) :background-color "#1A1D28"
+         (box :font-weight bold :color "#F7F8FF"
+              "MAKE ROOM\nFOR THE UNEXPECTED.")
+         (box :padding-top (lh 1) :color "#AEB6CE"
+              "A desktop of intersecting ideas.\nPull it apart. Shift the focus. Change the atmosphere."))
+    (flex :flex-wrap wrap :gap ((lh 1) (ch 1)) :padding-block (lh 1)
+          :pointer hand :font-weight bold :color "#101117"
+          :hover-style (:background-color "#FFFFFF")
+          (box :padding-inline (ch 1) :background-color "#D7FA73"
+               :help-echo "Separate the three cards, then bring them back into their original stack."
+               :keymap ,(layer-demo-action demo 'explode) "EXPLODE STACK")
+          (box :padding-inline (ch 1) :background-color "#A99BFF"
+               :help-echo "Bring Studio, Next, and Signal to the front in turn."
+               :keymap ,(layer-demo-action demo 'focus) "CYCLE FOCUS")
+          (box :padding-inline (ch 1) :background-color "#B9E9F2"
+               :help-echo "Switch between electric violet / ice / lime and a warmer studio palette."
+               :keymap ,(layer-demo-action demo 'mood) "SWITCH MOOD"))
+
+    ;; Each card is a local stacking group.  The dark slabs are separate
+    ;; backplates; moving the cards deliberately reveals the composition.
+    (box :id "orbit-canvas" :height (lh 25) :background-color "#101117"
+         (box :position absolute :left (ch 1) :top (lh 0)
+              :width (ch 24) :height (lh 1) :color "#9099B4"
+              "FIELD / 007    +    +")
+         (box :position absolute :left (% 75) :top (lh 0)
+              :width (ch 18) :height (lh 1) :color "#D7FA73"
+              "COMPOSITION / LIVE")
+         (box :position absolute :left (ch 0) :top (lh 2)
+              :width (ch 2) :height (lh 21) :color "#4E566E"
+              "00\n |\n |\n |\n04\n |\n |\n |\n08\n |\n |\n |\n12\n |\n |\n |\n16\n |\n |\n |\n20")
+         (box :position absolute :left (ch 8) :top (lh 5)
+              :width (ch 68) :height (lh 16) :background-color "#32354B"
+              (box :position absolute :left (ch 2) :top (lh 1)
+                   :width (ch 64) :height (lh 14) :background-color "#202333"
+                   (box :position absolute :left (ch 1) :top (lh 12)
+                        :width (ch 32) :height (lh 1) :color "#8B92AE"
+                        "+  LOCAL SPACE / INFINITE IDEAS")))
+         (box :position absolute :left (ch 6) :top (lh 4)
+              :width (ch 40) :height (lh 12) :z-index 1
+              :background-color "#06070B")
+         (box :position absolute :left (ch 48) :top (lh 3)
+              :width (ch 28) :height (lh 9) :z-index 1
+              :background-color "#06070B")
+         (box :position absolute :left (ch 22) :top (lh 8)
+              :width (ch 40) :height (lh 13) :z-index 1
+              :background-color "#06070B")
+
+         (box :id "orbit-violet" :position absolute :left (ch 4) :top (lh 3)
+              :width (ch 40) :height (lh 12) :z-index 2
+              :padding-inline (ch 2) :background-color "#A99BFF" :color "#201A38"
+              :help-echo "Studio is a local group: its small lime badge cannot escape above a higher sibling card."
+              (box :padding-top (lh 1) :font-weight bold "STUDIO / 01")
+              (box :padding-top (lh 1) "FORM FOLLOWS\nIMAGINATION.")
+              (box :position absolute :left (ch 2) :top (lh 5)
+                   :width (ch 32) :height (lh 5) :background-color "#30284E"
+                   :color "#D4C9FF"
+                   (box :position absolute :left (ch 2) :top (lh 1)
+                        :width (ch 14) :height (lh 3) :background-color "#645293"
+                        " [ [ + ] ]\n\n SHAPE / PLAY")
+                   (box :position absolute :left (ch 12) :top (lh 0)
+                        :width (ch 12) :height (lh 3) :z-index 1
+                        :background-color "#D7CFFF" :color "#30284E"
+                        "  +     +\n    / /\n  +     +")
+                   (box :position absolute :left (ch 20) :top (lh 2)
+                        :width (ch 10) :height (lh 2) :z-index 60
+                        :background-color "#D7FA73" :color "#202816"
+                        :text-align center "DEPTH\n03"))
+              (box :position absolute :left (ch 2) :top (lh 10)
+                   :width (ch 30) :height (lh 1) "OBJECT 01  /  EDITION 007"))
+
+         (box :id "orbit-lime" :position absolute :left (ch 46) :top (lh 2)
+              :width (ch 28) :height (lh 9) :z-index 3
+              :padding-inline (ch 2) :background-color "#D7FA73" :color "#202816"
+              :help-echo "Next is a separate sibling card. Cycle Focus to move its whole local composition forward."
+              (box :padding-top (lh 1) :font-weight bold "NEXT / 02")
+              (box :padding-top (lh 1) "LESS NOISE.\nMORE POSSIBILITY.")
+              (box :position absolute :left (ch 15) :top (lh 5)
+                   :width (ch 9) :height (lh 3) :background-color "#24301A"
+                   :color "#D7FA73" :text-align center "  /\n /___\n /   ")
+              (box :position absolute :left (ch 2) :top (lh 6)
+                   :width (ch 12) :height (lh 2) "OPEN SPACE\n24 / 7"))
+
+         (box :id "orbit-signal" :position absolute :left (ch 20) :top (lh 7)
+              :width (ch 40) :height (lh 13) :z-index 4
+              :padding-inline (ch 2) :background-color "#B9E9F2" :color "#173139"
+              :help-echo "Signal starts in front. Its bars, labels, and floating badge move together as one local stack."
+              (box :padding-top (lh 1) :font-weight bold "SIGNAL / NOW PLAYING")
+              (box :padding-top (lh 1) "AFTER HOURS\nA soundtrack for what comes next.")
+              (box :position absolute :left (ch 2) :top (lh 5)
+                   :width (ch 32) :height (lh 5) :background-color "#173139"
+                   :color "#B9E9F2"
+                   (box :position absolute :left (ch 2) :top (lh 3)
+                        :width (ch 3) :height (lh 1) :background-color "#B9E9F2")
+                   (box :position absolute :left (ch 6) :top (lh 2)
+                        :width (ch 3) :height (lh 2) :background-color "#A99BFF")
+                   (box :position absolute :left (ch 10) :top (lh 1)
+                        :width (ch 3) :height (lh 3) :background-color "#D7FA73")
+                   (box :position absolute :left (ch 14) :top (lh 0)
+                        :width (ch 3) :height (lh 4) :background-color "#B9E9F2")
+                   (box :position absolute :left (ch 18) :top (lh 2)
+                        :width (ch 3) :height (lh 2) :background-color "#A99BFF")
+                   (box :position absolute :left (ch 22) :top (lh 1)
+                        :width (ch 3) :height (lh 3) :background-color "#D7FA73")
+                   (box :position absolute :left (ch 26) :top (lh 3)
+                        :width (ch 3) :height (lh 1) :background-color "#B9E9F2")
+                   (box :position absolute :left (ch 20) :top (lh 0)
+                        :width (ch 10) :height (lh 1) :z-index 8
+                        :background-color "#F9FCF3" :color "#173139"
+                        :text-align center "ON AIR +"))
+              (box :position absolute :left (ch 2) :top (lh 11)
+                   :width (ch 32) :height (lh 1) "03:42  ========----  05:18"))
+
+         (box :position absolute :left (ch 61) :top (lh 15)
+              :width (ch 15) :height (lh 3) :z-index 5
+              :padding-inline (ch 1) :background-color "#F6F5EF" :color "#282B35"
+              "+ IN SYNC\n3 OPEN IDEAS\nSHARED SPACE")
+         (box :position absolute :left (ch 3) :top (lh 22)
+              :width (ch 72) :height (lh 1) :color "#A99BFF"
+              "+  .  +  .  +  .  +  .  +  .  +  .  +  .  +  .  +  .  +  .  +  .")
+         (box :position absolute :left (ch 3) :top (lh 24)
+              :width (ch 70) :height (lh 1) :color "#9099B4"
+              "ORBIT / 007     COMPOSE IN LAYERS. THINK IN POSSIBILITIES."))
+    (box :id "orbit-state" :padding-inline (ch 1)
+         :background-color "#222637" :color "#D7FA73"
+         ,(layer-demo-orbit-status demo))
+    (box :padding-top (lh 2) :font-weight bold :color "#F7F8FF"
+         "EBOX / LAYER LAB")
+    (box :color "#AEB6CE" "Retained content, opaque overlap, native interaction.")
     (box :padding-block (lh 1)
          "Click a control, or move point into it and press RET / SPC.\n"
          "All text shares one font size. Scroll with the wheel or C-v when needed.")
 
     (box "01 / LAYERED DESK   absolute position + local stacking")
     (flex :flex-wrap wrap :gap ((lh 1) (ch 1)) :padding-block (lh 1)
-          :pointer hand :hover-style (:background-color "#CCE0D6")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          :pointer hand :hover-style (:background-color "#505B7A")
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Hide or show Panel A. Revealing a lower layer shows its latest content."
                :keymap ,(layer-demo-action demo 'toggle) "TOGGLE PANEL A")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Move Panel A between left 4ch / top 2lh and left 10ch / top 0lh."
                :keymap ,(layer-demo-action demo 'move) "MOVE PANEL A")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Switch Panel A between z=2 and z=4; Panel B stays at z=3."
                :keymap ,(layer-demo-action demo 'raise) "RAISE / LOWER A")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Update the lower note even when every part of it is covered."
                :keymap ,(layer-demo-action demo 'update-lower) "UPDATE COVERED NOTE"))
-    (box :id "layer-desk" :height (lh 10) :background-color "#DFE5E4"
+    (box :id "layer-desk" :height (lh 10) :background-color "#222637"
          (box :height (lh 10)
               "DESK / ordinary content stays in its flow slot\n"
               "........................................................................\n"
@@ -58,7 +188,7 @@
     (box :height (lh 1))
 
     (box "02 / RELATIVE POSITION   reserve the slot, shift the paint")
-    (column :height (lh 4) :background-color "#E8E1EE"
+    (column :height (lh 4) :background-color "#292437"
             (box :id "relative-marker" :position relative :left (ch 4) :top (lh 1)
                  :width (ch 24) :height (lh 1) :z-index 1
                  :background-color "#765D87" :color "#FFFFFF" "RELATIVE / +4ch, +1lh")
@@ -72,18 +202,18 @@
          "The owner below clips to one row. Its menu stays a logical child\n"
          "but paints in the root layer, outside that local clip.")
     (flex :gap ((lh 0) (ch 1)) :padding-bottom (lh 1) :pointer hand
-          :hover-style (:background-color "#CCE0D6")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          :hover-style (:background-color "#505B7A")
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Cycle bottom-start, bottom-end, top-start, and top-end. Open the menu to compare."
                :keymap ,(layer-demo-action demo 'placement) "CYCLE PLACEMENT")
-          (box :padding-inline (ch 1) :background-color "#DDE9DF"
+          (box :padding-inline (ch 1) :background-color "#343B52"
                :help-echo "Move the relative trigger from left 4ch to 12ch. The open menu follows its anchor."
                :keymap ,(layer-demo-action demo 'anchor) "MOVE ANCHOR"))
-    (box :height (lh 3) :background-color "#E5EBE7"
+    (box :height (lh 3) :background-color "#1C2430"
          "SPACE ABOVE / top placements can cover this area\n"
          "........................................................................\n"
          "........................................................................")
-    (box :id "menu-owner" :height (lh 1) :overflow hidden :background-color "#CFDCD5"
+    (box :id "menu-owner" :height (lh 1) :overflow hidden :background-color "#303D43"
          (box :id "menu-trigger" :position relative :left (ch 4) :top (lh 0)
               :width (ch 32) :height (lh 1) :padding-inline (ch 1)
               :background-color "#286347" :color "#FFFFFF" :pointer hand
@@ -103,7 +233,7 @@
                    :hover-style (:background-color "#895314")
                    :help-echo "Choose amber, update the result, and close the menu."
                    :keymap ,(layer-demo-action demo 'amber) "CHOOSE AMBER")))
-    (box :height (lh 3) :background-color "#E5EBE7"
+    (box :height (lh 3) :background-color "#1C2430"
          "SPACE BELOW / bottom placements can cover this area\n"
          "........................................................................\n"
          "........................................................................")

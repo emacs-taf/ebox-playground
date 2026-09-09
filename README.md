@@ -31,10 +31,13 @@ the core size contracts and the actual example declarations, known arithmetic
 results, painted sizing differences, complete rendering, and retained viewport updates. `make check` also
 includes the example's regression tests.
 
-## Layer lab
+## ORBIT spatial desktop and layer lab
 
 `examples/layer-minimal.ebox` is the smallest static overlap example. The complete
-lab uses the same generic runner and a companion for application state:
+lab opens with **ORBIT / CREATIVE OS**, a dark spatial desktop with violet,
+ice-blue, and acid-green cards, offset shadow slabs, nested geometric artwork,
+and floating badges. It uses the same generic runner and a companion for
+application state:
 
 ```elisp
 (ebox-playground-open-file
@@ -46,6 +49,11 @@ Visit the `.ebox` file and press `C-c C-c` for the source/preview split. Every
 control supports click, `RET`, and `SPC`, with native help and hover paint.
 All text uses one font size.
 
+- **EXPLODE STACK** spreads the three cards apart and returns them to their
+  original positions without moving the following sections.
+- **CYCLE FOCUS** brings the studio, task card, and player to the front in turn.
+- **SWITCH MOOD** changes the card palette between lunar violet/ice/lime and
+  solar pink/apricot/mint. Each preview has independent state.
 - **UPDATE COVERED NOTE** changes a note fully covered by Panel A. Update it
   twice, then **TOGGLE PANEL A** to reveal revision 02. The revealed note has
   its own native action and live help; covering it never removes its logical

@@ -252,5 +252,56 @@
         (should (<= (ebox-string-pixel-width line) 1000)))
       (ebox-playground-layer-test--parity))))
 
+(ert-deftest ebox-playground-layer-orbit-expands-without-moving-following-content ()
+  "The spatial desktop moves its cards while keeping the next section fixed."
+  (ebox-playground-layer-test--with-preview (buffer)
+    (let ((home (ebox-playground-layer-test--coordinates "SIGNAL / NOW PLAYING"))
+          (following (ebox-playground-layer-test--coordinates "01 / LAYERED DESK")))
+      (ebox-playground-layer-test--activate "EXPLODE STACK")
+      (let ((expanded (ebox-playground-layer-test--coordinates "SIGNAL / NOW PLAYING")))
+        (should (> (car expanded) (car home)))
+        (should (= (cdr expanded) (+ (cdr home) 4))))
+      (should (equal following
+                     (ebox-playground-layer-test--coordinates "01 / LAYERED DESK")))
+      (should (string-match-p "EXPANDED" (buffer-string)))
+      (ebox-playground-layer-test--activate "EXPLODE STACK" (kbd "SPC"))
+      (should (equal home
+                     (ebox-playground-layer-test--coordinates "SIGNAL / NOW PLAYING")))
+      (should (string-match-p "STACKED" (buffer-string))))))
+
+(ert-deftest ebox-playground-layer-orbit-focus-and-palette-are-reversible ()
+  "Native commands update actual card order and paint, independently per preview."
+  (ebox-playground-layer-test--with-preview (first)
+    (cl-labels ((property (id key)
+                  (let* ((handle (ebox-region-resolve (current-buffer) id))
+                         (region-id (cdr (ebox-selector--region-target handle))))
+                    (ebox-get (ebox--buffer-region-render-owner-node
+                               (current-buffer) region-id) key))))
+      (dolist (card '(("orbit-violet" . "STUDIO")
+                      ("orbit-lime" . "NEXT")
+                      ("orbit-signal" . "SIGNAL")))
+        (ebox-playground-layer-test--activate "CYCLE FOCUS")
+        (should (= (property (car card) :z-index) 6))
+        (should (string-match-p (concat (cdr card) " IN FRONT") (buffer-string))))
+      (ebox-playground-layer-test--click "SWITCH MOOD")
+      (should (equal (property "orbit-signal" :bgcolor) "#FFD49B"))
+      (should (string-match-p "SOLAR PALETTE" (buffer-string)))
+      (ebox-playground-layer-test--with-preview (second 1000)
+        (should (string-match-p "LUNAR PALETTE" (buffer-string)))
+        (should (equal (property "orbit-signal" :bgcolor) "#B9E9F2")))
+      (ebox-playground-layer-test--activate "SWITCH MOOD")
+      (should (equal (property "orbit-signal" :bgcolor) "#B9E9F2"))
+      (should (string-match-p "LUNAR PALETTE" (buffer-string))))))
+
+(ert-deftest ebox-playground-layer-orbit-remains-bounded-at-desktop-widths ()
+  "The actual composition and toolbar remain usable across desktop widths."
+  (dolist (width '(80 104 140))
+    (ebox-playground-layer-test--with-preview (buffer width)
+      (should (integerp (ebox-playground-layer-test--position "STUDIO / 01")))
+      (should (integerp (ebox-playground-layer-test--position "SIGNAL / NOW PLAYING")))
+      (ebox-playground-layer-test--activate "EXPLODE STACK")
+      (dolist (line (ebox-string-lines (buffer-string)))
+        (should (<= (ebox-string-pixel-width line) width))))))
+
 (provide 'ebox-playground-layer-tests)
 ;;; ebox-playground-layer-tests.el ends here

@@ -13,7 +13,15 @@
 (cl-defstruct (layer-demo (:constructor layer-demo-create))
   "Application state belonging to one layer-lab preview."
   (visible t) moved raised (revision 0) (lower-clicks 0)
-  menu-visible (placement 0) anchor-moved (selection "none"))
+  menu-visible (placement 0) anchor-moved (selection "none")
+  exploded (focus 2) warm)
+
+(defun layer-demo-orbit-status (demo)
+  "Describe the spatial desktop controls for DEMO."
+  (format "%s   /   %s IN FRONT   /   %s PALETTE"
+          (if (layer-demo-exploded demo) "EXPANDED" "STACKED")
+          (aref ["STUDIO" "NEXT" "SIGNAL"] (layer-demo-focus demo))
+          (if (layer-demo-warm demo) "SOLAR" "LUNAR")))
 
 (defconst layer-demo-placements
   [bottom-start bottom-end top-start top-end]
@@ -52,6 +60,32 @@
    :activate
    (lambda ()
      (pcase action
+       ('explode
+        (setf (layer-demo-exploded demo) (not (layer-demo-exploded demo)))
+        (let ((expanded (layer-demo-exploded demo)))
+          (ebox-region-update "orbit-violet"
+                              :left (if expanded '(ch 2) '(ch 4))
+                              :top (if expanded '(lh 1) '(lh 3)))
+          (ebox-region-update "orbit-signal"
+                              :left (if expanded '(ch 26) '(ch 20))
+                              :top (if expanded '(lh 11) '(lh 7)))
+          (ebox-region-update "orbit-lime"
+                              :left (if expanded '(ch 52) '(ch 46))
+                              :top (if expanded '(lh 0) '(lh 2)))))
+       ('focus
+        (setf (layer-demo-focus demo) (% (1+ (layer-demo-focus demo)) 3))
+        (cl-loop for id in '("orbit-violet" "orbit-lime" "orbit-signal")
+                 for index from 0
+                 do (ebox-region-update id :z-index
+                                        (if (= index (layer-demo-focus demo))
+                                            6 (+ index 2)))))
+       ('mood
+        (setf (layer-demo-warm demo) (not (layer-demo-warm demo)))
+        (cl-loop for id in '("orbit-violet" "orbit-signal" "orbit-lime")
+                 for color in (if (layer-demo-warm demo)
+                                  '("#FFADCF" "#FFD49B" "#B8F1CD")
+                                '("#A99BFF" "#B9E9F2" "#D7FA73"))
+                 do (ebox-region-update id :background-color color)))
        ('toggle
         (setf (layer-demo-visible demo) (not (layer-demo-visible demo)))
         (ebox-region-update "panel-a" :visibility
@@ -91,7 +125,9 @@
                             :color (if (eq action 'sage) "#286347" "#895314"))
         (ebox-region-update "root-menu" :visibility 'hidden))
        (_ (error "Unknown layer-lab action: %S" action)))
-     (ebox-region-update "layer-status" :content (layer-demo-status demo)))))
+     (if (memq action '(explode focus mood))
+         (ebox-region-update "orbit-state" :content (layer-demo-orbit-status demo))
+       (ebox-region-update "layer-status" :content (layer-demo-status demo))))))
 
 (provide 'layer-demo-reference)
 
