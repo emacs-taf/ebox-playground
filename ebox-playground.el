@@ -35,10 +35,11 @@
   "Header line shown by `ebox-dsl-mode'.")
 
 (defun ebox-playground--source-form ()
-  "Read the single Ebox DSL form from the current buffer."
+  "Read and evaluate the single Elisp expression in the current buffer."
   (ebox-playground--evaluate-form
    (ebox-playground--read-form
-    (buffer-substring-no-properties (point-min) (point-max)))))
+    (buffer-substring-no-properties (point-min) (point-max)))
+   buffer-file-name))
 
 ;;;###autoload
 (define-derived-mode ebox-dsl-mode emacs-lisp-mode "EboxDSL"
@@ -90,7 +91,7 @@
   "Directory containing the Ebox Playground package.")
 
 (defcustom ebox-playground-default-file
-  (expand-file-name "examples/public-layout-gallery.ebox"
+  (expand-file-name "examples/grid-reference.ebox"
                     ebox-playground-directory)
   "Ebox DSL file rendered by `ebox-playground-open'."
   :type 'file
@@ -114,12 +115,9 @@
    ((ebox-playground--window-viewport-width window))
    (t ebox-playground-default-viewport-width)))
 
-(defun ebox-playground--apply-preview-display-settings (&optional canvas-background)
-  "Apply canvas redisplay settings to the current preview buffer.
-CANVAS-BACKGROUND fills display space outside generated root lines."
+(defun ebox-playground--apply-preview-display-settings ()
+  "Apply text redisplay settings without overriding buffer chrome or faces."
   (setq-local truncate-lines t)
-  (setq-local header-line-format nil)
-  (setq-local mode-line-format nil)
   (setq-local auto-hscroll-mode t)
   (setq-local fringe-indicator-alist
               (cl-remove-if
@@ -128,15 +126,12 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
                (copy-tree fringe-indicator-alist)))
   (setq-local bidi-display-reordering nil)
   (setq-local bidi-paragraph-direction 'left-to-right)
-  (setq-local bidi-inhibit-bpa t)
-  (setq-local face-remapping-alist
-              (when (stringp canvas-background)
-                (list (list 'default (list :background canvas-background))))))
+  (setq-local bidi-inhibit-bpa t))
 
 (defconst ebox-playground--preview-display-variables
-  '(truncate-lines header-line-format mode-line-format auto-hscroll-mode
+  '(truncate-lines auto-hscroll-mode
     fringe-indicator-alist bidi-display-reordering bidi-paragraph-direction
-    bidi-inhibit-bpa face-remapping-alist)
+    bidi-inhibit-bpa)
   "Buffer-local display variables owned by a playground preview.")
 
 (defun ebox-playground--preview-display-snapshot ()
@@ -168,9 +163,7 @@ CANVAS-BACKGROUND fills display space outside generated root lines."
       (unwind-protect
           (prog1
               (progn
-                (ebox-playground--apply-preview-display-settings
-                 (ebox-style-node-specified-value
-                  input :background-color))
+                (ebox-playground--apply-preview-display-settings)
                 (ebox-render-to-buffer buffer input))
             (setq published-p t))
         (unless published-p
@@ -184,57 +177,35 @@ Visible mounted buffers follow their window through Ebox's viewport controller."
              (ebox-playground--effective-viewport-width))))
     (ebox-playground--render-to-preview-buffer buffer input)))
 
-(defun ebox-playground--static-value-p (value)
-  "Return non-nil when VALUE is a literal or explicitly quoted form."
-  (or (null value) (numberp value) (stringp value) (characterp value)
-      (keywordp value) (eq value t)
-      (and (consp value) (memq (car value) '(quote function)))))
-
-(defun ebox-playground--evaluate-value (value)
-  "Evaluate executable DSL VALUE while preserving literal data values."
-  (if (ebox-playground--static-value-p value)
-      (if (and (consp value) (memq (car value) '(quote function)))
-          (eval value nil)
-        value)
-    (eval value nil)))
-
-(defun ebox-playground--evaluate-items (items)
-  "Evaluate property values and recurse into child forms in ITEMS."
-  (let (result)
-    (while items
-      (let ((item (pop items)))
-        (if (keywordp item)
-            (progn
-              (unless items
-                    (error "Ebox playground: missing value for %S" item))
-              (push item result)
-              (push (ebox-playground--evaluate-value (pop items)) result))
-          (push (ebox-playground--evaluate-form item) result))))
-    (nreverse result)))
-
-(defun ebox-playground--evaluate-form (form)
-  "Evaluate property expressions in one structural DSL FORM."
-  (if (and (consp form) (symbolp (car form)))
-      (cons (car form) (ebox-playground--evaluate-items (cdr form)))
-    form))
+(defun ebox-playground--evaluate-form (form &optional source-file)
+  "Evaluate one Elisp FORM lexically to produce Ebox DSL data.
+When SOURCE-FILE names a .ebox file, load its optional same-basename .el
+companion first.  Reload that exact source file on every evaluation."
+  (when (and source-file
+             (equal (file-name-extension source-file) "ebox"))
+    (let ((companion (concat (file-name-sans-extension
+                              (expand-file-name source-file)) ".el")))
+      (when (file-exists-p companion)
+        (load companion nil t t))))
+  (eval form t))
 
 (defun ebox-playground--read-form (source)
-  "Read one Ebox DSL form from SOURCE."
+  "Read exactly one Elisp expression from SOURCE."
   (when (string-empty-p (string-trim source))
     (user-error "The Ebox DSL source is empty"))
   (with-temp-buffer
+    (set-syntax-table emacs-lisp-mode-syntax-table)
     (insert source)
     (goto-char (point-min))
-    (let ((read-eval nil)
-          (form (read (current-buffer))))
-      (condition-case nil
-          (progn
-            (read (current-buffer))
-            (user-error "The Ebox DSL source must contain one form"))
-        (end-of-file form)))))
+    (let* ((read-eval nil)
+           (form (read (current-buffer))))
+      (forward-comment (point-max))
+      (unless (eobp)
+        (user-error "The Ebox source must contain one Elisp expression"))
+      form)))
 
 (defun ebox-playground--read-file (file)
-  "Read one Ebox DSL form from FILE."
+  "Read one Elisp expression from FILE."
   (unless (file-readable-p file)
     (user-error "Ebox DSL file is not readable: %s" file))
   (with-temp-buffer
@@ -244,13 +215,14 @@ Visible mounted buffers follow their window through Ebox's viewport controller."
 
 ;;;###autoload
 (defun ebox-playground-view (&optional file viewport-width)
-  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without buffer side effects."
+  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without publishing it.
+Reload FILE's optional same-basename .el companion before evaluating its DSL."
   (let ((ebox-viewport-width
-         (or viewport-width (ebox-playground--effective-viewport-width))))
+         (or viewport-width (ebox-playground--effective-viewport-width)))
+        (file (expand-file-name (or file ebox-playground-default-file))))
     (ebox-build
      (ebox-playground--evaluate-form
-      (ebox-playground--read-file
-       (expand-file-name (or file ebox-playground-default-file)))))))
+      (ebox-playground--read-file file) file))))
 
 ;;;###autoload
 (defun ebox-playground-open (&optional buffer-name)

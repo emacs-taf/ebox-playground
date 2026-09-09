@@ -3,19 +3,25 @@
 (require 'ert)
 (require 'cl-lib)
 (require 'ebox-playground)
+(require 'ebox-playground-flex-resize-evaluator
+         (expand-file-name "scripts/ebox-playground-flex-resize-evaluator.el"
+                           ebox-playground-directory))
 
 (defconst ebox-playground-test--fixtures
-  '("basic.ebox" "comprehensive.ebox" "flex-reference.ebox"
-    "responsive-reference.ebox" "grid-reference.ebox")
+  '("flex-reference.ebox" "grid-reference.ebox" "size-reference.ebox")
   "Migrated and maintained `.ebox' fixtures in the playground package.")
 
 (defun ebox-playground-test--dynamic-width ()
-  "Return a list-valued width from executable DSL property code."
-  '(240))
+  "Return a list-valued width from an ordinary Elisp expression."
+  '(px 240))
 
 (defun ebox-playground-test--dynamic-color ()
-  "Return a color from executable DSL property code."
+  "Return a color from an ordinary Elisp expression."
   "#123456")
+
+(defun ebox-playground-test--read-layout (file)
+  "Read and evaluate the layout expression in FILE."
+  (ebox-playground--evaluate-form (ebox-playground--read-file file) file))
 
 (defun ebox-playground-test--boxes (form)
   "Return every nested BOX form in FORM."
@@ -40,6 +46,12 @@
       (setq items (cddr items)))
     items))
 
+(defun ebox-playground-test--separator-form-p (form)
+  "Return non-nil for an empty gallery separator FORM, regardless of defaults."
+  (and (eq (car-safe form) 'box)
+       (null (ebox-playground-test--form-children form))
+       (equal (plist-get (cdr form) :bgcolor) "#FAF7F0")))
+
 (defun ebox-playground-test--line-widths (text)
   "Return rendered pixel widths for every line in TEXT."
   (mapcar #'ebox-string-pixel-width
@@ -49,99 +61,185 @@
   "Return the widest rendered pixel line in TEXT."
   (apply #'max (ebox-playground-test--line-widths text)))
 
+(defun ebox-playground-test--absolute-space-width (line)
+  "Return LINE's explicit pixel space width, preserving fractional precision."
+  (pcase (get-text-property 0 'display line)
+    (`(space :width (,width)) (and (numberp width) width))))
+
 (defconst ebox-playground-test--grid-value-forms
-  '(":grid-template-columns '(auto auto)"
-    ":grid-template-columns '(min-content max-content)"
-    ":grid-template-columns '((120) (74))"
-    ":padding '(0 (2))"
-    ":grid-template-columns '((192))"
-    ":grid-template-columns '((88) (88))"
-	":grid-template-columns '((fr 1) (fr 2))"
-    ":grid-template-columns '((minmax"
-    ":grid-template-columns '((repeat"
-    ":grid-template-rows '(auto auto)"
-	":grid-template-rows '((fr 1) (fr 2))"
-    ":grid-auto-columns '((64))"
-    ":grid-auto-columns 'auto"
-	":grid-auto-columns '(fr 1)"
-    ":grid-auto-columns '((minmax"
-    ":grid-auto-rows 2"
-    ":grid-auto-rows 'auto"
-	":grid-auto-rows '(fr 1)"
-    ":grid-auto-rows '((minmax"
-    ":grid-auto-flow 'row"
-    ":grid-auto-flow 'column"
-    ":gap 1"
-    ":gap '(1 (14))"
-    ":row-gap 2"
-    ":column-gap '(28)"
+  '(":grid-template-columns (auto auto)"
+    ":grid-template-columns (min-content max-content)"
+    ":grid-template-columns ((px 120) (px 74))"
+    ":padding-inline (px 2)"
+    ":grid-template-columns ((px 192))"
+    ":grid-template-columns ((px 88) (px 88))"
+	":grid-template-columns ((fr 1) (fr 2))"
+    ":grid-template-columns ((minmax"
+    ":grid-template-columns ((repeat"
+    ":grid-template-rows (auto auto)"
+	":grid-template-rows ((fr 1) (fr 2))"
+    ":grid-auto-columns ((px 64))"
+    ":grid-auto-columns auto"
+	":grid-auto-columns (fr 1)"
+    ":grid-auto-columns ((minmax"
+    ":grid-auto-rows (lh 2)"
+    ":grid-auto-rows auto"
+	":grid-auto-rows (fr 1)"
+    ":grid-auto-rows ((minmax"
+    ":grid-auto-flow row"
+    ":grid-auto-flow column"
+    ":gap ((lh 1) (ch 1))"
+    ":gap ((lh 1) (px 14))"
+    ":row-gap (lh 2)"
+    ":column-gap (px 28)"
     ":grid-column 2"
     ":grid-row 2"
-    ":grid-column '(1 :span 2)"
-    ":grid-row '(1 :span 2)"
-    ":grid-column '(1 3)"
-    ":grid-row '(1 3)"
+    ":grid-column (1 :span 2)"
+    ":grid-row (1 :span 2)"
+    ":grid-column (1 3)"
+    ":grid-row (1 3)"
     ":grid-column-span 2"
     ":grid-row-span 2"
-    ":justify-items 'start"
-    ":justify-items 'center"
-    ":justify-items 'end"
-    ":justify-items 'stretch"
-    ":align-items 'start"
-    ":align-items 'center"
-    ":align-items 'end"
-    ":align-items 'stretch"
-    ":align-items 'normal"
-    ":justify-content 'start"
-    ":justify-content 'center"
-    ":justify-content 'end"
-    ":justify-content 'space-between"
-    ":justify-content 'space-around"
-    ":justify-content 'space-evenly"
-    ":justify-content 'stretch"
-    ":justify-content 'normal"
-    ":align-content 'start"
-    ":align-content 'center"
-    ":align-content 'end"
-    ":align-content 'space-between"
-    ":align-content 'space-around"
-    ":align-content 'space-evenly"
-    ":align-content 'stretch"
-    ":align-content 'normal")
+    ":justify-items start"
+    ":justify-items center"
+    ":justify-items end"
+    ":justify-items stretch"
+    ":align-items start"
+    ":align-items center"
+    ":align-items end"
+    ":align-items stretch"
+    ":align-items normal"
+    ":justify-content start"
+    ":justify-content center"
+    ":justify-content end"
+    ":justify-content space-between"
+    ":justify-content space-around"
+    ":justify-content space-evenly"
+    ":justify-content stretch"
+    ":justify-content normal"
+    ":align-content start"
+    ":align-content center"
+    ":align-content end"
+    ":align-content space-between"
+    ":align-content space-around"
+    ":align-content space-evenly"
+    ":align-content stretch"
+    ":align-content normal")
   "Public Grid property/value fragments required in the reference fixture.")
 
-(ert-deftest ebox-playground-tinted-content-has-explicit-ink ()
-  "Every tinted content box in the public fixtures should set its text color."
-  (dolist (file (append ebox-playground-test--fixtures
-                        '("public-layout-gallery.ebox")))
-    (let ((form (ebox-playground--read-file
-                 (expand-file-name (concat "examples/" file)
-                                   ebox-playground-directory))))
-      (dolist (box (ebox-playground-test--boxes form))
-        (let ((properties (cdr box)))
-          (when (and (cl-some #'stringp
-                              (ebox-playground-test--form-children box))
-                     (memq :bgcolor properties))
-            (should (memq :color properties))))))))
+(ert-deftest ebox-playground-tinted-content-has-effective-ink ()
+  "Tinted fixture text should have effective ink, including inherited colors."
+  (dolist (file ebox-playground-test--fixtures)
+    (let* ((text (ebox-playground-flex-resize-evaluator--example-text
+                  (expand-file-name (concat "examples/" file)
+                                    ebox-playground-directory)
+                  720 t))
+           (normalized (ebox-playground-flex-resize-evaluator--visual-text text)))
+      (dotimes (index (length normalized))
+        (when (string-match-p "[^[:space:]]" (substring normalized index (1+ index)))
+          (let ((face (get-text-property index 'face normalized)))
+            (when (plist-get face :background)
+              (should (stringp (plist-get face :foreground))))))))))
+
+(ert-deftest ebox-playground-visual-comparison-merges-effective-faces ()
+  "Equivalent face grouping and runtime identities should not create differences."
+  (let ((before (propertize "text" 'face
+                            '((:foreground "red" :height 1.5)
+                              (:foreground "blue" :background "white" :height 120))
+                            'ebox-content-idx 1))
+        (after (propertize "text" 'face
+                           '(:height 180 :background "white" :foreground "red")
+                           'ebox-content-idx 9)))
+    (should (equal-including-properties
+             (ebox-playground-flex-resize-evaluator--visual-text before)
+             (ebox-playground-flex-resize-evaluator--visual-text after)))))
+
+(ert-deftest ebox-playground-visual-comparison-preserves-visible-and-interactive-changes ()
+  "Face, geometry, text, and interaction differences must survive normalization."
+  (dolist (values '((face (:foreground "red") (:foreground "blue"))
+                    (face (:height 120) (:height 180))
+                    (display (space :width (80)) (space :width (81)))
+                    (help-echo "first action" "second action")
+                    (keymap (keymap (13 . first-command))
+                            (keymap (13 . second-command)))
+                    (mouse-face (:foreground "red") (:foreground "blue"))))
+    (should-not
+     (equal-including-properties
+      (ebox-playground-flex-resize-evaluator--visual-text
+       (propertize "text" (nth 0 values) (nth 1 values)))
+      (ebox-playground-flex-resize-evaluator--visual-text
+       (propertize "text" (nth 0 values) (nth 2 values))))))
+  (should-not
+   (equal-including-properties
+    (ebox-playground-flex-resize-evaluator--visual-text "text")
+    (ebox-playground-flex-resize-evaluator--visual-text "changed"))))
+
+(ert-deftest ebox-playground-spacer-auto-width-and-inherited-color-render-equally ()
+  "Explicit spacer height and inherited ink retain geometry and local overrides."
+  (let* ((ebox-viewport-width 720)
+         (explicit
+          '(column :width (px 240)
+                   (box :width stretch :height (lh 1) :bgcolor "#FAF7F0")
+                   (box :color "#123456" :bgcolor "#FFFFFF" "Inherited ink")
+                   (box :color "#654321" :bgcolor "#FFFFFF" "Local ink")))
+         (inherited
+          '(column :width (px 240) :color "#123456"
+                   (box :height (lh 1) :bgcolor "#FAF7F0")
+                   (box :bgcolor "#FFFFFF" "Inherited ink")
+                   (box :color "#654321" :bgcolor "#FFFFFF" "Local ink")))
+         (before (ebox-playground-flex-resize-evaluator--visual-text
+                  (ebox-render (ebox-build explicit))))
+         (after (ebox-playground-flex-resize-evaluator--visual-text
+                 (ebox-render (ebox-build inherited)))))
+    (should (equal-including-properties before after))
+    (should (equal (plist-get
+                    (get-text-property (string-match "Local ink" after) 'face after)
+                    :foreground)
+                   "#654321"))))
 
 (ert-deftest ebox-playground-uses-only-public-layout-apis ()
   "The example should build and render through the public Ebox entry point."
-  (let* ((source (ebox-playground--read-file ebox-playground-default-file))
+  (let* ((source (ebox-playground-test--read-layout
+                  ebox-playground-default-file))
          (node (ebox-playground-view))
          (rendered (substring-no-properties (ebox-render node))))
     (should (eq (car source) 'column))
-    (dolist (label '("Ebox Playground" "FIXED + FRACTIONAL"
-                     "EXPLICIT PLACEMENT" "PUBLIC COMPOSITION"))
+    (dolist (label '("Ebox CSS Grid Reference" "Container property:"
+                     "120 PX"))
       (should (string-match-p (regexp-quote label) rendered)))))
 
 (ert-deftest ebox-playground-flex-evaluator-uses-public-observation ()
   "Keep the Flex resize gate on public Ebox reports without advice."
-  (let ((source (with-temp-buffer
+  (let* ((source (with-temp-buffer
                   (insert-file-contents
                    (expand-file-name
                     "scripts/ebox-playground-flex-resize-evaluator.el"
                     ebox-playground-directory))
                   (buffer-string)))
+        (resize-source
+         (with-temp-buffer
+           (insert source)
+           (goto-char (point-min))
+           ;; The shared file also contains private scroll diagnostics and
+           ;; declarative property-name metadata.  Guard every resize function
+           ;; and helper body, rather than unrelated top-level forms.
+           (let (functions)
+             (condition-case nil
+                 (while t
+                   (let ((form (read (current-buffer))))
+                     (when (and (eq (car-safe form) 'defun)
+                                (string-prefix-p
+                                 "ebox-playground-flex-resize-evaluator-"
+                                 (symbol-name (cadr form))))
+                       (push form functions))))
+               (end-of-file nil))
+             ;; Inspect API use, allowing this quoted render metadata name.
+             ;; The oracle canonicalizes its ids; it does not call an Ebox
+             ;; private function or read mutable runtime state through it.
+             (prin1-to-string
+              (cl-subst '(quote hover-owner-metadata)
+                        '(quote ebox--hover-style)
+                        (nreverse functions) :test #'equal)))))
         (runner (with-temp-buffer
                   (insert-file-contents
                    (expand-file-name "scripts/flex-resize-evaluator.sh"
@@ -151,7 +249,9 @@
                     (insert-file-contents
                      (expand-file-name "Makefile" ebox-playground-directory))
                     (buffer-string))))
-    (should (string-match-p "ebox-buffer-set-observer" source))
+    (should (string-match-p "ebox-playground-flex-resize-evaluator-run"
+                            resize-source))
+    (should (string-match-p "ebox-buffer-set-observer" resize-source))
     (should (string-match-p "evaluator-warmup-count 5" source))
     (should (string-match-p "evaluator-sample-count 30" source))
     (should (string-match-p "per-update p95 budget" source))
@@ -162,7 +262,7 @@
     (should-not (string-match-p "-l \"\$root/ebox-playground.el\"" runner))
     (dolist (private '("ebox--" "advice-add" "advice-remove"
                        "ebox-native-reflow--"))
-      (should-not (string-match-p (regexp-quote private) source)))))
+      (should-not (string-match-p (regexp-quote private) resize-source)))))
 
 (ert-deftest ebox-playground-keeps-layout-in-ebox-source ()
   "Keep concrete gallery content out of the generic Elisp runner."
@@ -241,6 +341,183 @@
                          1)))))
       (ebox-playground-close name))))
 
+(ert-deftest ebox-playground-evaluator-normalizes-hover-owner-identities ()
+  "Fresh ids compare equally without discarding paint or owner partitions."
+  (let* ((normalize #'ebox-playground-flex-resize-evaluator--visual-text)
+         (left (propertize "AB" 'ebox--hover-style
+                           '(:owner 22 :face (:background "red")
+                             :base (:foreground "white"))))
+         (fresh (propertize "AB" 'ebox--hover-style
+                            '(:owner 96 :face (:background "red")
+                              :base (:foreground "white")))))
+    (should (equal-including-properties
+             (funcall normalize left) (funcall normalize fresh)))
+    (should (= (plist-get (get-text-property 0 'ebox--hover-style left) :owner) 22))
+    (dolist (declaration '((:owner 96 :face (:background "blue")
+                           :base (:foreground "white"))
+                          (:owner 96 :face (:background "red")
+                           :base (:foreground "black"))
+                          (:owner 97 :face (:background "red")
+                           :base (:foreground "white"))))
+      (let ((changed (copy-sequence fresh)))
+        (put-text-property 1 2 'ebox--hover-style declaration changed)
+        (should-not (equal-including-properties
+                     (funcall normalize left) (funcall normalize changed)))))))
+
+(ert-deftest ebox-playground-interaction-evaluator-measures-and-cleans ()
+  "Native repeated commands report their work and release temporary state."
+  (let ((file (make-temp-file "ebox-interaction-evaluator-" nil ".ebox"))
+        (buffers (buffer-list))
+        (windows (window-state-get))
+        (functions
+         (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
+                 '(ebox--render-layout ebox-surface--surface-plan
+                   ebox-surface--rendered-fragments ebox-surface--ensure-node-tree))))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (prin1
+             '(let ((count 0))
+                (list 'column :width '(px 120)
+                      (list 'text :id "count" "00")
+                      (list 'text :keymap
+                            (ebox-keymap-create
+                             :activate
+                             (lambda ()
+                               (ebox-region-update
+                                "count" :content (format "%02d" (cl-incf count)))))
+                            "Add")))
+             (current-buffer)))
+          (let ((report (ebox-playground-interaction-evaluator-run
+                         file "Add" "RET" 3 120 8)))
+            (should (plist-get report :fresh-parity))
+            (should (string-match-p "03" (plist-get report :text)))
+            (should (= (plist-get report :publications) 3))
+            (dolist (key '(:mean-ms :p95-ms :max-ms :gc-count :gc-ms :cons-cells
+                           :layout-calls :surface-plans :fragment-scans
+                           :fragment-characters :node-registrations))
+              (should (>= (plist-get report key) 0))))
+          (cl-letf (((symbol-function 'ebox-region-update)
+                     (lambda (&rest _) (error "Injected command failure"))))
+            (should-error (ebox-playground-interaction-evaluator-run
+                           file "Add" "RET" 3 120 8)))
+          (should-error (ebox-playground-interaction-evaluator-run
+                         file "Missing" "RET" 3 120 8))
+          (should (equal buffers (buffer-list)))
+          (should (equal windows (window-state-get)))
+          (dolist (entry functions)
+            (should (eq (cdr entry) (symbol-function (car entry))))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-preserves-live-runtime ()
+  "Profiling multiple files preserves existing mounts, windows, and timers."
+  (let ((file (make-temp-file "ebox-scroll-evaluator-" nil ".ebox"))
+        (live (generate-new-buffer " *ebox-scroll-evaluator-live-test*"))
+        (ebox-runtime-idle-prewarm nil)
+        (ebox-runtime-idle-reflow-cache-prewarm nil)
+        (ebox-scroll-lazy-idle-prefetch-lines 0)
+        (layout '(column :width (px 120) :height (lh 4) :overflow scroll
+                  (box "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11"))))
+    (unwind-protect
+        (progn
+          (with-temp-file file (prin1 (list 'quote layout) (current-buffer)))
+          (ebox-render-to-buffer live (ebox-build layout))
+          (let* ((runtime (ebox--buffer-render-state live))
+                 (region-id
+                  (plist-get (plist-get runtime :root-node) :region-id))
+                 (scroll-state (ebox--scroll-get-state region-id))
+                 (contents (with-current-buffer live (buffer-string)))
+                 (windows (window-state-get))
+                 (buffers (buffer-list))
+                 (timer (run-at-time 3600 nil #'ignore))
+                 (ebox--deferred-render-gc-timer timer))
+            (unwind-protect
+                (let* ((standard-output (lambda (_character)))
+                       ;; Exercise the GUI GC lease without displaying a buffer.
+                       (noninteractive nil)
+                       (reports (ebox-playground-scroll-evaluator-run
+                                 (list file file) 121 3 8)))
+                  (should (= (length reports) 4))
+                  (should (equal (mapcar (lambda (report)
+                                           (plist-get report :position))
+                                         reports)
+                                 '(top middle top middle)))
+                  (dolist (report reports)
+                    (should (plist-get report :fresh-render-parity))
+                    (should (= (plist-get report :steps) 3))
+                    (dolist (key '(:mean-ms :p95-ms :max-ms :root-renders
+                                   :node-styles :style-computations))
+                      (should (>= (plist-get report key) 0))))
+                  (should (eq runtime (ebox--buffer-render-state live)))
+                  (should (eq scroll-state (ebox--scroll-get-state region-id)))
+                  (should (equal-including-properties
+                           contents (with-current-buffer live (buffer-string))))
+                  (should (equal windows (window-state-get)))
+                  (should (equal buffers (buffer-list)))
+                  (should (eq ebox--deferred-render-gc-timer timer))
+                  (should (memq timer timer-list)))
+              (cancel-timer timer))))
+      (when (buffer-live-p live) (kill-buffer live))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-cleans-after-scroll-error ()
+  "A measured scroll failure removes advice and the evaluator's mount."
+  (let ((file (make-temp-file "ebox-scroll-evaluator-error-" nil ".ebox"))
+        (calls 0)
+        (original-scroll (symbol-function 'ebox--scroll-region-by))
+        (functions
+         (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
+                 '(ebox-surface--render-candidate
+                   ebox-surface--apply-node-style
+                   ebox-surface--compute-node-style)))
+        (buffers (buffer-list)))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (prin1
+             ''(column :width (px 120) :height (lh 2) :overflow scroll
+                (box "0\n1\n2\n3\n4\n5\n6"))
+             (current-buffer)))
+          (cl-letf (((symbol-function 'ebox--scroll-region-by)
+                     (lambda (&rest arguments)
+                       (when (= (cl-incf calls) 3)
+                         (error "Injected measured scroll failure"))
+                       (apply original-scroll arguments))))
+            (should-error
+             (ebox-playground-scroll-evaluator-run file 121 3 8)))
+          (should (= calls 3))
+          (should (equal buffers (buffer-list)))
+          (dolist (entry functions)
+            (should (eq (cdr entry) (symbol-function (car entry))))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-normalizes-only-invisible-spacers ()
+  "The visual oracle tolerates empty padding but retains visible differences."
+  (let* ((text (propertize "A" 'face '(:foreground "#123456")))
+         (normalize #'ebox-playground-scroll-evaluator--visual-text))
+    (should (equal-including-properties
+             (funcall normalize text)
+             (funcall normalize
+                      (concat (propertize " " 'display '(space :width (0))
+                                          'face '(:foreground "#123456"))
+                              text))))
+    (dolist (changed
+             (list (concat (propertize " " 'display '(space :width (1))) text)
+                   (propertize "A" 'face '(:foreground "#654321"))
+                   (propertize "B" 'face '(:foreground "#123456"))))
+      (should-not (equal-including-properties
+                   (funcall normalize text)
+                   (funcall normalize changed)))))
+  (dolist (carrier
+           (list (propertize " " 'display '(space :width (0)))
+                 (propertize " " 'display '(space :width (0) :height 2))
+                 (propertize " " 'display '(space :width (0) :ascent 90))
+                 (propertize " " 'display '(space :width (0))
+                             'face '(:height 2.0))))
+    (should (> (length (ebox-playground-scroll-evaluator--visual-text
+                       (concat carrier "\nA")))
+               2))))
+
 (ert-deftest ebox-playground-effective-viewport-prefers-window-text-width ()
   "Interactive viewport resolution should prefer the window text width."
   (let ((ebox-viewport-width nil))
@@ -270,7 +547,7 @@
                    (lambda (&optional _frame) 8)))
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-render.ebox")
-            (insert "(box :width '(viewport) :height 1 \"viewport\")")
+            (insert "'(box :width (vw 100) :height (lh 1) \"viewport\")")
             (ebox-dsl-mode)
             (ebox-dsl-render)
             (with-current-buffer preview
@@ -317,7 +594,7 @@
           (with-temp-buffer
             (setq source (current-buffer)
                   buffer-file-name "/tmp/ebox-playground-two-window.ebox")
-            (insert "(box :width '(viewport) :height 1 \"two windows\")")
+            (insert "'(box :width (vw 100) :height (lh 1) \"two windows\")")
             (ebox-dsl-mode)
             (cl-letf (((symbol-function 'window-body-width)
                        (lambda (&optional _window _pixelwise) 987))
@@ -339,17 +616,24 @@
         (kill-buffer preview)))))
 
 (ert-deftest ebox-playground-preview-resizes-through-ebox-viewport-update ()
-  "A preview resize should publish an incremental Ebox viewport update."
+  "A queued preview resize should publish an incremental viewport update."
   (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-resize.ebox*")
-        (window-width 987))
+        (window-width 987)
+        (ebox--window-size-change-pending-frames nil)
+        (ebox--window-size-change-timer nil)
+        scheduled)
     (unwind-protect
         (cl-letf (((symbol-function 'window-body-width)
                    (lambda (&optional _window _pixelwise) window-width))
                   ((symbol-function 'frame-char-width)
-                   (lambda (&optional _frame) 8)))
+                   (lambda (&optional _frame) 8))
+                  ((symbol-function 'run-at-time)
+                   (lambda (_time _repeat function &rest args)
+                     (setq scheduled (cons function args))
+                     'queued-viewport)))
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-resize.ebox")
-            (insert "(box :width '(viewport) :height 1 \"viewport\")")
+            (insert "'(box :width (vw 100) :height (lh 1) \"viewport\")")
             (ebox-dsl-mode)
             (ebox-dsl-render)
             (setq window-width 1234)
@@ -358,7 +642,12 @@
                 (should (memq #'ebox--window-size-change
                               window-size-change-functions))
                 (let ((noninteractive nil))
-                  (ebox--window-size-change (window-frame window)))))
+                  (ebox--window-size-change (window-frame window))))
+              (should (= (ebox-playground-test--max-line-width
+                          (buffer-string))
+                         (- 987 16))))
+            (should scheduled)
+            (apply (car scheduled) (cdr scheduled))
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
@@ -462,8 +751,8 @@
       (when (get-buffer preview)
         (kill-buffer preview)))))
 
-(ert-deftest ebox-playground-flex-reference-paints-root-canvas ()
-  "The Flex reference should carry its canvas color into the preview face."
+(ert-deftest ebox-playground-flex-reference-preserves-buffer-chrome ()
+  "Root canvas paint should preserve the ordinary buffer face and mode line."
   (let ((preview " *ebox-playground-flex-canvas-test*")
         (path (expand-file-name "examples/flex-reference.ebox"
                                ebox-playground-directory)))
@@ -472,8 +761,8 @@
           (ebox-playground--render-input-to-buffer
            preview (ebox-playground-view path 720) 720)
           (with-current-buffer preview
-            (should (equal face-remapping-alist
-                           '((default (:background "#FAF7F0")))))
+            (should-not face-remapping-alist)
+            (should (equal mode-line-format (default-value 'mode-line-format)))
             (let ((display-signature (ebox--current-display-signature))
                   (matching-cache-entry-p nil)
                   (render-cache
@@ -506,52 +795,89 @@
                                 ebox-playground-directory)))
     (let ((separators
            (cl-remove-if-not
-            (lambda (form)
-              (and (equal (plist-get (cdr form) :width)
-                          '(quote (viewport)))
-                   (equal (plist-get (cdr form) :height) 1)
-                   (equal (plist-get (cdr form) :bgcolor) "#FAF7F0")))
+            #'ebox-playground-test--separator-form-p
             (ebox-playground-test--forms-named
-             'box (ebox-playground--read-file path)))))
+             'box (ebox-playground-test--read-layout path)))))
       (should (= (length separators) 11)))
     (dolist (viewport '(691 720))
       (let* ((ebox-viewport-width viewport)
+             (form (ebox-playground-test--read-layout path))
+             ;; Pin this canvas contract without changing the author's root.
+             (_ (setcdr form (plist-put (cdr form) :width '(vw 100))))
              (lines (ebox-string-lines
-                     (ebox-render (ebox-playground-view path viewport))))
+                     (ebox-render (ebox-build form))))
              (separator-lines
               (cl-remove-if-not
                (lambda (line)
-                 (equal (get-text-property 0 'display line)
-                        `(space :width (,viewport))))
+                 (let ((width (ebox-playground-test--absolute-space-width line)))
+                   (and width (= width viewport))))
                lines)))
         (should (= (length separator-lines) 11))
         (dolist (line separator-lines)
-          (should (equal (get-text-property 0 'display line)
-                         `(space :width (,viewport))))
+          (should (= (ebox-playground-test--absolute-space-width line)
+                     viewport))
           (should (= (ebox-string-pixel-width line) viewport))
           (should (equal (get-text-property 0 'face line)
                          '(:background "#FAF7F0"))))))))
 
-(ert-deftest ebox-playground-public-layout-gallery-fixed-separators-paint-the-canvas ()
-  "The default public gallery fixed separators should keep canvas coverage."
-  (let* ((path (expand-file-name "examples/public-layout-gallery.ebox"
-                                 ebox-playground-directory))
+(ert-deftest ebox-playground-default-fixture-separators-paint-the-canvas ()
+  "The default fixture separators should cover the preview canvas."
+  (let* ((ebox-viewport-width 720)
+         (form (ebox-playground-test--read-layout ebox-playground-default-file))
+         (_ (setcdr form (plist-put (cdr form) :width '(vw 100))))
          (lines (ebox-string-lines
-                 (ebox-render (ebox-playground-view path))))
+                 (ebox-render (ebox-build form))))
          (separators 0))
     (dolist (line lines)
-      (when (equal (get-text-property 0 'display line)
-                   '(space :width (720)))
+      (when (let ((width (ebox-playground-test--absolute-space-width line)))
+              (and width (= width 720)))
         (setq separators (1+ separators))
         (should (equal (get-text-property 0 'face line)
                        '(:background "#FAF7F0")))))
     (should (> separators 0))))
 
+(ert-deftest ebox-playground-separators-follow-a-narrower-root ()
+  "Explicit and auto gallery separators fill a root narrower than the viewport."
+  (dolist (fixture '(("flex-reference.ebox" . 12)
+                     ("grid-reference.ebox" . 11)))
+    (dolist (omit-width '(nil t))
+      (let* ((ebox-viewport-width 1000)
+             (path (expand-file-name (concat "examples/" (car fixture))
+                                     ebox-playground-directory))
+             (form (ebox-playground-test--read-layout path))
+             (parent-width 900))
+        ;; Inspect the entire gallery independently of the author's height.
+        (setcdr form (plist-put (cdr form) :width '(vw 90)))
+        (setcdr form (plist-put (cdr form) :height 'auto))
+        (cl-remf (cdr form) :overflow)
+        (setcdr form (append '(:overflow visible) (cdr form)))
+        (dolist (box (ebox-playground-test--form-children form))
+          (when (and (eq (car-safe box) 'box)
+                     (null (ebox-playground-test--form-children box)))
+            (should (equal (plist-get (cdr box) :height) '(lh 1)))
+            (if omit-width
+                (cl-remf (cdr box) :width)
+              (setcdr box (plist-put (cdr box) :width 'stretch)))))
+        (let* ((lines (ebox-string-lines (ebox-render (ebox-build form))))
+               (separators
+                (cl-remove-if-not
+                 (lambda (line)
+                   (let ((face (get-text-property 0 'face line)))
+                     (and (ebox-playground-test--absolute-space-width line)
+                          (or (equal face '(:background "#FAF7F0"))
+                              (equal (car-safe face)
+                                     '(:background "#FAF7F0"))))))
+                 lines)))
+          (should (= (length separators) (cdr fixture)))
+          (dolist (line separators)
+            (should (= (ebox-playground-test--absolute-space-width line)
+                       parent-width))))))))
+
 (ert-deftest ebox-playground-grid-reference-covers-public-properties ()
   "The Grid reference should cover every public property and supported value form."
   (let ((source
          (prin1-to-string
-          (ebox-playground--read-file
+          (ebox-playground-test--read-layout
            (expand-file-name "examples/grid-reference.ebox"
                              ebox-playground-directory)))))
     (dolist (property '(:grid-template-columns :grid-template-rows
@@ -572,21 +898,22 @@
           (ebox-playground-open name)
           (should (buffer-live-p (get-buffer name)))
           (with-current-buffer name
-            (should (string-match-p "Ebox Playground" (buffer-string)))))
+            (should (string-match-p "Ebox CSS Grid Reference"
+                                    (buffer-string)))))
       (ebox-playground-close name))))
 
 (ert-deftest ebox-playground-fits-a-compact-gui-window ()
-  "Keep the gallery wide enough to teach Grid without crossing 800 px frames."
-  (let* ((input (ebox-playground-view))
-         (root (car (ebox-canonical-input-roots input)))
-         (gallery-width
-          (plist-get (car (ebox-box-node-children root)) :width))
+  "Keep the default gallery inside a compact 720 px preview canvas."
+  (let* ((viewport 720)
+         (ebox-viewport-width viewport)
+         (form (ebox-playground-test--read-layout ebox-playground-default-file))
+         (_ (setcdr form (plist-put (cdr form) :width '(vw 100))))
+         (input (ebox-build form))
          (rendered (ebox-render input))
          (widths (mapcar #'ebox-string-pixel-width
                          (ebox-string-lines rendered)))
          (maximum (apply #'max widths)))
-    (should (= maximum gallery-width))
-    (should (<= gallery-width 760))))
+    (should (= maximum viewport))))
 
 (ert-deftest ebox-playground-registers-ebox-file-mode ()
   "Open Ebox DSL files in the package-owned major mode."
@@ -603,7 +930,7 @@
     (unwind-protect
         (with-temp-buffer
           (setq buffer-file-name "/tmp/ebox-playground-render-test.ebox")
-          (insert "(box :width '(240) \"Rendered from .ebox\")")
+          (insert "'(box :width (px 240) \"Rendered from .ebox\")")
           (ebox-dsl-mode)
           (ebox-dsl-render)
           (should (eq (window-buffer (selected-window)) (current-buffer)))
@@ -613,22 +940,211 @@
       (when (get-buffer preview)
         (kill-buffer preview)))))
 
-(ert-deftest ebox-playground-evaluates-property-expressions ()
-  "Evaluate executable property values while preserving quoted constants."
-  (let* ((form (ebox-playground--evaluate-form
-                '(box :width (ebox-playground-test--dynamic-width)
-                      :color (ebox-playground-test--dynamic-color)
-                      :padding '(0 (4))
-                      :text-align 'center
-                      "Dynamic property values")))
+(ert-deftest ebox-playground-evaluates-quoted-layout-as-data ()
+  "Quoted layout lists and symbols reach Ebox without extra evaluation."
+  (let* ((expected '(box :width (px 240) :padding ((lh 0) (px 4))
+                        :text-align center "Literal values"))
+         (form (ebox-playground--evaluate-form
+                (ebox-playground--read-form
+                 "'(box :width (px 240) :padding ((lh 0) (px 4))
+                        :text-align center \"Literal values\")")))
          (node (ebox-build form)))
-    (should (equal (ebox-style-node-specified-value node :width) '(240)))
+    (should (equal form expected))
+    (should (equal (ebox-style-node-specified-value node :width) '(px 240)))
+    (should (equal (ebox-style-node-specified-value node :padding-inline-start)
+                   '(px 4)))
+    (should (eq (ebox-style-node-specified-value node :text-align) 'center))))
+
+(ert-deftest ebox-playground-evaluates-backquoted-property-expressions ()
+  "Use ordinary unquote expressions to calculate property values."
+  (let* ((form (ebox-playground--evaluate-form
+                '(let ((width (ebox-playground-test--dynamic-width))
+                       (color (ebox-playground-test--dynamic-color)))
+                   `(box :width ,width :color ,color
+                         :padding ((lh 0) (px 4)) :text-align center
+                         "Dynamic property values"))))
+         (node (ebox-build form)))
+    (should (equal (ebox-style-node-specified-value node :width) '(px 240)))
     (should (equal (ebox-style-node-specified-value node :color) "#123456"))
     (should (equal
              (ebox-style-node-specified-value node :padding-inline-start)
-             '(4)))
+             '(px 4)))
     (should (eq (ebox-style-node-specified-value node :text-align)
                 'center))))
+
+(ert-deftest ebox-playground-evaluates-lexical-children-and-text ()
+  "Lexical closures can produce spliced child lists and dynamic text."
+  (let* ((source
+          "(let ((labels '(\"one\" \"two\"))
+                 (make-child (let ((prefix \"Item: \"))
+                               (lambda (label)
+                                 `(box ,(concat prefix label))))))
+             `(column :padding ((lh 0) (ch ,(length labels)))
+                      ,@(mapcar make-child labels)))")
+         (form (ebox-playground--evaluate-form
+                (ebox-playground--read-form source)))
+         (rendered (substring-no-properties (ebox-render (ebox-build form)))))
+    (should (equal form '(column :padding ((lh 0) (ch 2))
+                                (box "Item: one") (box "Item: two"))))
+    (should (string-match-p "Item: one" rendered))
+    (should (string-match-p "Item: two" rendered))))
+
+(ert-deftest ebox-playground-does-not-evaluate-quoted-property-data ()
+  "A property that resembles executable code remains literal data."
+  (let ((form (ebox-playground--evaluate-form
+               '(quote (box :width (error "Must remain data") "Text")))))
+    (should (equal form
+                   '(box :width (error "Must remain data") "Text")))))
+
+(ert-deftest ebox-playground-rejects-multiple-or-incomplete-trailing-forms ()
+  "Exactly one complete Elisp expression is allowed in a source file."
+  (dolist (source '("'(box \"one\")\n'(box \"two\")"
+                    "'(box \"one\")\n("
+                    "'(box \"one\")\n\"unfinished"))
+    (should-error (ebox-playground--read-form source) :type 'user-error))
+  (should (equal (ebox-playground--read-form
+                  "; Header\n'(box \"one\") ; Trailing comment\n")
+                 '(quote (box "one")))))
+
+(ert-deftest ebox-playground-file-and-buffer-share-elisp-evaluation ()
+  "File previews and editor buffers build the same computed layout."
+  (let* ((source "(let ((body \"Computed body\"))
+                   `(box :width (px 240) ,body))")
+         (file (make-temp-file "ebox-playground-evaluation-" nil ".ebox" source)))
+    (unwind-protect
+        (with-temp-buffer
+          (insert source)
+          (ebox-dsl-mode)
+          (let ((buffer-form (ebox-playground--source-form)))
+            (should (equal buffer-form '(box :width (px 240) "Computed body")))
+            (should (equal (ebox-render (ebox-playground-view file 720))
+                           (ebox-render (ebox-build buffer-form))))))
+      (delete-file file))))
+
+(defvar ebox-playground-test--companion-value nil
+  "Dynamically isolated value written by temporary companion fixtures.")
+
+(defvar ebox-playground-test--companion-loads 0
+  "Number of source loads performed by a temporary companion fixture.")
+
+(defun ebox-playground-test--call-with-companion-files (function)
+  "Call FUNCTION with temporary DSL, companion, and preview names; clean up."
+  (let* ((directory (make-temp-file "ebox-playground-companion-" t))
+         (file (expand-file-name "example.ebox" directory))
+         (companion (expand-file-name "example.el" directory))
+         (preview (generate-new-buffer-name " *ebox-companion-test*"))
+         (ebox-playground-test--companion-value nil)
+         (ebox-playground-test--companion-loads 0)
+         (load-history load-history))
+    (unwind-protect
+        (funcall function file companion preview)
+      (ebox-playground-close preview)
+      (ebox-playground-close (format "*Ebox Preview: %s*" file))
+      (delete-directory directory t))))
+
+(ert-deftest ebox-playground-companion-reloads-exact-source-before-file-evaluation ()
+  "Reload an edited sibling source, regardless of bytecode or current directory."
+  (ebox-playground-test--call-with-companion-files
+   (lambda (file companion _preview)
+     (with-temp-file file
+       (insert "(list 'box ebox-playground-test--companion-value)"))
+     (with-temp-file companion
+       (insert ";;; -*- lexical-binding: t; -*-\n")
+       (insert "(setq ebox-playground-test--companion-value \"stale bytecode\")"))
+     (should (byte-compile-file companion))
+     (let ((default-directory temporary-file-directory)
+           (load-prefer-newer nil))
+       (dolist (value '("first source" "edited source"))
+         (with-temp-file companion
+           (insert ";;; -*- lexical-binding: t; -*-\n")
+           (prin1 `(progn
+                     (cl-incf ebox-playground-test--companion-loads)
+                     (setq ebox-playground-test--companion-value ,value))
+                  (current-buffer)))
+         ;; An ordinary suffix-selecting load would choose the newer .elc.
+         (set-file-times companion
+                         (time-subtract (current-time) (seconds-to-time 60)))
+         (should (string-match-p
+                  value (ebox-render (ebox-playground-view file 240))))
+         (should-not (equal ebox-playground-test--companion-value
+                            "stale bytecode"))))
+     (should (= ebox-playground-test--companion-loads 2)))))
+
+(ert-deftest ebox-playground-companion-source-command-reloads-and-preserves-preview ()
+  "C-c C-c loads the sibling before unsaved DSL and preserves a failed preview."
+  (ebox-playground-test--call-with-companion-files
+   (lambda (file companion _preview)
+     (with-temp-file file (insert "'(box \"Saved disk layout\")"))
+     (save-window-excursion
+       (with-temp-buffer
+         (setq buffer-file-name file)
+         (insert "(list 'box ebox-playground-test--companion-value)")
+         (ebox-dsl-mode)
+         (let ((default-directory temporary-file-directory)
+               (preview (format "*Ebox Preview: %s*" file))
+               (ebox-viewport-width 240))
+           (dolist (value '("first buffer preview" "edited buffer preview"))
+             (with-temp-file companion
+               (insert ";;; -*- lexical-binding: t; -*-\n")
+               (prin1 `(progn
+                         (cl-incf ebox-playground-test--companion-loads)
+                         (setq ebox-playground-test--companion-value ,value))
+                      (current-buffer)))
+             (call-interactively (key-binding (kbd "C-c C-c")))
+             (with-current-buffer preview
+               (should (string-match-p value (buffer-string)))
+               (should-not (string-match-p "Saved disk layout" (buffer-string)))))
+           (should (= ebox-playground-test--companion-loads 2))
+           (let ((before (with-current-buffer preview (buffer-string)))
+                 (existing (get-buffer preview)))
+             (with-temp-file companion
+               (insert ";;; -*- lexical-binding: t; -*-\n")
+               (insert "(error \"Companion source failed\")"))
+             (should-error
+              (call-interactively (key-binding (kbd "C-c C-c"))))
+             (should (eq existing (get-buffer preview)))
+             (with-current-buffer preview
+               (should (equal-including-properties before (buffer-string)))))))))))
+
+(ert-deftest ebox-playground-companion-file-load-error-preserves-mounted-preview ()
+  "A failed companion leaves existing preview contents and region handles live."
+  (ebox-playground-test--call-with-companion-files
+   (lambda (file companion preview)
+     (with-temp-file file
+       (insert "(list 'box :id \"kept\" ebox-playground-test--companion-value)"))
+     (with-temp-file companion
+       (insert ";;; -*- lexical-binding: t; -*-\n")
+       (insert "(setq ebox-playground-test--companion-value \"Before failure\")"))
+     (let* ((buffer (ebox-playground-open-file file preview))
+            (handle (ebox-region-resolve buffer "kept"))
+            (before (with-current-buffer buffer (buffer-string))))
+       (with-temp-file companion
+         (insert ";;; -*- lexical-binding: t; -*-\n")
+         (insert "(error \"Companion load failed\")"))
+       (should-error (ebox-playground-open-file file preview))
+       (should (eq buffer (get-buffer preview)))
+       (with-current-buffer buffer
+         (should (equal-including-properties before (buffer-string))))
+       (ebox-region-update handle :content "Still mounted")
+       (with-current-buffer buffer
+         (should (string-match-p "Still mounted" (buffer-string))))))))
+
+(ert-deftest ebox-playground-companion-is-optional-and-bytecode-alone-is-ignored ()
+  "Unpaired files and editor buffers keep working without loading stray bytecode."
+  (ebox-playground-test--call-with-companion-files
+   (lambda (file companion preview)
+     (with-temp-file file (insert "'(box \"Standalone example\")"))
+     (with-temp-file (concat companion "c")
+       (insert "(error \"A bytecode-only companion must not load\")"))
+     (let ((buffer (ebox-playground-open-file file preview)))
+       (with-current-buffer buffer
+         (should (string-match-p "Standalone example" (buffer-string)))))
+     (with-temp-buffer
+       (setq buffer-file-name file)
+       (insert-file-contents file)
+       (ebox-dsl-mode)
+       (should (equal (ebox-playground--source-form)
+                      '(box "Standalone example")))))))
 
 (provide 'ebox-playground-tests)
 

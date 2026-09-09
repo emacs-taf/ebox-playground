@@ -1,0 +1,433 @@
+'(column :id "size-root" :width (vw 100) :height (vh 100) :overflow scroll
+         :bgcolor "#FAF7F0" :color "#253038"
+   (box :padding-inline (px 6) :border "#2E3740" :bgcolor "#FFFDF8"
+        :font-weight bold :text-align center "Ebox Size Reference")
+   (box :padding-inline (px 6) :border-left "#2E3740"
+        :border-right "#2E3740" :border-bottom "#2E3740" :bgcolor "#FFFDF8"
+        :text-align center "Lengths, sizing keywords, and calculations.\nHorizontal: px/ch/vw/%. Vertical: lh/vh/%.\nRead the solid rectangle: its edges show the measured Box width and height, including empty space.\nWhite bordered cards hold labels; they are not the measured Box.")
+   (box :height (lh 1))
+
+   ;; Each regular card has 220 px of content and a one-pixel border.
+   ;; Stretch aligns outer frames; the colored targets retain their own sizes.
+   (box :padding-inline (px 6) :border "#B85C3C" :bgcolor "#F1D4C9"
+        "01 / LENGTH UNITS\nEach card has a 220 px measuring surface.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#B85C3C" :border-right "#B85C3C"
+         :border-bottom "#B85C3C" :bgcolor "#FFF9F4"
+     (column :width (px 222) :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":width (px 180)\nPX / fixed pixels")
+       (box :id "size-px" :width (px 180) :height (lh 2)
+            :bgcolor "#D97757" :text-align center "180 px")
+       (box "Fixed width: 180 px."))
+     (column :id "size-percent-parent" :width (px 222)
+             :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":width (% 50)\n% / parent content")
+       (box :id "size-percent" :width (% 50) :height (lh 2)
+            :bgcolor "#D97757" :text-align center "110 px")
+       (box "50% of 220 px = 110 px."))
+     (column :id "size-vw-parent" :width (px 222)
+             :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":width (vw 20)\n:max-width (% 100)")
+       (box :id "size-vw" :width (vw 20) :max-width (% 100) :height (lh 2)
+            :bgcolor "#D97757" :text-align center "20 vw")
+       (box "20% of viewport width.\nCapped at 220 px."))
+     (column :width (px 222) :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":width (ch 12)\n:max-width (% 100)")
+       (box :id "size-ch" :width (ch 12) :max-width (% 100) :height (lh 2)
+            :bgcolor "#D97757" :text-align center "000000000000")
+       (box "Twelve zero advances.\nCapped at 220 px."))
+     (column :width (px 222) :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":height (lh 2)\nLH / line count")
+       (box :id "size-lh" :height (lh 2) :bgcolor "#D97757"
+            :text-align center "line one\nline two")
+       (box "Two lines in this font."))
+     (column :width (px 222) :border "#B85C3C" :bgcolor "#FFFDF8"
+       (box :border-bottom "#B85C3C" :bgcolor "#F7C8B3" :text-align center
+            ":height (vh 10)\nVH / viewport height")
+       (box :id "size-vh" :height (vh 10) :bgcolor "#D97757"
+            :text-align center "10 vh")
+       (box "10% of viewport lines,\nfloored to whole lines.")))
+   (box :height (lh 1))
+
+   (box :padding-inline (px 6) :border "#5E7F6A" :bgcolor "#DCEBDD"
+        "02 / FONT AND HEIGHT CONTEXTS\nOnly the measured text changes font. Percentage height needs a definite parent.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#5E7F6A" :border-right "#5E7F6A"
+         :border-bottom "#5E7F6A" :bgcolor "#F3FAF4"
+     (column :id "size-font-small-context" :width (px 222)
+             :border "#5E7F6A" :bgcolor "#FFFDF8"
+       (box :border-bottom "#5E7F6A" :bgcolor "#BFD6C2" :text-align center
+            ":font-size 14\n:width (ch 8)\n:height (lh 2)")
+       (box :id "size-font-small" :width (ch 8) :height (lh 2)
+            :font-size 14 :bgcolor "#8FAF95" "00000000\nsmall")
+       (box "Eight zeros, two lines."))
+     (column :id "size-font-large-context" :width (px 222)
+             :border "#5E7F6A" :bgcolor "#FFFDF8"
+       (box :border-bottom "#5E7F6A" :bgcolor "#BFD6C2" :text-align center
+            ":font-size 22\n:width (ch 8)\n:height (lh 2)")
+       (box :id "size-font-large" :width (ch 8) :height (lh 2)
+            :font-size 22 :bgcolor "#8FAF95" "00000000\nlarge")
+       (box "Same units, larger font."))
+     (column :width (px 222) :border "#5E7F6A" :bgcolor "#FFFDF8"
+       (box :border-bottom "#5E7F6A" :bgcolor "#BFD6C2" :text-align center
+            ":height (% 50)\nParent: :height (lh 6)\nResult: three lines")
+       (column :id "size-percent-height-parent" :height (lh 6)
+         (box :id "size-percent-height" :height (% 50) :bgcolor "#8FAF95"
+              :text-align center "50%\nof six lines"))
+       (box "50% of six = three lines.")))
+   (box :height (lh 1))
+
+   ;; Short text shows equivalent results; the constrained cases below
+   ;; separate intrinsic sizes using the same text and available width.
+   (box :padding-inline (px 6) :border "#3F6D88" :bgcolor "#CAE6F0"
+        "03 / WIDTH KEYWORDS\nStart with red ink in 112 px frames, then constrain longer text to reveal the differences.")
+   (box :padding-inline (px 6) :border-left "#3F6D88" :border-right "#3F6D88"
+        :bgcolor "#F6FBFD" "WIDTH / auto = stretch in a Column. Short text fits, so fit-content = max-content here.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3F6D88" :border-right "#3F6D88" :border-bottom "#3F6D88" :bgcolor "#F6FBFD"
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":width\nauto")
+       (box :id "size-width-auto" :width auto :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":width\nmin-content")
+       (box :id "size-width-min-content" :width min-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":width\nmax-content")
+       (box :id "size-width-max-content" :width max-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":width\nfit-content")
+       (box :id "size-width-fit-content" :width fit-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":width\nstretch")
+       (box :id "size-width-stretch" :width stretch :height (lh 2) :bgcolor "#7DB8CE" "red ink")))
+   (box :padding-inline (px 6) :border-left "#3F6D88" :border-right "#3F6D88"
+        :bgcolor "#F6FBFD" "MIN-WIDTH / :width (px 24). auto adds no floor; content keywords raise it; stretch reaches the parent.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3F6D88" :border-right "#3F6D88" :border-bottom "#3F6D88" :bgcolor "#F6FBFD"
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":min-width\nauto")
+       (box :id "size-min-width-auto" :width (px 24) :min-width auto :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":min-width\nmin-content")
+       (box :id "size-min-width-min-content" :width (px 24) :min-width min-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":min-width\nmax-content")
+       (box :id "size-min-width-max-content" :width (px 24) :min-width max-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":min-width\nfit-content")
+       (box :id "size-min-width-fit-content" :width (px 24) :min-width fit-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":min-width\nstretch")
+       (box :id "size-min-width-stretch" :width (px 24) :min-width stretch :height (lh 2) :bgcolor "#7DB8CE" "red ink")))
+   (box :padding-inline (px 6) :border-left "#3F6D88" :border-right "#3F6D88"
+        :bgcolor "#F6FBFD" "MAX-WIDTH / :width (px 112). none adds no cap; stretch also gives 112 px in this parent.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3F6D88" :border-right "#3F6D88" :border-bottom "#3F6D88" :bgcolor "#F6FBFD"
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":max-width\nnone")
+       (box :id "size-max-width-none" :width (px 112) :max-width none :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":max-width\nmin-content")
+       (box :id "size-max-width-min-content" :width (px 112) :max-width min-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":max-width\nmax-content")
+       (box :id "size-max-width-max-content" :width (px 112) :max-width max-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":max-width\nfit-content")
+       (box :id "size-max-width-fit-content" :width (px 112) :max-width fit-content :height (lh 2) :bgcolor "#7DB8CE" "red ink"))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center ":max-width\nstretch")
+       (box :id "size-max-width-stretch" :width (px 112) :max-width stretch :height (lh 2) :bgcolor "#7DB8CE" "red ink")))
+   (box :padding-inline (px 6) :border-left "#3F6D88" :border-right "#3F6D88"
+        :bgcolor "#F6FBFD"
+        "LONG CONTENT / Same text, same 8ch parent in each row. Pale ruler = parent width; blue rectangle = actual Box.\nmin-content follows the longest word; fit-content uses 8ch; max-content extends beyond the ruler.\nEach blue rectangle is four lines high. Blank blue space is part of the Box, not extra text.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3F6D88" :border-right "#3F6D88" :border-bottom "#3F6D88" :bgcolor "#F6FBFD"
+     (column :width (px 222) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center "min-content\nLongest word")
+       (box "width min-content")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-width-long-min-content" :width min-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 1ch + min-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-min-width-long-min-content" :width (ch 1) :min-width min-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 20ch + max-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-max-width-long-min-content" :width (ch 20) :max-width min-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue")))
+     (column :width (px 222) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center "fit-content\nFit available width")
+       (box "width fit-content")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-width-long-fit-content" :width fit-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 1ch + min-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-min-width-long-fit-content" :width (ch 1) :min-width fit-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 20ch + max-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-max-width-long-fit-content" :width (ch 20) :max-width fit-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue")))
+     (column :width (px 222) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center "max-content\nWhole unwrapped text")
+       (box "width max-content")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-width-long-max-content" :width max-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 1ch + min-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-min-width-long-max-content" :width (ch 1) :min-width max-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))
+       (box "width 20ch + max-width")
+       (box :width (ch 8) :bgcolor "#CAE6F0" "8ch")
+       (column :width (ch 8)
+         (box :id "size-max-width-long-max-content" :width (ch 20) :max-width max-content :height (lh 4)
+              :bgcolor "#7DB8CE" "red ink on blue"))))
+   (box :padding-inline (px 6) :border-left "#3F6D88" :border-right "#3F6D88"
+        :bgcolor "#F6FBFD"
+        "ROW CONTEXT / Same 112 px available. auto follows content in a Row; stretch fills the width.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3F6D88" :border-right "#3F6D88" :border-bottom "#3F6D88" :bgcolor "#F6FBFD"
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center "Row child\n:width auto")
+       (row
+         (box :id "size-width-row-auto" :width auto :height (lh 2) :bgcolor "#7DB8CE" "red ink")))
+     (column :width (px 114) :border "#3F6D88" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3F6D88" :bgcolor "#A8D2E2" :text-align center "Row child\n:width stretch")
+       (row
+         (box :id "size-width-row-stretch" :width stretch :height (lh 2) :bgcolor "#7DB8CE" "red ink"))))
+   (box :height (lh 1))
+
+   (box :padding-inline (px 6) :border "#7C6A2F" :bgcolor "#EEE1A8"
+        "04 / HEIGHT KEYWORDS\nFive-line measuring surfaces. Ebox gives min-content, max-content, and fit-content the same natural height.\nThese three keywords intentionally match: three content lines. stretch fills all five parent lines.")
+   (box :padding-inline (px 6) :border-left "#7C6A2F" :border-right "#7C6A2F"
+        :bgcolor "#FFFDF0" "HEIGHT / three text lines, with automatic, content, or stretch sizing.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#7C6A2F" :border-right "#7C6A2F" :border-bottom "#7C6A2F" :bgcolor "#FFFDF0"
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":height\nauto")
+       (column :height (lh 5)
+         (box :id "size-height-auto" :height auto :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":height\nmin-content")
+       (column :height (lh 5)
+         (box :id "size-height-min-content" :height min-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":height\nmax-content")
+       (column :height (lh 5)
+         (box :id "size-height-max-content" :height max-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":height\nfit-content")
+       (column :height (lh 5)
+         (box :id "size-height-fit-content" :height fit-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":height\nstretch")
+       (column :height (lh 5)
+         (box :id "size-height-stretch" :height stretch :bgcolor "#D9C46D" "red\nink\nhere"))))
+   (box :padding-inline (px 6) :border-left "#7C6A2F" :border-right "#7C6A2F"
+        :bgcolor "#FFFDF0" "MIN-HEIGHT / :height (lh 1). auto adds no floor; content floors to three; stretch floors to five.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#7C6A2F" :border-right "#7C6A2F" :border-bottom "#7C6A2F" :bgcolor "#FFFDF0"
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":min-height\nauto")
+       (column :height (lh 5)
+         (box :id "size-min-height-auto" :height (lh 1) :min-height auto :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":min-height\nmin-content")
+       (column :height (lh 5)
+         (box :id "size-min-height-min-content" :height (lh 1) :min-height min-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":min-height\nmax-content")
+       (column :height (lh 5)
+         (box :id "size-min-height-max-content" :height (lh 1) :min-height max-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":min-height\nfit-content")
+       (column :height (lh 5)
+         (box :id "size-min-height-fit-content" :height (lh 1) :min-height fit-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":min-height\nstretch")
+       (column :height (lh 5)
+         (box :id "size-min-height-stretch" :height (lh 1) :min-height stretch :bgcolor "#D9C46D" "red\nink\nhere"))))
+   (box :padding-inline (px 6) :border-left "#7C6A2F" :border-right "#7C6A2F"
+        :bgcolor "#FFFDF0" "MAX-HEIGHT / :height (lh 5). Content caps to three; none and stretch both allow five here.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#7C6A2F" :border-right "#7C6A2F" :border-bottom "#7C6A2F" :bgcolor "#FFFDF0"
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":max-height\nnone")
+       (column :height (lh 5)
+         (box :id "size-max-height-none" :height (lh 5) :max-height none :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":max-height\nmin-content")
+       (column :height (lh 5)
+         (box :id "size-max-height-min-content" :height (lh 5) :max-height min-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":max-height\nmax-content")
+       (column :height (lh 5)
+         (box :id "size-max-height-max-content" :height (lh 5) :max-height max-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":max-height\nfit-content")
+       (column :height (lh 5)
+         (box :id "size-max-height-fit-content" :height (lh 5) :max-height fit-content :bgcolor "#D9C46D" "red\nink\nhere")))
+     (column :width (px 114) :border "#7C6A2F" :bgcolor "#FFFDF8"
+       (box :border-bottom "#7C6A2F" :bgcolor "#EEE1A8" :text-align center ":max-height\nstretch")
+       (column :height (lh 5)
+         (box :id "size-max-height-stretch" :height (lh 5) :max-height stretch :bgcolor "#D9C46D" "red\nink\nhere"))))
+   (box :height (lh 1))
+
+   (box :padding-inline (px 6) :border "#6F6A95" :bgcolor "#E4DEF4"
+        "05 / SIZE FUNCTIONS\nEvery operand follows the property's axis. The white frames have 220 px of content.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#6F6A95" :border-right "#6F6A95"
+         :border-bottom "#6F6A95" :bgcolor "#FBF9FF"
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (calc (- (% 100) (px 24)))")
+       (box :id "size-calc" :width (calc (- (% 100) (px 24))) :height (lh 2)
+            :bgcolor "#AFA3D1" :text-align center "196 px")
+       (box "220 - 24 = 196 px."))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (min (% 75) (px 100))")
+       (box :id "size-min" :width (min (% 75) (px 100)) :height (lh 2)
+            :bgcolor "#AFA3D1" :text-align center "100 px")
+       (box "min(165, 100) = 100 px."))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (max (px 60) (% 50))")
+       (box :id "size-max" :width (max (px 60) (% 50)) :height (lh 2)
+            :bgcolor "#AFA3D1" :text-align center "110 px")
+       (box "max(60, 110) = 110 px."))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (clamp (px 48) (vw 12) (px 200))")
+       (box :id "size-clamp" :width (clamp (px 48) (vw 12) (px 200)) :height (lh 2)
+            :bgcolor "#AFA3D1" :text-align center "clamp")
+       (box "12vw, bounded to 48..200px."))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (calc (/ (* (+ (px 24) (px 16)) 3) 2))")
+       (box :id "size-arithmetic" :width (calc (/ (* (+ (px 24) (px 16)) 3) 2))
+            :height (lh 2) :bgcolor "#AFA3D1" :text-align center "60 px")
+       (box "(24 + 16) x 3 / 2 = 60 px."))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center
+            ":width (min (% 100) (max (px 80) (vw 20)))")
+       (box :id "size-nested" :width (min (% 100) (max (px 80) (vw 20)))
+            :height (lh 2) :bgcolor "#AFA3D1" :text-align center "nested")
+       (box "20vw, bounded to 80..220px.")))
+   (box :padding-inline (px 6) :border-left "#6F6A95" :border-right "#6F6A95"
+        :bgcolor "#FBF9FF"
+        "COMPARE FUNCTIONS / Same input X in each card; fixed bounds 48..144 px.\nmin caps the top; max floors the bottom; clamp does both. Compare all three input ranges at once.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#6F6A95" :border-right "#6F6A95" :border-bottom "#6F6A95" :bgcolor "#FBF9FF"
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center "LOW / X = 24 px\nBelow the 48 px floor")
+       (box "min(X, 144) = 24 px")
+       (box :id "size-function-min-low" :width (min (px 24) (px 144)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "max(48, X) = 48 px")
+       (box :id "size-function-max-low" :width (max (px 48) (px 24)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "clamp(48, X, 144) = 48 px")
+       (box :id "size-function-clamp-low" :width (clamp (px 48) (px 24) (px 144)) :height (lh 1) :bgcolor "#AFA3D1"))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center "MID / X = 96 px\nInside the 48..144 px range")
+       (box "min(X, 144) = 96 px")
+       (box :id "size-function-min-mid" :width (min (px 96) (px 144)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "max(48, X) = 96 px")
+       (box :id "size-function-max-mid" :width (max (px 48) (px 96)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "clamp(48, X, 144) = 96 px")
+       (box :id "size-function-clamp-mid" :width (clamp (px 48) (px 96) (px 144)) :height (lh 1) :bgcolor "#AFA3D1"))
+     (column :width (px 222) :border "#6F6A95" :bgcolor "#FFFDF8"
+       (box :border-bottom "#6F6A95" :bgcolor "#CBC2E3" :text-align center "HIGH / X = 192 px\nAbove the 144 px cap")
+       (box "min(X, 144) = 144 px")
+       (box :id "size-function-min-high" :width (min (px 192) (px 144)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "max(48, X) = 192 px")
+       (box :id "size-function-max-high" :width (max (px 48) (px 192)) :height (lh 1) :bgcolor "#AFA3D1")
+       (box "clamp(48, X, 144) = 144 px")
+       (box :id "size-function-clamp-high" :width (clamp (px 48) (px 192) (px 144)) :height (lh 1) :bgcolor "#AFA3D1")))
+   (box :height (lh 1))
+
+   (box :padding-inline (px 6) :border "#3D7068" :bgcolor "#CDEBE5"
+        "06 / BOX MODEL, FLEX, AND GRID\nThe same axis rules size edges, gaps, bases, and tracks.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#3D7068" :border-right "#3D7068"
+         :border-bottom "#3D7068" :bgcolor "#F7FCFB"
+     (column :width (px 222) :border "#3D7068" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3D7068" :bgcolor "#CDEBE5" :text-align center
+            ":box-sizing border-box\n:padding ((lh 1) (ch 1))")
+       (box :id "size-box-model" :width (px 180) :height (lh 4) :box-sizing border-box
+            :padding ((lh 1) (ch 1)) :margin ((lh 0) (px 6))
+            :border ((px 1) solid "#3D7068") :bgcolor "#9FD5CB"
+            "padding\ninside the border")
+       (box "180px outer; 6px margins.\n1lh/1ch padding; 1px stroke."))
+     (column :width (px 222) :border "#3D7068" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3D7068" :bgcolor "#CDEBE5" :text-align center
+            ":flex (1 1 (ch 12))\n:flex (2 1 (px 96))")
+       (flex :id "size-flex" :flex-wrap wrap :gap ((lh 1) (px 10))
+         (box :id "size-flex-basis" :flex (1 1 (ch 12)) :min-width (px 0)
+              :height (lh 2) :bgcolor "#9FD5CB" :text-align center "1 share\n12ch")
+         (box :flex (2 1 (px 96)) :min-width (px 0) :height (lh 2)
+              :bgcolor "#71BDB0" :text-align center "2 shares\n96px"))
+       (box "Bases: 12ch and 96px.\nLarger fonts may wrap items.\nGap: 1lh x 10px."))
+     (column :width (px 222) :border "#3D7068" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3D7068" :bgcolor "#CDEBE5" :text-align center
+            ":flex (1 1 (px 30))\n:flex (2 1 (px 30))")
+       (flex :id "size-flex-grow" :column-gap (px 10)
+         (box :id "size-flex-grow-one" :flex (1 1 (px 30)) :min-width (px 0)
+              :height (lh 2) :bgcolor "#9FD5CB" :text-align center "80px\n+50px")
+         (box :id "size-flex-grow-two" :flex (2 1 (px 30)) :min-width (px 0)
+              :height (lh 2) :bgcolor "#71BDB0" :text-align center "130px\n+100px"))
+       (box "Same 30px base; 10px gap.\n150px extra splits 1:2.\nTotal widths: 80px / 130px."))
+     (column :width (px 222) :border "#3D7068" :bgcolor "#FFFDF8"
+       (box :border-bottom "#3D7068" :bgcolor "#CDEBE5" :text-align center
+            ":grid-template-columns ((ch 8) (fr 1))\n:grid-template-rows ((lh 2) (lh 2))")
+       (grid :id "size-grid" :grid-template-columns ((ch 8) (fr 1))
+             :grid-template-rows ((lh 2) (lh 2)) :gap ((lh 1) (ch 1))
+         (box :bgcolor "#9FD5CB" :text-align center "8ch")
+         (box :bgcolor "#71BDB0" :text-align center "1fr")
+         (box :bgcolor "#9FD5CB" :text-align center "2lh")
+         (box :bgcolor "#71BDB0" :text-align center "2lh"))
+       (box "Two 2lh rows.\nGap: 1lh x 1ch.")))
+   (box :height (lh 1))
+
+   (box :padding-inline (px 6) :border "#9A6B43" :bgcolor "#F1D0AF"
+        "07 / PRECISION AND BOUNDARIES\nHorizontal calculations retain fractions. Final vertical sizes use whole lines.\n2.75lh and 2lh intentionally render alike: both resolve to two whole lines.")
+   (flex :flex-wrap wrap :column-gap (px 6) :padding-inline (px 6)
+         :border-left "#9A6B43" :border-right "#9A6B43"
+         :border-bottom "#9A6B43" :bgcolor "#FFFAF5"
+     (column :width (px 222) :border "#9A6B43" :bgcolor "#FFFDF8"
+       (box :border-bottom "#9A6B43" :bgcolor "#F1D0AF" :text-align center
+            ":width (vw 12)\n:max-width (% 100)")
+       (box :id "size-fractional-width" :width (vw 12) :max-width (% 100)
+            :height (lh 2) :bgcolor "#D9AD83" :text-align center "12 vw")
+       (box "853px viewport: 102.36px.\nCapped at 220px content."))
+     (column :width (px 222) :border "#9A6B43" :bgcolor "#FFFDF8"
+       (box :border-bottom "#9A6B43" :bgcolor "#F1D0AF" :text-align center
+            ":height (lh 2.75)\n:overflow hidden")
+       (box :id "size-fractional-height" :height (lh 2.75) :overflow hidden
+            :bgcolor "#D9AD83" :text-align center "line one\nline two\nline three")
+       (box "Floors to two visible lines.\nThe third line is clipped."))
+     (column :width (px 222) :border "#9A6B43" :bgcolor "#FFFDF8"
+       (box :border-bottom "#9A6B43" :bgcolor "#F1D0AF" :text-align center
+            ":height (lh 2)\n:overflow hidden")
+       (box :id "size-whole-height" :height (lh 2) :overflow hidden
+            :bgcolor "#D9AD83" :text-align center "line one\nline two\nline three")
+       (box "Exactly two visible lines.\nThe third line is clipped.")))
+   (box :padding-inline (px 6) :border-left "#9A6B43" :border-right "#9A6B43"
+        :border-bottom "#9A6B43" :bgcolor "#FFFAF5"
+        "Empty auto-sized boxes occupy zero lines; use :height (lh 1) for a spacer.\nVertical properties reject px/ch/vw, including function operands. Border strokes reject percentages."))

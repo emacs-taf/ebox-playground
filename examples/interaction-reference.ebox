@@ -1,0 +1,136 @@
+;; Layout and property declarations.  The matching .el file supplies state
+;; and business actions; the runner loads it before evaluating this expression.
+(let ((demo (interaction-demo-create)))
+    `(column :width (vw 100) :height (vh 95)
+             :padding ((lh 1) (ch 2))
+             :background-color "#F4F3ED" :color "#273B42"
+       (box :background-color "#153F4A" :color "#FFFFFF"
+            :padding ((lh 1) (ch 2))
+         (text :font-weight bold "EBOX  /  NATIVE INTERACTION LAB")
+         "\nFour node properties. Real commands. Incremental updates.")
+       (box :padding-block (lh 1)
+         "Wheel / C-v scroll. Hover to inspect. Click a control, or move point into it and press RET / SPC.\n"
+         "Solid borders mark Box surfaces, including padding. Gaps belong to no control.\n"
+         "Each section below isolates an effect; the live console combines all four.")
+
+       (box :font-weight bold "01  HELP + POINTER  /  hints without actions")
+       (flex :flex-wrap wrap :gap ((lh 1) (ch 2)) :padding-block (lh 1)
+         (box :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#90A9AB" :background-color "#FFFFFF"
+              :help-echo "Static help: this entire bordered Box supplies the same hint."
+              :pointer arrow
+           "ARROW\nStatic Box help")
+         (box :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#90A9AB" :background-color "#FFFFFF"
+           "TEXT POINTER\n"
+           (text :pointer text
+                 :help-echo "This help belongs only to the underlined text, not its surrounding card."
+                 :text-decoration-line underline
+             "Text-only hint"))
+         (box :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#90A9AB" :background-color "#FFFFFF"
+              :pointer hdrag
+              :help-echo "Pointer shape only: this is not a draggable splitter."
+           "HORIZONTAL DRAG\nShape demonstration"))
+
+       (box :font-weight bold "02  HOVER STYLE  /  appearance, no command")
+       (flex :flex-wrap wrap :gap ((lh 1) (ch 2)) :padding-block (lh 1) :pointer arrow
+         (box :id "hover-cool" :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#5893A3" :background-color "#E2EFF2"
+              :help-echo "Cool hover changes foreground/background. Font size and Box size stay fixed."
+              :hover-style (:color "#FFFFFF" :background-color "#286477")
+           "COOL FILL\nMove over the padding too")
+         (box :id "hover-warm" :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#B8874D" :background-color "#F8EDDC"
+              :help-echo "Warm hover adds an underline as well as color."
+              :hover-style (:color "#683D16" :background-color "#F6D6AB"
+                            :text-decoration-line underline)
+           "WARM + UNDERLINE\nNo layout movement")
+         (box :width (ch 22) :padding ((lh 1) (ch 1))
+              :border "#A7ABA5" :background-color "#E9EAE5"
+              :help-echo "Control sample: no hover-style declaration."
+           "NO HOVER STYLE\nCompare the three cards"))
+
+       (box :font-weight bold "03  LIVE CONSOLE  /  native keymaps + region updates")
+       (box :padding ((lh 1) (ch 1)) :border "#5893A3"
+            :background-color "#FFFFFF"
+         (box :id "count" :color "#205A6C" :font-weight bold "COUNT  00")
+         (box :id "binding-state" "step 1  ·  four properties attached  ·  cool hover")
+         (box :height (lh 1))
+         (flex :flex-wrap wrap :gap ((lh 1) (ch 2))
+           (box :id "live-action" :width (ch 23) :padding ((lh 1) (ch 1))
+                :border "#286477" :background-color "#E2EFF2"
+                :help-echo ,(ebox-help-create
+                             (apply-partially #'interaction-demo-description demo))
+                :pointer hand
+                :hover-style ,(interaction-demo-hover demo) :keymap ,(interaction-demo-keymap demo)
+             (text :id "action-label" "ADD 1   [+] ")
+             (text :id "subtract-text"
+                   :keymap ,(interaction-demo-subtract-keymap demo)
+                   :help-echo ,(ebox-help-create
+                                (apply-partially #'interaction-demo-description demo t))
+               "[-]"))
+           (box :id "step-control" :width (ch 23) :padding ((lh 1) (ch 1))
+                :border "#90A9AB" :background-color "#F0F4F2"
+                :pointer hand :help-echo "Replace the ADD control's keymap: +1 ↔ +5."
+                :hover-style (:background-color "#CCE0D6")
+                :keymap ,(interaction-demo-action demo 'step)
+             "SWITCH STEP  1 / 5")
+           (box :id "binding-control" :width (ch 23) :padding ((lh 1) (ch 1))
+                :border "#90A9AB" :background-color "#F0F4F2"
+                :pointer hand :help-echo "Remove or restore all four properties on the ADD control."
+                :hover-style (:background-color "#CCE0D6")
+                :keymap ,(interaction-demo-action demo 'binding)
+             "REMOVE / RESTORE")
+           (box :id "palette-control" :width (ch 23) :padding ((lh 1) (ch 1))
+                :border "#B8874D" :background-color "#F8EDDC"
+                :pointer hand :help-echo "Replace the ADD control's hover-style while preserving its geometry."
+                :hover-style (:background-color "#F6D6AB")
+                :keymap ,(interaction-demo-action demo 'palette)
+             "SWITCH HOVER PALETTE")
+           (box :id "group-control" :width (ch 23) :padding ((lh 1) (ch 1))
+                :border "#789783" :background-color "#E9F0E9"
+                :pointer hand :help-echo "Update all three .demo-status regions with one selector call."
+                :hover-style (:background-color "#C8DDC9")
+                :keymap ,(interaction-demo-action demo 'group)
+             "UPDATE STATUS GROUP"))
+         (row :item-gap (ch 2) :padding-block (lh 1)
+           "Class targets:"
+           (box :id "status-a" :class demo-status :color "#85652F" "WAIT A")
+           (box :id "status-b" :class demo-status :color "#85652F" "WAIT B")
+           (box :id "status-c" :class demo-status :color "#85652F" "WAIT C"))
+         (box :padding-block (lh 1)
+           "Text can be interactive too: "
+           (text :id "reset-text" :pointer hand :keymap ,(interaction-demo-action demo 'reset)
+                 :help-echo "Reset count through a Text node's keymap."
+                 :color "#286477" :text-decoration-line underline
+                 :hover-style (:color "#9A531C")
+             "[ RESET COUNT ]")))
+
+       (box :height (lh 1))
+       (box :font-weight bold "04  NESTED OWNERSHIP  /  parent, child, explicit nil")
+       (box :id "parent-surface" :padding ((lh 1) (ch 2))
+            :border "#789783" :background-color "#E9F0E9"
+            :pointer hand :help-echo "Parent surface: clicking its padding records PARENT."
+            :hover-style (:background-color "#C8DDC9")
+            :keymap ,(interaction-demo-action demo 'parent)
+         "PARENT SURFACE — click here or in its padding\n"
+         (text :id "child-text" :pointer hand
+               :help-echo "Child owns its binding: this records CHILD, not PARENT."
+               :hover-style (:color "#FFFFFF" :background-color "#466B55")
+               :keymap ,(interaction-demo-action demo 'child)
+           "[ CHILD ACTION ]")
+         "   "
+         (text :id "quiet-text" :help-echo nil :pointer nil
+               :hover-style nil :keymap nil
+           "[ EXPLICIT NIL: no inherited interaction ]"))
+
+       (box :height (lh 1))
+       (box :font-weight bold "EVENT LOG  /  newest first")
+       (box :id "event-log" :height (lh 4) :padding-inline (ch 1)
+            :background-color "#153F4A" :color "#E2EFF2"
+         "No actions yet.\n—\n—\n—")
+       (box :padding-block (lh 1) :color "#586B6A"
+         "Commands update named regions; they do not rewrite buffer text.\n"
+         "Keymaps do not create a focus system: move point normally to use local keys.\n"
+         "Hint display and exact pointer shapes follow your Emacs settings and window system.")))

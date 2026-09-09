@@ -56,7 +56,8 @@
 (defconst ebox-playground-flex-resize-evaluator--runtime-properties
   (delete-dups
    (append (mapcar #'cdr ebox-region-types)
-           '(ebox-content-idx ebox-content-owners ebox-scroll-window)))
+           '(ebox-content-idx ebox-content-owners ebox-scroll-window
+             ebox--paint-origin)))
   "Ebox identity properties omitted from fresh-render comparison.")
 
 (defun ebox-playground-flex-resize-evaluator--line-widths (buffer)
@@ -65,19 +66,175 @@
     (mapcar #'ebox-string-pixel-width
             (ebox-string-lines (buffer-string)))))
 
+(defun ebox-playground-flex-resize-evaluator--merge-face (higher lower)
+  "Merge HIGHER priority face attributes into LOWER without losing relative sizes."
+  (let ((result (copy-sequence lower)))
+    (while higher
+      (let ((attribute (pop higher))
+            (value (pop higher)))
+        (unless (eq value 'unspecified)
+          (setq result
+                (plist-put result attribute
+                           (if (plist-member result attribute)
+                               (merge-face-attribute
+                                attribute value (plist-get result attribute))
+                             value))))))
+    result))
+
+(defun ebox-playground-flex-resize-evaluator--effective-face (face &optional seen)
+  "Return sorted effective attributes of FACE, guarding inheritance with SEEN.
+Face lists put higher priority entries first.  Relative heights are merged using
+Emacs's own attribute operation; named faces use the current display frame."
+  (let
+      ((attributes
+        (cond
+         ((null face) nil)
+         ((facep face)
+          (when (member face seen)
+            (error "Cyclic face inheritance: %S" face))
+          (ebox-playground-flex-resize-evaluator--effective-face
+           (cl-mapcan (lambda (entry) (list (car entry) (cdr entry)))
+                      (face-all-attributes face (selected-frame)))
+           (cons face seen)))
+         ((and (proper-list-p face) (keywordp (car face)))
+          (unless (zerop (% (length face) 2))
+            (error "Invalid anonymous face: %S" face))
+          (let ((own (copy-sequence face))
+                (inherited (plist-get face :inherit)))
+            (cl-remf own :inherit)
+            (ebox-playground-flex-resize-evaluator--merge-face
+             own
+             (unless (memq inherited '(nil unspecified))
+               (ebox-playground-flex-resize-evaluator--effective-face
+                inherited seen)))))
+         ((proper-list-p face)
+          (let (result)
+            (dolist (entry (reverse face))
+              (setq result
+                    (ebox-playground-flex-resize-evaluator--merge-face
+                     (ebox-playground-flex-resize-evaluator--effective-face
+                      entry seen)
+                     result)))
+            result))
+         (t (error "Unsupported face value in render comparison: %S" face)))))
+    (cl-loop for key in (sort (cl-loop for (key _value) on attributes by #'cddr
+                                      collect key)
+                              (lambda (a b)
+                                (string-lessp (symbol-name a) (symbol-name b))))
+             append (list key (plist-get attributes key)))))
+
 (defun ebox-playground-flex-resize-evaluator--visual-text (text)
-  "Return TEXT with fresh-render identity properties removed.
-Fresh renders allocate different region ids by design.  Keep character,
-face, display, and all non-runtime properties so the comparison still checks
-the visible right-hand surface rather than merely checking that rendering
-completed."
-  (let ((copy (copy-sequence text)))
+  "Return TEXT with runtime ids removed and face cascades normalized.
+Keep characters, display dimensions, effective face attributes, and interactive
+properties.  Equivalent anonymous face stacks compare equal; changes to visible
+color, relative font size, measurement, or interaction still compare unequal."
+  (let ((copy (copy-sequence text))
+        (hover-owners (make-hash-table :test #'eql)))
     (when (> (length copy) 0)
       (remove-list-of-text-properties
        0 (length copy)
        ebox-playground-flex-resize-evaluator--runtime-properties
-       copy))
+       copy)
+      ;; Fresh renders allocate different owner ids.  Preserve the owner
+      ;; partition, while comparing all of the retained hover paint facts.
+      (let ((start 0) end)
+        (while (< start (length copy))
+          (setq end (next-single-property-change
+                     start 'ebox--hover-style copy (length copy)))
+          (when-let* ((declaration (get-text-property start 'ebox--hover-style copy))
+                      (owner (plist-get declaration :owner)))
+            (put-text-property
+             start end 'ebox--hover-style
+             (plist-put
+              (copy-sequence declaration) :owner
+              (or (gethash owner hover-owners)
+                  (puthash owner (1+ (hash-table-count hover-owners)) hover-owners)))
+             copy))
+          (setq start end)))
+      (dolist (property '(face font-lock-face mouse-face))
+        (let ((start 0) end)
+          (while (< start (length copy))
+            (setq end (next-single-property-change
+                       start property copy (length copy)))
+            (when-let* ((face (get-text-property start property copy)))
+              (put-text-property
+               start end property
+               (ebox-playground-flex-resize-evaluator--effective-face face)
+               copy))
+            (setq start end)))))
     copy))
+
+(defun ebox-playground-flex-resize-evaluator--example-text (file width full)
+  "Render FILE at WIDTH, using an unclipped document copy when FULL is non-nil."
+  (let ((ebox-viewport-width width)
+        (ebox-viewport-height 36))
+    (if full
+        (let ((form (ebox-playground--evaluate-form
+                     (ebox-playground--read-file file) file)))
+          ;; These changes affect only the comparison copy, never the author file.
+          (cl-remf (cdr form) :height)
+          (cl-remf (cdr form) :overflow)
+          (setcdr form (append '(:height auto :overflow visible) (cdr form)))
+          (ebox-render (ebox-build form)))
+      (ebox-render (ebox-playground-view file width)))))
+
+(defun ebox-playground-compare-example-directories
+    (baseline-directory current-directory &optional widths files)
+  "Compare FILES in BASELINE-DIRECTORY and CURRENT-DIRECTORY at WIDTHS.
+Default FILES are the Flex and Grid references; default WIDTHS are 720 and 1000.
+Compare both the authored 36-line viewport and the complete document so changes
+below the fold cannot pass unnoticed.  Print bounded results and signal an error
+on changed text, effective face, display, interaction, or measured line width.
+No files, windows, buffers, or persistent render state are modified."
+  (let (results failures)
+    (dolist (file (or files '("flex-reference.ebox" "grid-reference.ebox")))
+      (dolist (width (or widths '(720 1000)))
+        (unless (and (numberp width) (> width 0))
+          (error "Comparison viewport must be a positive number: %S" width))
+        (dolist (full '(nil t))
+          (let* ((before (ebox-playground-flex-resize-evaluator--example-text
+                          (expand-file-name file baseline-directory) width full))
+                 (after (ebox-playground-flex-resize-evaluator--example-text
+                         (expand-file-name file current-directory) width full))
+                 (before-widths (mapcar #'ebox-string-pixel-width
+                                       (ebox-string-lines before)))
+                 (after-widths (mapcar #'ebox-string-pixel-width
+                                      (ebox-string-lines after)))
+                 (left (ebox-playground-flex-resize-evaluator--visual-text before))
+                 (right (ebox-playground-flex-resize-evaluator--visual-text after))
+                 (same-widths (and (= (length before-widths) (length after-widths))
+                                   (cl-every #'= before-widths after-widths)))
+                 (same-text (equal-including-properties left right))
+                 (same (and same-widths same-text))
+                 (result (list :file file :width width
+                               :mode (if full 'document 'viewport)
+                               :equal same :line-widths-equal same-widths
+                               :before-length (length before)
+                               :after-length (length after))))
+            (princ (format "%s %s width=%s mode=%s characters=%s/%s line-widths=%s\n"
+                           (if same "PASS" "FAIL") file width
+                           (if full 'document 'viewport)
+                           (length before) (length after) same-widths))
+            (unless same
+              (let* ((position
+                      (cl-loop for index below (min (length left) (length right))
+                               unless (equal-including-properties
+                                       (substring left index (1+ index))
+                                       (substring right index (1+ index)))
+                               return index))
+                     (print-level 4) (print-length 12))
+                (when position
+                  (princ (format "  first difference at character %s: %S -> %S\n"
+                                 position
+                                 (list (aref left position)
+                                       (text-properties-at position left))
+                                 (list (aref right position)
+                                       (text-properties-at position right))))))
+              (push result failures))
+            (push result results)))))
+    (when failures
+      (error "Example render comparison failed in %d cases" (length failures)))
+    (nreverse results)))
 
 (defun ebox-playground-flex-resize-evaluator--check (name condition detail)
   "Record a named check and return whether CONDITION passed."
@@ -85,6 +242,366 @@ completed."
                 (if condition "PASS" "FAIL") name detail)
         ebox-playground-flex-resize-evaluator--output-lines)
   condition)
+
+(defun ebox-playground-scroll-evaluator--measure (region-id steps)
+  "Measure STEPS alternating cached one-line scrolls of REGION-ID."
+  (let ((root-renders 0) (node-styles 0) (style-computations 0)
+        samples installed)
+    (unwind-protect
+        (progn
+          (dolist (entry
+                   (list
+                    (cons 'ebox-surface--render-candidate
+                          (lambda (&rest _) (cl-incf root-renders)))
+                    (cons 'ebox-surface--apply-node-style
+                          (lambda (&rest _) (cl-incf node-styles)))
+                    (cons 'ebox-surface--compute-node-style
+                          (lambda (&rest _) (cl-incf style-computations)))))
+            (advice-add (car entry) :before (cdr entry))
+            (push entry installed))
+          (dotimes (index steps)
+            (let* ((delta (if (zerop (% index 2)) 1 -1))
+                   (start (float-time))
+                   (consumed (ebox--scroll-region-by region-id delta 1)))
+              (push (* 1000.0 (- (float-time) start)) samples)
+              (unless (equal consumed delta)
+                (error "Scroll evaluator moved %S lines, expected %S"
+                       consumed delta))))
+          (list :mean-ms (/ (apply #'+ samples) (float steps))
+                :p95-ms (ebox-playground-flex-resize-evaluator--percentile
+                         samples 0.95)
+                :max-ms (apply #'max samples)
+                :root-renders root-renders :node-styles node-styles
+                :style-computations style-computations))
+      (dolist (entry installed)
+        (advice-remove (car entry) (cdr entry))))))
+
+(defun ebox-playground-scroll-evaluator--fresh-parity (buffer file)
+  "Compare BUFFER with an independent FILE render at its root scroll offset."
+  (let* ((state (ebox--buffer-render-state buffer))
+         (ebox-viewport-width (plist-get state :viewport-width))
+         (ebox-viewport-height (plist-get state :viewport-height))
+         (region-id (plist-get (plist-get state :root-node) :region-id))
+         (offset (plist-get (gethash region-id (plist-get state :scroll-state-table))
+                            :scroll-offset))
+         offset-set
+         (set-offset
+          (lambda (root)
+            (unless offset-set
+              (setq offset-set t)
+              (ebox-put root :scroll-offset (or offset 0))
+              (ebox-put root :ebox-scroll-offset-controlled-p t))))
+         expected)
+    ;; Scroll offset is runtime state, not an authorable DSL style property.
+    ;; Set it on the independent candidate immediately before its first render.
+    (unwind-protect
+        (progn
+          (advice-add 'ebox--render-layout :before set-offset)
+          (setq expected (ebox-render (ebox-playground-view
+                                       file ebox-viewport-width)))
+          (unless offset-set
+            (error "Fresh scroll oracle did not reach the root layout")))
+      (advice-remove 'ebox--render-layout set-offset))
+    (with-current-buffer buffer
+      (let* ((actual (ebox-playground-scroll-evaluator--visual-text
+                      (buffer-string)))
+             (fresh (ebox-playground-scroll-evaluator--visual-text expected))
+             (same (equal-including-properties actual fresh)))
+        (unless same
+          (let ((position
+                 (cl-loop for index below (min (length actual) (length fresh))
+                          unless (equal-including-properties
+                                  (substring actual index (1+ index))
+                                  (substring fresh index (1+ index)))
+                          return index))
+                (print-level 4) (print-length 12))
+            (princ (format "  render lengths=%s/%s first-difference=%S %S -> %S\n"
+                           (length actual) (length fresh) position
+                           (and position (substring actual position
+                                                    (1+ position)))
+                           (and position (substring fresh position
+                                                    (1+ position)))))))
+        same))))
+
+(defun ebox-playground-scroll-evaluator--visual-text (text)
+  "Normalize visible TEXT, ignoring identity and inert zero-pixel spacers.
+Fresh layout may retain empty padding spaces that materialized scroll content
+omits.  Drop one only beside a visible character with identical faces, so line
+font metrics are preserved.  Retain height, ascent and alignment carriers."
+  (let ((text (ebox-playground-flex-resize-evaluator--visual-text text))
+        (start 0) parts)
+    (dotimes (index (length text))
+      (when (and (= (aref text index) ?\s)
+                 (equal (get-text-property index 'display text)
+                        '(space :width (0)))
+                 (cl-some
+                  (lambda (neighbor)
+                    (and (<= 0 neighbor) (< neighbor (length text))
+                         (/= (aref text neighbor) ?\n)
+                         (let ((display (get-text-property neighbor 'display text)))
+                           (or (null display)
+                               (pcase display
+                                 (`(space :width (,width))
+                                  (and (numberp width) (> width 0))))))
+                         (cl-every
+                          (lambda (property)
+                            (equal (get-text-property index property text)
+                                   (get-text-property neighbor property text)))
+                          '(face font-lock-face))))
+                  (list (1- index) (1+ index))))
+        (push (substring text start index) parts)
+        (setq start (1+ index))))
+    (push (substring text start) parts)
+    (apply #'concat (nreverse parts))))
+
+(defun ebox-playground-interaction-evaluator-click (buffer label &optional offset)
+  "Simulate a native mouse-1 at visible LABEL in BUFFER, plus character OFFSET.
+This GUI diagnostic resolves the actual text-property keymap with an Emacs
+mouse event and invokes its interactive command.  It does not call a business
+action directly, move point, select a window or generate an OS mouse event.
+Return the clicked position; the caller must verify the application's result."
+  (setq buffer (get-buffer buffer) offset (or offset 0))
+  (unless (and (buffer-live-p buffer) (stringp label) (> (length label) 0)
+               (integerp offset) (<= 0 offset) (< offset (length label)))
+    (error "Click diagnostic needs a live buffer, label and in-label offset"))
+  (let* ((window (or (get-buffer-window buffer t)
+                     (error "Click diagnostic target is not visible")))
+         (position
+          (with-current-buffer buffer
+            (save-excursion
+              (goto-char (point-min))
+              (unless (search-forward label nil t)
+                (error "Click diagnostic label is missing: %s" label))
+              (+ (- (point) (length label)) offset))))
+         (posn (or (posn-at-point position window)
+                   (error "Click diagnostic label is outside the visible window")))
+         (event (list 'mouse-1 posn))
+         (command (key-binding (vector event)))
+         (native (with-current-buffer buffer
+                   (get-text-property position 'keymap))))
+    (unless (and (keymapp native) (commandp command)
+                 (eq command (lookup-key native [mouse-1])))
+      (error "Click diagnostic label has no native mouse-1 command"))
+    (let ((last-input-event event)) (call-interactively command))
+    position))
+
+(defun ebox-playground-interaction-evaluator-run
+    (file label &optional key steps width height)
+  "Measure repeated native KEY activation at LABEL in FILE.
+KEY defaults to RET, STEPS to 30, WIDTH to 720 pixels and HEIGHT to 200 lines.
+Place point at LABEL once, then perform normal key lookup for every command;
+fail if an update loses that binding.  Return command timing in milliseconds,
+GC counts and time, allocated cons cells, publication count and work counts,
+and total characters scanned for fragment extraction (including local slices),
+final plain text and fresh-render parity.
+Rendering a committed snapshot independently must reproduce the mounted text.
+
+This measures synchronous commands and publication, including GC, without
+redisplay, OS key repeat or idle prewarming.  It uses current font metrics and
+a temporary preview, preserving existing buffers, windows and runtime state.
+Cleanup runs on success, error and quit; stop between samples after 30 seconds."
+  (setq key (or key "RET") steps (or steps 30)
+        width (or width 720) height (or height 200))
+  (unless (and (stringp file) (stringp label) (> (length label) 0)
+               (or (stringp key) (vectorp key)))
+    (error "Interaction evaluator needs a file, nonempty label and native key"))
+  (dolist (value (list steps width height))
+    (unless (and (integerp value) (> value 0))
+      (error "Interaction evaluator dimensions and steps must be positive integers")))
+  (let ((keys (if (stringp key) (kbd key) key))
+        (buffer (generate-new-buffer " *ebox-interaction-evaluator*"))
+        (ebox-viewport-width width) (ebox-viewport-height height)
+        (ebox-runtime-idle-prewarm nil)
+        (ebox-runtime-idle-reflow-cache-prewarm nil)
+        (ebox-scroll-lazy-idle-prefetch-lines 0)
+        (gc-cons-threshold gc-cons-threshold)
+        (gc-cons-percentage gc-cons-percentage)
+        (ebox--deferred-render-gc-state nil)
+        (ebox--deferred-render-gc-timer nil)
+        (ebox--deferred-render-gc-depth 0)
+        (ebox--deferred-render-gc-generation 0)
+        (work (list :layout-calls 0 :surface-plans 0 :fragment-scans 0
+                    :fragment-characters 0
+                    :node-registrations 0))
+        samples installed)
+    (unwind-protect
+        (progn
+          (when (zerop (length keys))
+            (error "Interaction evaluator key must not be empty"))
+          (ebox-playground-open-file file (buffer-name buffer))
+          (with-current-buffer buffer
+            (goto-char (point-min))
+            (unless (search-forward label nil t)
+              (error "Interaction label is not visible: %s" label))
+            (backward-char (length label))
+            (let* ((command (key-binding keys))
+                   (native (get-text-property (point) 'keymap))
+                   (revision (plist-get (ebox-surface-buffer-snapshot buffer)
+                                        :revision))
+                   (gc-count gcs-done) (gc-time gc-elapsed)
+                   (cons-count (car (memory-use-counts)))
+                   (deadline (+ (float-time) 30)))
+              (unless (and (keymapp native) (commandp command)
+                           (eq command (lookup-key native keys)))
+                (error "Interaction label has no native command for %s"
+                       (key-description keys)))
+              (dolist (entry '((ebox--render-layout . :layout-calls)
+                               (ebox-surface--surface-plan . :surface-plans)
+                               (ebox-surface--ensure-node-tree . :node-registrations)))
+                (let* ((key (cdr entry))
+                       (advice (lambda (&rest _)
+                                 (plist-put work key (1+ (plist-get work key))))))
+                  (advice-add (car entry) :before advice)
+                  (push (cons (car entry) advice) installed)))
+              (let ((advice
+                     (lambda (text)
+                       (cl-incf (plist-get work :fragment-scans))
+                       (cl-incf (plist-get work :fragment-characters)
+                                (length text)))))
+                (advice-add 'ebox-surface--rendered-fragments :before advice)
+                (push (cons 'ebox-surface--rendered-fragments advice) installed))
+              (dotimes (_ steps)
+                (when (> (float-time) deadline)
+                  (error "Interaction evaluator exceeded 30 seconds"))
+                (unless (eq (key-binding keys) command)
+                  (error "Repeated %s lost its node binding at point %d"
+                         (key-description keys) (point)))
+                (let ((started (float-time))
+                      (last-input-event (aref (vconcat keys) (1- (length keys)))))
+                  (call-interactively command)
+                  (push (* 1000 (- (float-time) started)) samples)))
+              (dolist (entry installed) (advice-remove (car entry) (cdr entry)))
+              (setq installed nil)
+              (let* ((cons-count (- (car (memory-use-counts)) cons-count))
+                     (gc-count (- gcs-done gc-count))
+                     (gc-ms (* 1000 (- gc-elapsed gc-time)))
+                     (snapshot (ebox-surface-buffer-snapshot buffer))
+                     (fresh (ebox-render (plist-get snapshot :input)))
+                     (actual (buffer-string))
+                     (parity (equal-including-properties
+                              (ebox-playground-scroll-evaluator--visual-text actual)
+                              (ebox-playground-scroll-evaluator--visual-text fresh))))
+                (unless parity
+                  (error "Repeated interaction differs from committed snapshot render"))
+                (append
+                 (list :file (expand-file-name file) :label label
+                      :key (key-description keys) :steps steps
+                      :mean-ms (/ (apply #'+ samples) (float steps))
+                      :p95-ms (ebox-playground-flex-resize-evaluator--percentile
+                               samples 0.95)
+                      :max-ms (apply #'max samples)
+                      :gc-count gc-count :gc-ms gc-ms
+                      :cons-cells cons-count
+                      :publications (- (plist-get snapshot :revision) (or revision 0))
+                       :fresh-parity parity :text (substring-no-properties actual))
+                 work)))))
+      (dolist (entry installed) (advice-remove (car entry) (cdr entry)))
+      (when (buffer-live-p buffer) (ebox-playground-close (buffer-name buffer)))
+      (when (timerp ebox--deferred-render-gc-timer)
+        (cancel-timer ebox--deferred-render-gc-timer)))))
+
+(defun ebox-playground-scroll-evaluator-run
+    (files &optional width steps height)
+  "Profile cached root scrolling for FILES at WIDTH with STEPS and HEIGHT.
+FILES is one `.ebox' path or a list of paths.  WIDTH defaults to 720 pixels,
+STEPS to 20 alternating one-line motions, and HEIGHT to 36 viewport lines.
+Each file must have a scrollable root.  Fully materialize its content outside
+the samples, then measure cached top and midpoint motion.  Return bounded
+plists with mean, p95 and maximum milliseconds, full root render counts, node
+style visits, style computations, and fresh-render parity for each position.
+Signal an error on missing scroll capacity, incomplete motion or render drift.
+
+Use the current Emacs frame's font metrics without displaying temporary
+buffers or changing windows.  This measures retained TP publication; native
+window scrolling, idle prewarming and redisplay are excluded.  Existing live
+buffers, timers and runtime tables are preserved.  Temporary mounts and advice
+are cleaned on success, error or quit; no global runtime reset is performed."
+  (setq files (if (stringp files) (list files) files)
+        width (or width 720) steps (or steps 20) height (or height 36))
+  (unless (and files (proper-list-p files) (cl-every #'stringp files))
+    (error "Scroll evaluator needs a file path or nonempty list of paths"))
+  (dolist (value (list width steps height))
+    (unless (and (integerp value) (> value 0))
+      (error "Scroll evaluator dimensions and steps must be positive integers")))
+  (let ((ebox-viewport-width width)
+        (ebox-viewport-height height)
+        (ebox-native-buffer-scroll nil)
+        (ebox-runtime-idle-prewarm nil)
+        (ebox-runtime-idle-reflow-cache-prewarm nil)
+        (ebox-scroll-lazy-idle-prefetch-lines 0)
+        ;; Isolate the GUI deferred-GC lease, including any timer it creates.
+        (gc-cons-threshold gc-cons-threshold)
+        (gc-cons-percentage gc-cons-percentage)
+        (ebox--deferred-render-gc-state nil)
+        (ebox--deferred-render-gc-timer nil)
+        (ebox--deferred-render-gc-depth 0)
+        (ebox--deferred-render-gc-generation 0)
+        results)
+    (unwind-protect
+        (dolist (file files)
+          (let ((buffer (generate-new-buffer " *ebox-scroll-evaluator*")))
+            (unwind-protect
+                (progn
+                  (ebox-playground-open-file file (buffer-name buffer))
+                  (with-current-buffer buffer
+                    (let* ((runtime (ebox--buffer-render-state buffer))
+                           (region-id (plist-get (plist-get runtime :root-node)
+                                                 :region-id))
+                           (table (plist-get runtime :scroll-state-table))
+                           (state (and region-id (gethash region-id table)))
+                           max-offset)
+                      (unless state
+                        (error "Scroll evaluator requires a scrollable root: %s"
+                               file))
+                      (setq state (ebox--scroll-state-materialize-lines
+                                   region-id state))
+                      (puthash region-id state table)
+                      (setq max-offset
+                            (max 0 (- (length (plist-get state :content-lines))
+                                      (plist-get state :content-height))))
+                      (unless (> max-offset 0)
+                        (error "Scroll evaluator root has no scroll capacity: %s"
+                               file))
+                      ;; Publish warmed content before measuring cached motion.
+                      (ebox--scroll-region-by region-id 1 1)
+                      (ebox--scroll-region-by region-id -1 1)
+                      (dolist (position '(top middle))
+                        (ebox--surface-scroll-to-offset
+                         buffer region-id
+                         (if (eq position 'top) 0 (/ max-offset 2)))
+                        (let* ((measurement
+                                (ebox-playground-scroll-evaluator--measure
+                                 region-id steps))
+                               (parity
+                                (ebox-playground-scroll-evaluator--fresh-parity
+                                 buffer file))
+                               (result
+                                (append
+                                 (list :file (expand-file-name file)
+                                       :width width :height height :steps steps
+                                       :position position :max-offset max-offset
+                                       :fresh-render-parity parity)
+                                 measurement)))
+                          (princ
+                           (format
+                            "%s scroll %s %s mean=%.3fms p95=%.3fms max=%.3fms roots=%d node-styles=%d style-computations=%d parity=%S\n"
+                            (if parity "PASS" "FAIL")
+                            (file-name-nondirectory file) position
+                            (plist-get measurement :mean-ms)
+                            (plist-get measurement :p95-ms)
+                            (plist-get measurement :max-ms)
+                            (plist-get measurement :root-renders)
+                            (plist-get measurement :node-styles)
+                            (plist-get measurement :style-computations) parity))
+                          (push result results)
+                          (unless parity
+                            (error "Scroll evaluator fresh-render mismatch: %s %s"
+                                   file position)))))))
+              (when (buffer-live-p buffer)
+                (kill-buffer buffer)))))
+      (when (timerp ebox--deferred-render-gc-timer)
+        (cancel-timer ebox--deferred-render-gc-timer)))
+    (nreverse results)))
 
 (defun ebox-playground-flex-resize-evaluator--settle-preview
     (preview preview-window)

@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-08-05
+- Last refreshed: 2026-09-08
 - Primary product surfaces: The `.ebox` files under `examples/`, the buffer opened by `ebox-playground-open`, and the generic file mode.
 - Evidence reviewed: `ebox-playground.el`, the `.ebox` fixtures under `examples/`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, and rendered gallery/reference previews.
 
@@ -44,7 +44,9 @@
 - Author forms to reuse: String, `text`, `box`, `row`, `column`, `flex`, and `grid`. Empty `box` nodes express spacing directly without another public form.
 - New/changed components: Header band, property section bands, track-function cards, implicit-track/flow cards, gap/placement cards, alignment cards, and public-contract footer.
 - Variants and states: Static semantic color families only.
-- Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner owns only parsing and rendering. The migrated references remain data files, so adding a layout does not add a fixture-specific Elisp branch.
+- Token/component ownership: Palette values and example composition live in `.ebox` fixtures; the runner reads and evaluates one ordinary Elisp expression with lexical bindings, then passes the resulting DSL data to public `ebox-build` and renders it. Adding a layout does not add a fixture-specific runner branch.
+- Source contract: A static layout quotes the whole list; dynamic layouts use normal Elisp such as `let`, backquote, comma, and comma splicing. The expression is identical to the argument of `ebox-build` in an `.el` file. The runner does not evaluate properties separately or auto-detect the old unquoted structural format.
+- Size contract: Use Ebox's explicit `(unit number)` values (`px`, `%`, `vw`, `vh`, `ch`, `lh`) and `calc`/`min`/`max`/`clamp` data. Bare `fit-content` is a keyword, never a function. Ebox owns resolution and vertical line quantization; the Playground adds no unit parser or alternate semantics.
 
 ## Accessibility
 - Target standard: High contrast and readable labels in ordinary GUI Emacs themes.
@@ -55,7 +57,7 @@
 
 ## Responsive behavior
 - Supported breakpoints/devices: GUI Emacs windows from compact split previews to fullscreen desktop widths.
-- Layout adaptations: Standalone gallery entry points default to a 720 px content canvas; split-window `.ebox` previews bind `(viewport)` to the preview pane's display-safe width so viewport-based sections fit the active pane.
+- Layout adaptations: Standalone gallery entry points default to a 720 px content canvas; split-window `.ebox` previews resolve `(vw 100)` against the preview pane's display-safe width and `(vh 100)` against its body height so viewport-based sections fit the active pane.
 - Touch/hover differences: None.
 
 ## Interaction states

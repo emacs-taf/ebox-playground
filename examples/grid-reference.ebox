@@ -1,1049 +1,1049 @@
-(column :height '(viewport-height) :width '(viewport)
-	(box :padding '(1 (20)) :border "#2E3740" :color "#20252B"
-	     :bgcolor "#FFFDF8" :font-weight 'bold :text-align 'center
-	     "Ebox CSS Grid Reference\nA complete, self-explaining gallery of the public Ebox Grid properties and value forms.")
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#B85C3C" :bgcolor "#F1D4C9"
-	     :color "#4C271D" :wrap-mode 'word
-	     "Container property: :grid-template-columns\nTrack sizing accepts fixed sizes, auto, fractional tracks, minmax, and repeat.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#B85C3C"
-	      :border-bottom "#B85C3C" :border-left "#B85C3C"
-	      :bgcolor "#FFF9F4"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center "fixed\n:((120) (74))")
-		      (grid :width '(206) :height 3 :padding '(0 (2))
-			    :grid-template-columns '((120) (74))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "120 PX")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "74 PX")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "auto\nauto tracks use intrinsic content")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns '(auto auto)
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "intrinsic")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "content")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "intrinsic keywords\nmin-content / max-content")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns '(min-content max-content)
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "alpha beta")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "gamma delta")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "fractional tracks\n(fr N) distributes by weight")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns '((fr 1) (fr 2))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "1FR")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "2FR")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "fractional forms\n(fr FACTOR) is equivalent to NFR")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns '((fr 1) (fr 2))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "(fr 1)")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "(fr 2)")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "minmax\nminimum protects a readable track")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns
-			    '((minmax (74) (120)) (74))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "74 → 120")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "fixed")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B85C3C"
-			   :bgcolor "#F7C8B3" :color "#3D2B1F"
-			   :text-align 'center
-			   "repeat\nrepeat 2 visibly expands the template")
-		      (grid :width '(206) :height 3 :padding '(0 (6))
-			    :grid-template-columns
-			    '((repeat 2 (62)) (fr 1))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :border "#B85C3C" :bgcolor "#FFF8F2"
-			    (box :bgcolor "#F1D0AF" :color "#3D2B1F"
-				 :text-align 'center "REPEAT A")
-			    (box :bgcolor "#D9AD83" :color "#3D2B1F"
-				 :text-align 'center "REPEAT B")
-			    (box :bgcolor "#BF7F63" :color "#FFFFFF"
-				 :text-align 'center "FR"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#537A63" :bgcolor "#DCEBDD"
-	     :color "#26402F" :wrap-mode 'word
-	     "Container property: :grid-template-rows\nThe same track grammar works on the block axis; fixed lines, auto sizing, fractions, minmax, and repeat are shown independently.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#537A63"
-	      :border-bottom "#537A63" :border-left "#537A63"
-	      :bgcolor "#F7FBF7"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center "fixed rows\n(1 2)")
-		      (grid :width '(206) :height 5 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '(1 2) :gap '(0 (6))
-			    :border "#537A63" :bgcolor "#F8FCF8"
-			    (box :bgcolor "#DCEBDD" :color "#26402F"
-				 :text-align 'center "ROW 1")
-			    (box :bgcolor "#A6C6AB" :color "#26402F"
-				 :text-align 'center "ROW 2")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center
-			   "auto rows\nintrinsic line heights")
-		      (grid :width '(206) :height 5 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '(auto auto) :gap
-			    '(0 (6)) :border "#537A63" :bgcolor
-			    "#F8FCF8"
-			    (box :height 1 :bgcolor "#DCEBDD" :color
-				 "#26402F" :text-align 'center "short")
-			    (box :height 2 :bgcolor "#A6C6AB" :color
-				 "#26402F" :text-align 'center
-				 "tall\ncontent")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center
-			   "fractional rows\n(fr 1) / (fr 2)")
-		      (grid :width '(206) :height 6 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '((fr 1) (fr 2)) :gap
-			    '(0 (6)) :border "#537A63" :bgcolor
-			    "#F8FCF8"
-			    (box :bgcolor "#DCEBDD" :color "#26402F"
-				 :text-align 'center "1FR")
-			    (box :bgcolor "#A6C6AB" :color "#26402F"
-				 :text-align 'center "2FR")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center
-			   "fractional row forms\n(fr 1) / (fr 2)")
-		      (grid :width '(206) :height 6 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '((fr 1) (fr 2)) :gap
-			    '(0 (6)) :border "#537A63" :bgcolor
-			    "#F8FCF8"
-			    (box :bgcolor "#DCEBDD" :color "#26402F"
-				 :text-align 'center "(fr 1)")
-			    (box :bgcolor "#A6C6AB" :color "#26402F"
-				 :text-align 'center "(fr 2)")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center
-			   "minmax rows\n(min 1 / max 3)")
-		      (grid :width '(206) :height 6 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '((minmax (1) (3)) 1)
-			    :gap '(0 (6)) :border "#537A63" :bgcolor
-			    "#F8FCF8"
-			    (box :bgcolor "#DCEBDD" :color "#26402F"
-				 :text-align 'center "MINMAX")
-			    (box :bgcolor "#A6C6AB" :color "#26402F"
-				 :text-align 'center "FIXED")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#537A63"
-			   :bgcolor "#C8DDCB" :color "#26402F"
-			   :text-align 'center
-			   "repeat rows\nrepeat 3 expands lines")
-		      (grid :width '(206) :height 6 :padding '(0 (6))
-			    :grid-template-columns '((192))
-			    :grid-template-rows '((repeat 3 (1))) :gap
-			    '(0 (6)) :border "#537A63" :bgcolor
-			    "#F8FCF8"
-			    (box :bgcolor "#DCEBDD" :color "#26402F"
-				 :text-align 'center "ROW A")
-			    (box :bgcolor "#A6C6AB" :color "#26402F"
-				 :text-align 'center "ROW B")
-			    (box :bgcolor "#7EA887" :color "#FFFFFF"
-				 :text-align 'center "ROW C"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#416E8A" :bgcolor "#D9EAF2"
-	     :color "#203A4A" :wrap-mode 'word
-	     "Container properties: :grid-auto-columns and :grid-auto-rows\nImplicit tracks use the same fixed, auto, fractional, and minmax track forms. Ebox resolves one normalized implicit track at a time.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#416E8A"
-	      :border-bottom "#416E8A" :border-left "#416E8A"
-	      :bgcolor "#F6FBFD"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-columns · fixed\n:grid-auto-columns ((64))")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((64))
-			    :grid-template-rows '(1 1)
-			    :grid-auto-columns '((64)) :grid-auto-flow
-			    'column :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "B")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-columns · auto\nintrinsic implicit width")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((64))
-			    :grid-template-rows '(1 1)
-			    :grid-auto-columns 'auto :grid-auto-flow
-			    'column :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "LONG C")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-columns · (fr 1)\nimplicit remainder")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((64))
-			    :grid-template-rows '(1 1)
-			    :grid-auto-columns '(fr 1) :grid-auto-flow
-			    'column :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "1FR")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-columns · minmax\nminimum implicit width")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((64))
-			    :grid-template-rows '(1 1)
-			    :grid-auto-columns '((minmax (64) (120)))
-			    :grid-auto-flow 'column :gap '(0 (6))
-			    :border "#416E8A" :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "MINMAX")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-rows · fixed\n:grid-auto-rows 2")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1) :grid-auto-rows 2
-			    :gap '(0 (6)) :border "#416E8A" :bgcolor
-			    "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "B")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "AUTO ROW")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-rows · auto\nintrinsic implicit height")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1) :grid-auto-rows
-			    'auto :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "B")
-			    (box :height 2 :bgcolor "#A9D0DE" :color
-				 "#203A4A" :text-align 'center
-				 "TALL\nAUTO ROW")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-rows · (fr 1)\nimplicit remainder")
-		      (grid :width '(206) :height 6
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1) :grid-auto-rows
-			    '(fr 1) :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "B")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "1FR ROW")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "auto-rows · minmax\nbounded implicit height")
-		      (grid :width '(206) :height 6
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1) :grid-auto-rows
-			    '((minmax (1) (3))) :gap '(0 (6)) :border
-			    "#416E8A" :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "B")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "MINMAX ROW"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#416E8A" :bgcolor "#D9EAF2"
-	     :color "#203A4A" :wrap-mode 'word
-	     "Container property: :grid-auto-flow\nAutomatic placement is row-major or column-major. Ebox intentionally supports row and column, not the browser dense variants.")
-	(grid :grid-template-columns '((206) (206)) :grid-auto-rows
-	      'auto :gap '(1 (10)) :justify-content 'space-between
-	      :padding '(0 (12)) :border-right "#416E8A"
-	      :border-bottom "#416E8A" :border-left "#416E8A"
-	      :bgcolor "#F6FBFD"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "row\nfills each row before creating the next")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1 1) :grid-auto-flow
-			    'row :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "1A")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "1B")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "2A")
-			    (box :bgcolor "#8DBDCE" :color "#203A4A"
-				 :text-align 'center "2B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#416E8A"
-			   :bgcolor "#C3DFEA" :color "#203A4A"
-			   :text-align 'center
-			   "column\nfills each column before creating the next")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94))
-			    :grid-template-rows '(1 1)
-			    :grid-auto-columns '((94)) :grid-auto-flow
-			    'column :gap '(0 (6)) :border "#416E8A"
-			    :bgcolor "#F8FCFE"
-			    (box :bgcolor "#D9EAF2" :color "#203A4A"
-				 :text-align 'center "C1/R1")
-			    (box :bgcolor "#C3DFEA" :color "#203A4A"
-				 :text-align 'center "C1/R2")
-			    (box :bgcolor "#A9D0DE" :color "#203A4A"
-				 :text-align 'center "C2/R1")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C2/R2"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#3D7068" :bgcolor "#CDEBE5"
-	     :color "#1D3935" :wrap-mode 'word
-	     "Container properties: :gap, :row-gap, :column-gap\nThe shorthand accepts one shared value or a row/column pair. The two longhands independently control row and column spacing.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#3D7068"
-	      :border-bottom "#3D7068" :border-left "#3D7068"
-	      :bgcolor "#F7FCFB"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center "gap scalar\n:gap 1")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1 1) :gap 1 :border
-			    "#3D7068" :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "B")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center
-			   "gap pair\n:gap (1 (14))")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1 1) :gap '(1 (14))
-			    :border "#3D7068" :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "ROW GAP")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "COLUMN GAP")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "PAIR")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center "row-gap\n:row-gap 2")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((94) (94))
-			    :grid-template-rows '(1 1) :row-gap 2
-			    :column-gap '(8) :border "#3D7068"
-			    :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "B")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "ROW 2")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center
-			   "column-gap\n:column-gap (28)")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((88) (88))
-			    :grid-template-rows '(1 1) :row-gap 1
-			    :column-gap '(28) :border "#3D7068"
-			    :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "LEFT")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "RIGHT")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "LONG GAP")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center
-			   "longhands\n:row-gap / :column-gap")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((88) (88))
-			    :grid-template-rows '(1 1) :row-gap 2
-			    :column-gap '(28) :border "#3D7068"
-			    :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "ROW GAP")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "COLUMN GAP")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "OVERRIDE")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#3D7068"
-			   :bgcolor "#9FD5CB" :color "#1D3935"
-			   :text-align 'center
-			   "independent longhands\nrow and column are explicit")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((88) (88))
-			    :grid-template-rows '(1 1)
-			    :row-gap 0 :column-gap '(28) :border
-			    "#3D7068" :bgcolor "#F7FCFB"
-			    (box :bgcolor "#CDEBE5" :color "#1D3935"
-				 :text-align 'center "ROW 0")
-			    (box :bgcolor "#9FD5CB" :color "#1D3935"
-				 :text-align 'center "COLUMN 28")
-			    (box :bgcolor "#71BDB0" :color "#FFFFFF"
-				 :text-align 'center "SIDES"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#6A5C8B" :bgcolor "#E7E2F1"
-	     :color "#332B4B" :wrap-mode 'word
-	     "Item properties: :grid-column, :grid-row, :grid-column-span, :grid-row-span\nPlacement is one-based. A property accepts a start number, (start :span count), or (start end); span longhands work with automatic placement too.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#6A5C8B"
-	      :border-bottom "#6A5C8B" :border-left "#6A5C8B"
-	      :bgcolor "#FBF9FF"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   "automatic placement\nno item coordinates")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "A")
-			    (box :bgcolor "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "B")
-			    (box :bgcolor "#AFA3D1" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-column 2\none column start")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-column 2 :bgcolor "#CBC2E3"
-				 :color "#332B4B" :text-align 'center
-				 "C2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "AUTO")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-row 2\none row start")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-row 2 :bgcolor "#CBC2E3" :color
-				 "#332B4B" :text-align 'center "R2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "AUTO")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-column (1 :span 2)\nspan in the column value")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-column '(1 :span 2) :bgcolor
-				 "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "C1–C2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "C3")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-row (1 :span 2)\nspan in the row value")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-row '(1 :span 2) :bgcolor
-				 "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "R1–R2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "OTHER")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-column (1 3)\nexplicit end line")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-column '(1 3) :bgcolor
-				 "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "C1→C2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "C3")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-row (1 3)\nexplicit end line")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-row '(1 3) :bgcolor "#CBC2E3"
-				 :color "#332B4B" :text-align 'center
-				 "R1→R2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "OTHER")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-column-span 2\nlonghand span")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-column-span 2 :bgcolor
-				 "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "C1–C2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "C3")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   ":grid-row-span 2\nlonghand span")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-row-span 2 :bgcolor "#CBC2E3"
-				 :color "#332B4B" :text-align 'center
-				 "R1–R2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "OTHER")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#6A5C8B"
-			   :bgcolor "#D8D0E8" :color "#332B4B"
-			   :text-align 'center
-			   "direct child placement\nitem is a parent-child role")
-		      (grid :width '(206) :height 4
-			    :grid-template-columns '((58) (58) (58))
-			    :grid-template-rows '(1 1) :gap '(0 (4))
-			    :border "#6A5C8B" :bgcolor "#FBF9FF"
-			    (box :grid-column 2 :grid-row 2 :bgcolor
-				 "#CBC2E3" :color "#332B4B"
-				 :text-align 'center "DIRECT\nC2/R2")
-			    (box :bgcolor "#E7E2F1" :color "#332B4B"
-				 :text-align 'center "AUTO"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#B07836" :bgcolor "#F3E4C7"
-	     :color "#513718" :wrap-mode 'word
-	     "Container property: :justify-items\nInline-axis item alignment supports start, center, end, stretch, and normal. Fixed-size items make the first three positions visible.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#B07836"
-	      :border-bottom "#B07836" :border-left "#B07836"
-	      :bgcolor "#FFF9ED"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "start")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(3) :justify-items
-			    'start :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(72) :bgcolor "#F3E4C7"
-				 :color "#513718" :text-align 'center
-				 "START")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "center")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(3) :justify-items
-			    'center :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(72) :bgcolor "#F3E4C7"
-				 :color "#513718" :text-align 'center
-				 "CENTER")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "end")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(3) :justify-items
-			    'end :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(72) :bgcolor "#F3E4C7"
-				 :color "#513718" :text-align 'center
-				 "END")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "stretch")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(3) :justify-items
-			    'stretch :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :bgcolor "#F3E4C7" :color "#513718"
-				 :text-align 'center
-				 "AUTO WIDTH\nSTRETCH")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "stretch default")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(3) :justify-items
-			    'stretch :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :bgcolor "#F3E4C7" :color "#513718"
-				 :text-align 'center
-				 "AUTO WIDTH\nNORMAL"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#B07836" :bgcolor "#F3E4C7"
-	     :color "#513718" :wrap-mode 'word
-	     "Container property: :align-items\nBlock-axis item alignment supports start, center, end, stretch, and normal. The fixed row height exposes the vertical offset.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#B07836"
-	      :border-bottom "#B07836" :border-left "#B07836"
-	      :bgcolor "#FFF9ED"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "start")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(5) :justify-items
-			    'center :align-items 'start :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(82) :height 1 :bgcolor
-				 "#F3E4C7" :color "#513718"
-				 :text-align 'center "START")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "center")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(5) :justify-items
-			    'center :align-items 'center :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(82) :height 1 :bgcolor
-				 "#F3E4C7" :color "#513718"
-				 :text-align 'center "CENTER")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "end")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(5) :justify-items
-			    'center :align-items 'end :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :width '(82) :height 1 :bgcolor
-				 "#F3E4C7" :color "#513718"
-				 :text-align 'center "END")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "stretch")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(5) :justify-items
-			    'center :align-items 'stretch :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :bgcolor "#F3E4C7" :color "#513718"
-				 :text-align 'center
-				 "AUTO HEIGHT\nSTRETCH")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#B07836"
-			   :bgcolor "#EAD2A6" :color "#513718"
-			   :text-align 'center "normal")
-		      (grid :width '(206) :height 5
-			    :grid-template-columns '((194))
-			    :grid-template-rows '(5) :justify-items
-			    'center :align-items 'normal :border
-			    "#B07836" :bgcolor "#FFF9ED"
-			    (box :bgcolor "#F3E4C7" :color "#513718"
-				 :text-align 'center "NORMAL"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#2F7180" :bgcolor "#CFE8EA"
-	     :color "#1E4148" :wrap-mode 'word
-	     "Container property: :justify-content\nInline-axis track packing supports start, center, end, space-between, space-around, space-evenly, stretch, and normal.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#2F7180"
-	      :border-bottom "#2F7180" :border-left "#2F7180"
-	      :bgcolor "#F6FCFC"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "start")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'start :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "center")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'center :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "end")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'end :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-between")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'space-between
-			    :justify-items 'center :align-items
-			    'center :border "#2F7180" :bgcolor
-			    "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-around")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'space-around
-			    :justify-items 'center :align-items
-			    'center :border "#2F7180" :bgcolor
-			    "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-evenly")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'space-evenly
-			    :justify-items 'center :align-items
-			    'center :border "#2F7180" :bgcolor
-			    "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "stretch")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'stretch :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "normal")
-		      (grid :width '(206) :height 3
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(2) :gap '(0 (6))
-			    :justify-content 'normal :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(0 (18)) :border "#2F7180" :bgcolor "#CFE8EA"
-	     :color "#1E4148" :wrap-mode 'word
-	     "Container property: :align-content\nBlock-axis track packing mirrors justify-content: start, center, end, space-between, space-around, space-evenly, stretch, and normal.")
-	(grid :grid-template-columns '((206) (206) (206))
-	      :grid-auto-rows 'auto :gap '(1 (10)) :justify-content
-	      'space-between :padding '(0 (12)) :border-right "#2F7180"
-	      :border-bottom "#2F7180" :border-left "#2F7180"
-	      :bgcolor "#F6FCFC"
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "start")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'start :justify-content
-			    'center :justify-items 'center
-			    :align-items 'center :border "#2F7180"
-			    :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "center")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'center :justify-content
-			    'center :justify-items 'center
-			    :align-items 'center :border "#2F7180"
-			    :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "end")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'end :justify-content
-			    'center :justify-items 'center
-			    :align-items 'center :border "#2F7180"
-			    :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-between")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'space-between
-			    :justify-content 'center :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-around")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'space-around
-			    :justify-content 'center :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "space-evenly")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'space-evenly
-			    :justify-content 'center :justify-items
-			    'center :align-items 'center :border
-			    "#2F7180" :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "stretch")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'stretch :justify-content
-			    'center :justify-items 'center
-			    :align-items 'center :border "#2F7180"
-			    :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C")))
-	      (column :width '(206)
-		      (box :padding '(0 (6)) :border "#2F7180"
-			   :bgcolor "#B5DDE0" :color "#1E4148"
-			   :text-align 'center "normal")
-		      (grid :width '(206) :height 7
-			    :grid-template-columns '((60) (60))
-			    :grid-template-rows '(1 1) :gap '(0 (6))
-			    :align-content 'normal :justify-content
-			    'center :justify-items 'center
-			    :align-items 'center :border "#2F7180"
-			    :bgcolor "#F6FCFC"
-			    (box :bgcolor "#CFE8EA" :color "#1E4148"
-				 :text-align 'center "A")
-			    (box :bgcolor "#9ACED2" :color "#1E4148"
-				 :text-align 'center "B")
-			    (box :bgcolor "#8DBDCE" :color "#FFFFFF"
-				 :text-align 'center "C"))))
-	(box :width '(viewport) :height 1 :bgcolor "#FAF7F0")
-	(box :padding '(1 (16)) :border "#2E3740" :color "#FFFFFF"
-	     :bgcolor "#3D4B55" :wrap-mode 'word :text-align 'center
-	     "GRID TOOLKIT\n:grid-template-columns · :grid-template-rows · :grid-auto-columns · :grid-auto-rows · :grid-auto-flow · :gap · :row-gap · :column-gap · :justify-items · :align-items · :justify-content · :align-content · :grid-column · :grid-row · :grid-column-span · :grid-row-span\nTrack forms: fixed · auto · (fr FACTOR) · NFR · minmax · repeat. Placement forms: start · (start :span count) · (start end)."))
+'(column :height (vh 90) :width (vw 95)
+	     (box :padding ((lh 1) (px 20)) :border "#2E3740" :color "#20252B"
+	          :bgcolor "#FFFDF8" :font-weight bold :text-align center
+	          "Ebox CSS Grid Reference\nA complete, self-explaining gallery of the public Ebox Grid properties and value forms.")
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#B85C3C" :bgcolor "#F1D4C9"
+	          :color "#4C271D"
+	          "Container property: :grid-template-columns\nTrack sizing accepts fixed sizes, auto, fractional tracks, minmax, and repeat.")
+	     (grid :color "#3D2B1F"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#B85C3C"
+	           :border-bottom "#B85C3C" :border-left "#B85C3C"
+	           :bgcolor "#FFF9F4"
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center "fixed\n((px 120) (px 74))")
+		        (grid :height (lh 3) :padding-inline (px 2)
+			          :grid-template-columns ((px 120) (px 74))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "120 PX")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "74 PX")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "auto\nauto tracks use intrinsic content")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns (auto auto)
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "intrinsic")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "content")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "intrinsic keywords\nmin-content / max-content")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns (min-content max-content)
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "alpha beta")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "gamma delta")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "fractional tracks\n(fr N) distributes by weight")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns ((fr 1) (fr 2))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "1FR")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "2FR")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "fractional forms\n(fr FACTOR) is equivalent to NFR")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns ((fr 1) (fr 2))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "(fr 1)")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "(fr 2)")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "minmax\nminimum protects a readable track")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns
+			          ((minmax (px 74) (px 120)) (px 74))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "74 → 120")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "fixed")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B85C3C"
+			         :bgcolor "#F7C8B3"
+			         :text-align center
+			         "repeat\nrepeat 2 visibly expands the template")
+		        (grid :height (lh 3) :padding-inline (px 6)
+			          :grid-template-columns
+			          ((repeat 2 (px 62)) (fr 1))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :border "#B85C3C" :bgcolor "#FFF8F2"
+			          (box :bgcolor "#F1D0AF"
+				           :text-align center "REPEAT A")
+			          (box :bgcolor "#D9AD83"
+				           :text-align center "REPEAT B")
+			          (box :bgcolor "#BF7F63" :color "#FFFFFF"
+				           :text-align center "FR"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#537A63" :bgcolor "#DCEBDD"
+	          :color "#26402F"
+	          "Container property: :grid-template-rows\nThe same track grammar works on the block axis; fixed lines, auto sizing, fractions, minmax, and repeat are shown independently.")
+	     (grid :color "#26402F"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#537A63"
+	           :border-bottom "#537A63" :border-left "#537A63"
+	           :bgcolor "#F7FBF7"
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center "fixed rows\n((lh 1) (lh 2))")
+		        (grid :height (lh 5) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows ((lh 1) (lh 2)) :gap ((lh 0) (px 6))
+			          :border "#537A63" :bgcolor "#F8FCF8"
+			          (box :bgcolor "#DCEBDD"
+				           :text-align center "ROW 1")
+			          (box :bgcolor "#A6C6AB"
+				           :text-align center "ROW 2")))
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center
+			         "auto rows\nintrinsic line heights")
+		        (grid :height (lh 5) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows (auto auto) :gap
+			          ((lh 0) (px 6)) :border "#537A63" :bgcolor
+			          "#F8FCF8"
+			          (box :height (lh 1) :bgcolor "#DCEBDD" :text-align center "short")
+			          (box :height (lh 2) :bgcolor "#A6C6AB" :text-align center
+				           "tall\ncontent")))
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center
+			         "fractional rows\n(fr 1) / (fr 2)")
+		        (grid :height (lh 6) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows ((fr 1) (fr 2)) :gap
+			          ((lh 0) (px 6)) :border "#537A63" :bgcolor
+			          "#F8FCF8"
+			          (box :bgcolor "#DCEBDD"
+				           :text-align center "1FR")
+			          (box :bgcolor "#A6C6AB"
+				           :text-align center "2FR")))
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center
+			         "fractional row forms\n(fr 1) / (fr 2)")
+		        (grid :height (lh 6) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows ((fr 1) (fr 2)) :gap
+			          ((lh 0) (px 6)) :border "#537A63" :bgcolor
+			          "#F8FCF8"
+			          (box :bgcolor "#DCEBDD"
+				           :text-align center "(fr 1)")
+			          (box :bgcolor "#A6C6AB"
+				           :text-align center "(fr 2)")))
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center
+			         "minmax rows\n(min 1 / max 3)")
+		        (grid :height (lh 6) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows ((minmax (lh 1) (lh 3)) (lh 1))
+			          :gap ((lh 0) (px 6)) :border "#537A63" :bgcolor
+			          "#F8FCF8"
+			          (box :bgcolor "#DCEBDD"
+				           :text-align center "MINMAX")
+			          (box :bgcolor "#A6C6AB"
+				           :text-align center "FIXED")))
+	           (column
+		        (box :padding-inline (px 6) :border "#537A63"
+			         :bgcolor "#C8DDCB"
+			         :text-align center
+			         "repeat rows\nrepeat 3 expands lines")
+		        (grid :height (lh 6) :padding-inline (px 6)
+			          :grid-template-columns ((px 192))
+			          :grid-template-rows ((repeat 3 (lh 1))) :gap
+			          ((lh 0) (px 6)) :border "#537A63" :bgcolor
+			          "#F8FCF8"
+			          (box :bgcolor "#DCEBDD"
+				           :text-align center "ROW A")
+			          (box :bgcolor "#A6C6AB"
+				           :text-align center "ROW B")
+			          (box :bgcolor "#7EA887" :color "#FFFFFF"
+				           :text-align center "ROW C"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#416E8A" :bgcolor "#D9EAF2"
+	          :color "#203A4A"
+	          "Container properties: :grid-auto-columns and :grid-auto-rows\nImplicit tracks use the same fixed, auto, fractional, and minmax track forms. Ebox resolves one normalized implicit track at a time.")
+	     (grid :color "#203A4A"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#416E8A"
+	           :border-bottom "#416E8A" :border-left "#416E8A"
+	           :bgcolor "#F6FBFD"
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-columns · fixed\n:grid-auto-columns (px 64)")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 64))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :grid-auto-columns ((px 64)) :grid-auto-flow
+			          column :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "B")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-columns · auto\nintrinsic implicit width")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 64))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :grid-auto-columns auto :grid-auto-flow
+			          column :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "LONG C")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-columns · (fr 1)\nimplicit remainder")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 64))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :grid-auto-columns (fr 1) :grid-auto-flow
+			          column :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "1FR")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-columns · minmax\nminimum implicit width")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 64))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :grid-auto-columns ((minmax (px 64) (px 120)))
+			          :grid-auto-flow column :gap ((lh 0) (px 6))
+			          :border "#416E8A" :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "MINMAX")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-rows · fixed\n:grid-auto-rows (lh 2)")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1)) :grid-auto-rows (lh 2)
+			          :gap ((lh 0) (px 6)) :border "#416E8A" :bgcolor
+			          "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "B")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "AUTO ROW")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-rows · auto\nintrinsic implicit height")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1)) :grid-auto-rows
+			          auto :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "B")
+			          (box :height (lh 2) :bgcolor "#A9D0DE" :text-align center
+				           "TALL\nAUTO ROW")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-rows · (fr 1)\nimplicit remainder")
+		        (grid :height (lh 6)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1)) :grid-auto-rows
+			          (fr 1) :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "B")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "1FR ROW")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "auto-rows · minmax\nbounded implicit height")
+		        (grid :height (lh 6)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1)) :grid-auto-rows
+			          ((minmax (lh 1) (lh 3))) :gap ((lh 0) (px 6)) :border
+			          "#416E8A" :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "B")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "MINMAX ROW"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#416E8A" :bgcolor "#D9EAF2"
+	          :color "#203A4A"
+	          "Container property: :grid-auto-flow\nAutomatic placement is row-major or column-major. Ebox intentionally supports row and column, not the browser dense variants.")
+	     (grid :color "#203A4A"
+	           :grid-template-columns ((px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content space-between
+	           :padding-inline (px 12) :border-right "#416E8A"
+	           :border-bottom "#416E8A" :border-left "#416E8A"
+	           :bgcolor "#F6FBFD"
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "row\nfills each row before creating the next")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1) (lh 1)) :grid-auto-flow
+			          row :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "1A")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "1B")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "2A")
+			          (box :bgcolor "#8DBDCE"
+				           :text-align center "2B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#416E8A"
+			         :bgcolor "#C3DFEA"
+			         :text-align center
+			         "column\nfills each column before creating the next")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :grid-auto-columns ((px 94)) :grid-auto-flow
+			          column :gap ((lh 0) (px 6)) :border "#416E8A"
+			          :bgcolor "#F8FCFE"
+			          (box :bgcolor "#D9EAF2"
+				           :text-align center "C1/R1")
+			          (box :bgcolor "#C3DFEA"
+				           :text-align center "C1/R2")
+			          (box :bgcolor "#A9D0DE"
+				           :text-align center "C2/R1")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C2/R2"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#3D7068" :bgcolor "#CDEBE5"
+	          :color "#1D3935"
+	          "Container properties: :gap, :row-gap, :column-gap\nThe shorthand accepts one shared value or a row/column pair. The two longhands independently control row and column spacing.")
+	     (grid :color "#1D3935"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#3D7068"
+	           :border-bottom "#3D7068" :border-left "#3D7068"
+	           :bgcolor "#F7FCFB"
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center "text-relative gaps\n:gap ((lh 1) (ch 1))")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 1) (ch 1)) :border
+			          "#3D7068" :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "A")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "B")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center
+			         "gap pair\n:gap ((lh 1) (px 14))")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 1) (px 14))
+			          :border "#3D7068" :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "ROW GAP")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "COLUMN GAP")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "PAIR")))
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center "row-gap\n:row-gap (lh 2)")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 94) (px 94))
+			          :grid-template-rows ((lh 1) (lh 1)) :row-gap (lh 2)
+			          :column-gap (px 8) :border "#3D7068"
+			          :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "A")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "B")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "ROW 2")))
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center
+			         "column-gap\n:column-gap (px 28)")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 88) (px 88))
+			          :grid-template-rows ((lh 1) (lh 1)) :row-gap (lh 1)
+			          :column-gap (px 28) :border "#3D7068"
+			          :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "LEFT")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "RIGHT")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "LONG GAP")))
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center
+			         "longhands\n:row-gap / :column-gap")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 88) (px 88))
+			          :grid-template-rows ((lh 1) (lh 1)) :row-gap (lh 2)
+			          :column-gap (px 28) :border "#3D7068"
+			          :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "ROW GAP")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "COLUMN GAP")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "OVERRIDE")))
+	           (column
+		        (box :padding-inline (px 6) :border "#3D7068"
+			         :bgcolor "#9FD5CB"
+			         :text-align center
+			         "independent longhands\nrow and column are explicit")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 88) (px 88))
+			          :grid-template-rows ((lh 1) (lh 1))
+			          :row-gap (lh 0) :column-gap (px 28) :border
+			          "#3D7068" :bgcolor "#F7FCFB"
+			          (box :bgcolor "#CDEBE5"
+				           :text-align center "ROW 0")
+			          (box :bgcolor "#9FD5CB"
+				           :text-align center "COLUMN 28")
+			          (box :bgcolor "#71BDB0" :color "#FFFFFF"
+				           :text-align center "SIDES"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#6A5C8B" :bgcolor "#E7E2F1"
+	          :color "#332B4B"
+	          "Item properties: :grid-column, :grid-row, :grid-column-span, :grid-row-span\nPlacement is one-based. A property accepts a start number, (start :span count), or (start end); span longhands work with automatic placement too.")
+	     (grid :color "#332B4B"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#6A5C8B"
+	           :border-bottom "#6A5C8B" :border-left "#6A5C8B"
+	           :bgcolor "#FBF9FF"
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         "automatic placement\nno item coordinates")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "A")
+			          (box :bgcolor "#CBC2E3"
+				           :text-align center "B")
+			          (box :bgcolor "#AFA3D1" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-column 2\none column start")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-column 2 :bgcolor "#CBC2E3" :text-align center
+				           "C2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "AUTO")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-row 2\none row start")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-row 2 :bgcolor "#CBC2E3" :text-align center "R2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "AUTO")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-column (1 :span 2)\nspan in the column value")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-column (1 :span 2) :bgcolor
+				           "#CBC2E3"
+				           :text-align center "C1–C2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "C3")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-row (1 :span 2)\nspan in the row value")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-row (1 :span 2) :bgcolor
+				           "#CBC2E3"
+				           :text-align center "R1–R2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "OTHER")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-column (1 3)\nexplicit end line")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-column (1 3) :bgcolor
+				           "#CBC2E3"
+				           :text-align center "C1→C2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "C3")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-row (1 3)\nexplicit end line")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-row (1 3) :bgcolor "#CBC2E3" :text-align center
+				           "R1→R2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "OTHER")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-column-span 2\nlonghand span")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-column-span 2 :bgcolor
+				           "#CBC2E3"
+				           :text-align center "C1–C2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "C3")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         ":grid-row-span 2\nlonghand span")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-row-span 2 :bgcolor "#CBC2E3" :text-align center
+				           "R1–R2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "OTHER")))
+	           (column
+		        (box :padding-inline (px 6) :border "#6A5C8B"
+			         :bgcolor "#D8D0E8"
+			         :text-align center
+			         "direct child placement\nitem is a parent-child role")
+		        (grid :height (lh 4)
+			          :grid-template-columns ((px 58) (px 58) (px 58))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 4))
+			          :border "#6A5C8B" :bgcolor "#FBF9FF"
+			          (box :grid-column 2 :grid-row 2 :bgcolor
+				           "#CBC2E3"
+				           :text-align center "DIRECT\nC2/R2")
+			          (box :bgcolor "#E7E2F1"
+				           :text-align center "AUTO"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#B07836" :bgcolor "#F3E4C7"
+	          :color "#513718"
+	          "Container property: :justify-items\nInline-axis item alignment supports start, center, end, stretch, and normal. Fixed-size items make the first three positions visible.")
+	     (grid :color "#513718"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#B07836"
+	           :border-bottom "#B07836" :border-left "#B07836"
+	           :bgcolor "#FFF9ED"
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "start")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 3)) :justify-items
+			          start :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 72) :bgcolor "#F3E4C7" :text-align center
+				           "START")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "center")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 3)) :justify-items
+			          center :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 72) :bgcolor "#F3E4C7" :text-align center
+				           "CENTER")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "end")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 3)) :justify-items
+			          end :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 72) :bgcolor "#F3E4C7" :text-align center
+				           "END")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "stretch")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 3)) :justify-items
+			          stretch :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :bgcolor "#F3E4C7"
+				           :text-align center
+				           "AUTO WIDTH\nSTRETCH")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "stretch default")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 3)) :justify-items
+			          stretch :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :bgcolor "#F3E4C7"
+				           :text-align center
+				           "AUTO WIDTH\nNORMAL"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#B07836" :bgcolor "#F3E4C7"
+	          :color "#513718"
+	          "Container property: :align-items\nBlock-axis item alignment supports start, center, end, stretch, and normal. The fixed row height exposes the vertical offset.")
+	     (grid :color "#513718"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#B07836"
+	           :border-bottom "#B07836" :border-left "#B07836"
+	           :bgcolor "#FFF9ED"
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "start")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 5)) :justify-items
+			          center :align-items start :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 82) :height (lh 1) :bgcolor
+				           "#F3E4C7"
+				           :text-align center "START")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "center")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 5)) :justify-items
+			          center :align-items center :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 82) :height (lh 1) :bgcolor
+				           "#F3E4C7"
+				           :text-align center "CENTER")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "end")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 5)) :justify-items
+			          center :align-items end :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :width (px 82) :height (lh 1) :bgcolor
+				           "#F3E4C7"
+				           :text-align center "END")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "stretch")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 5)) :justify-items
+			          center :align-items stretch :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :bgcolor "#F3E4C7"
+				           :text-align center
+				           "AUTO HEIGHT\nSTRETCH")))
+	           (column
+		        (box :padding-inline (px 6) :border "#B07836"
+			         :bgcolor "#EAD2A6"
+			         :text-align center "normal")
+		        (grid :height (lh 5)
+			          :grid-template-columns ((px 194))
+			          :grid-template-rows ((lh 5)) :justify-items
+			          center :align-items normal :border
+			          "#B07836" :bgcolor "#FFF9ED"
+			          (box :bgcolor "#F3E4C7"
+				           :text-align center "NORMAL"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#2F7180" :bgcolor "#CFE8EA"
+	          :color "#1E4148"
+	          "Container property: :justify-content\nInline-axis track packing supports start, center, end, space-between, space-around, space-evenly, stretch, and normal.")
+	     (grid :color "#1E4148"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#2F7180"
+	           :border-bottom "#2F7180" :border-left "#2F7180"
+	           :bgcolor "#F6FCFC"
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "start")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content start :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "center")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content center :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "end")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content end :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-between")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content space-between
+			          :justify-items center :align-items
+			          center :border "#2F7180" :bgcolor
+			          "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-around")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content space-around
+			          :justify-items center :align-items
+			          center :border "#2F7180" :bgcolor
+			          "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-evenly")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content space-evenly
+			          :justify-items center :align-items
+			          center :border "#2F7180" :bgcolor
+			          "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "stretch")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content stretch :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "normal")
+		        (grid :height (lh 3)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 2)) :gap ((lh 0) (px 6))
+			          :justify-content normal :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding-inline (px 18) :border "#2F7180" :bgcolor "#CFE8EA"
+	          :color "#1E4148"
+	          "Container property: :align-content\nBlock-axis track packing mirrors justify-content: start, center, end, space-between, space-around, space-evenly, stretch, and normal.")
+	     (grid :color "#1E4148"
+	           :grid-template-columns ((px 206) (px 206) (px 206))
+	           :gap ((lh 1) (px 10)) :justify-content
+	           space-between :padding-inline (px 12) :border-right "#2F7180"
+	           :border-bottom "#2F7180" :border-left "#2F7180"
+	           :bgcolor "#F6FCFC"
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "start")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content start :justify-content
+			          center :justify-items center
+			          :align-items center :border "#2F7180"
+			          :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "center")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content center :justify-content
+			          center :justify-items center
+			          :align-items center :border "#2F7180"
+			          :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "end")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content end :justify-content
+			          center :justify-items center
+			          :align-items center :border "#2F7180"
+			          :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-between")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content space-between
+			          :justify-content center :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-around")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content space-around
+			          :justify-content center :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "space-evenly")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content space-evenly
+			          :justify-content center :justify-items
+			          center :align-items center :border
+			          "#2F7180" :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "stretch")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content stretch :justify-content
+			          center :justify-items center
+			          :align-items center :border "#2F7180"
+			          :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C")))
+	           (column
+		        (box :padding-inline (px 6) :border "#2F7180"
+			         :bgcolor "#B5DDE0"
+			         :text-align center "normal")
+		        (grid :height (lh 7)
+			          :grid-template-columns ((px 60) (px 60))
+			          :grid-template-rows ((lh 1) (lh 1)) :gap ((lh 0) (px 6))
+			          :align-content normal :justify-content
+			          center :justify-items center
+			          :align-items center :border "#2F7180"
+			          :bgcolor "#F6FCFC"
+			          (box :bgcolor "#CFE8EA"
+				           :text-align center "A")
+			          (box :bgcolor "#9ACED2"
+				           :text-align center "B")
+			          (box :bgcolor "#8DBDCE" :color "#FFFFFF"
+				           :text-align center "C"))))
+	     (box :height (lh 1) :bgcolor "#FAF7F0")
+	     (box :padding ((lh 1) (px 16)) :border "#2E3740" :color "#FFFFFF"
+	          :bgcolor "#3D4B55" :text-align center
+	          "GRID TOOLKIT\n:grid-template-columns · :grid-template-rows · :grid-auto-columns · :grid-auto-rows · :grid-auto-flow · :gap · :row-gap · :column-gap · :justify-items · :align-items · :justify-content · :align-content · :grid-column · :grid-row · :grid-column-span · :grid-row-span\nTrack forms: fixed · auto · (fr FACTOR) · NFR · minmax · repeat. Placement forms: start · (start :span count) · (start end)."))
