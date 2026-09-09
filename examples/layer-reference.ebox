@@ -94,7 +94,7 @@
          (box :id "root-menu" :position absolute :layer root :anchor "menu-trigger"
               :placement bottom-start :z-index 50 :visibility hidden
               :width (ch 26) :height (lh 3) :background-color "#153F4A" :color "#FFFFFF"
-              (box :padding-inline (ch 1) "ROOT MENU / choose a color")
+              (box :padding-inline (ch 1) "ROOT MENU / choose")
               (box :id "menu-sage" :padding-inline (ch 1) :pointer hand
                    :hover-style (:background-color "#407E5C")
                    :help-echo "Choose sage, update the result, and close the menu."

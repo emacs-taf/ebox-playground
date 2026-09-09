@@ -54,7 +54,10 @@
 
 (defun ebox-playground-layer-test--parity ()
   "Compare native paint and interactions with the committed snapshot render."
-  (let* ((snapshot (ebox-surface-buffer-snapshot (current-buffer)))
+  (let* ((state (ebox--buffer-render-state (current-buffer)))
+         (ebox-viewport-width (plist-get state :viewport-width))
+         (ebox-viewport-height (plist-get state :viewport-height))
+         (snapshot (ebox-surface-buffer-snapshot (current-buffer)))
          (fresh (ebox-render (plist-get snapshot :input))))
     (should (ebox-canonical-input-p (plist-get snapshot :input)))
     (should
