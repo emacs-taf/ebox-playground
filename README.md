@@ -1,6 +1,6 @@
 # ebox-playground
 
-`ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates.
+`ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu.
 
 ECSS 0.1.0 and TP 1.0.1 are independent packages and may be installed in either order. Install both before Ebox 2.0.1, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
 
@@ -30,6 +30,59 @@ Run `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` to chec
 the core size contracts and the actual example declarations, known arithmetic
 results, painted sizing differences, complete rendering, and retained viewport updates. `make check` also
 includes the example's regression tests.
+
+## Layer lab
+
+`examples/layer-minimal.ebox` is the smallest static overlap example. The complete
+lab uses the same generic runner and a companion for application state:
+
+```elisp
+(ebox-playground-open-file
+ (expand-file-name "examples/layer-reference.ebox"
+                   ebox-playground-directory))
+```
+
+Visit the `.ebox` file and press `C-c C-c` for the source/preview split. Every
+control supports click, `RET`, and `SPC`, with native help and hover paint.
+All text uses one font size.
+
+- **UPDATE COVERED NOTE** changes a note fully covered by Panel A. Update it
+  twice, then **TOGGLE PANEL A** to reveal revision 02. The revealed note has
+  its own native action and live help; covering it never removes its logical
+  data or bindings.
+- **MOVE PANEL A** changes `:left` and `:top` without adding flow rows.
+  **RAISE / LOWER A** changes `:z-index` between 2 and 4 while Panel B stays at
+  3. Opaque panel content and padding replace the lower layer's visible paint.
+- The relative marker reserves its original flow row and paints one row lower.
+  Each parent forms a local stacking group automatically; no isolation
+  declaration is needed.
+- **OPEN / CLOSE ROOT MENU** shows a menu whose logical owner clips to one
+  row. The nested absolute menu declares `:layer root` and anchors to the
+  trigger's semantic ID, so it can paint beyond that local clip.
+  **CYCLE PLACEMENT** visits `bottom-start`, `bottom-end`, `top-start`, and
+  `top-end`; **MOVE ANCHOR** moves the trigger and its open menu together.
+  Choosing sage or amber updates the result and closes the menu.
+
+`layer-reference.ebox` contains layout data and state references;
+`layer-reference.el` owns state and business actions. It uses only public
+`ebox-keymap-create`, `ebox-help-create`, and `ebox-region-update` APIs.
+Offsets use inline `ch` and block `lh` units. The text renderer composes whole
+rows, and positioned content must share its host's line height.
+
+Run the batch checks without opening GUI windows:
+
+```sh
+make layer-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+```
+
+This target runs core layer contracts and the actual demo's native commands,
+covered updates, movement, stacking, all four anchor placements, cross-buffer
+mouse dispatch, and independent previews. After each command, the tests compare
+the mounted output with a fresh render of the committed snapshot, including
+paint and native capabilities. `make check` includes the Playground tests.
+For repeated command timing, use the existing interaction evaluator with
+`"examples/layer-reference.ebox"` and a toolbar label such as
+`"UPDATE COVERED NOTE"`; see the invocation below.
 
 <a id="native-interaction-lab"></a>
 ## Native interaction lab

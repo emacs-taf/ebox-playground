@@ -1,0 +1,9 @@
+'(box :width (ch 32) :height (lh 5)
+      :background-color "#233044"
+      (box :color "#cbd5e1"
+           "01234567890123456789012345678901\nabcdefghijklmnopqrstuvwxyzABCDEF\n01234567890123456789012345678901\nabcdefghijklmnopqrstuvwxyzABCDEF\n01234567890123456789012345678901")
+      (box :position absolute :left (ch 6) :top (lh 1)
+           :width (ch 18) :height (lh 3) :z-index 1
+           :background-color "#2563eb" :color "white"
+           :padding-inline (ch 1)
+           "Upper layer\nCovers the base\nBase stays alive"))
