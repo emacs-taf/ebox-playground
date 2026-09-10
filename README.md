@@ -336,8 +336,8 @@ sample count, viewport height in lines, and an optional options plist.
 By default, each file needs a scrollable root.
 Content is fully cached before alternating one-line motions at the top and
 midpoint. Results report mean/p95/max milliseconds, measurement-loop GC count/time,
-full root renders, node style
-visits, style computations, prefix rendering, full content materialization, and
+full root renders, general document preparations, surface-plan construction,
+node style visits, style computations, prefix rendering, full content materialization, and
 fresh-render parity; incomplete motion or changed
 output fails the run. The independent render comparison ignores runtime identity
 and zero-pixel spacers beside identical font faces; height carriers are retained.
@@ -360,6 +360,8 @@ fresh oracle renders the committed input with its scroll offsets, preserving
 callback and keymap identity. It does not reload companion application state.
 These checks cover Ebox publication work; use an actual displayed window when
 measuring input delivery and Emacs redisplay latency.
+Inspect `:document-preparations` and `:surface-plans` to distinguish a viewport
+publication from scrolling that still enters the general document update path.
 
 Size data uses `(unit number)` with `px`, `%`, `vw`, `vh`, `ch`, and `lh`, plus
 `calc`, `min`, `max`, and `clamp`. The [shared unit-constraint

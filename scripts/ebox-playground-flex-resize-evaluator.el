@@ -247,6 +247,7 @@ No files, windows, buffers, or persistent render state are modified."
   "Measure STEPS one-line scrolls of REGION-ID.
 Alternate cached motion by default; COLD advances without retracing prior rows."
   (let ((root-renders 0) (node-styles 0) (style-computations 0)
+        (document-preparations 0) (surface-plans 0)
         (prefix-renders 0) (materializations 0)
         (deadline (+ (float-time) 30))
         samples installed gc-start gc-time-start)
@@ -254,6 +255,10 @@ Alternate cached motion by default; COLD advances without retracing prior rows."
         (progn
           (dolist (entry
                    (list
+                    (cons 'ebox-incremental-prepare-scoped-commit
+                          (lambda (&rest _) (cl-incf document-preparations)))
+                    (cons 'ebox-surface--surface-plan
+                          (lambda (&rest _) (cl-incf surface-plans)))
                     (cons 'ebox-surface--render-candidate
                           (lambda (&rest _) (cl-incf root-renders)))
                     (cons 'ebox-surface--apply-node-style
@@ -293,6 +298,8 @@ Alternate cached motion by default; COLD advances without retracing prior rows."
                          samples 0.95)
                 :max-ms (apply #'max samples)
                 :root-renders root-renders :node-styles node-styles
+                :document-preparations document-preparations
+                :surface-plans surface-plans
                 :style-computations style-computations
                 :prefix-renders prefix-renders :materializations materializations))
       (dolist (entry installed)
@@ -625,6 +632,8 @@ Return bounded plists with :mode, semantic :region-id, :start-offset,
 visits, style computations, and fresh-render parity for each position.
 :prefix-renders counts calls to the bounded scroll source renderer;
 :materializations counts full-content producer invocations during samples.
+:document-preparations counts general scoped document preparation;
+:surface-plans counts construction of full surface publication plans.
 :position is top/middle for cached samples or cold for advancing samples.
 :max-offset is nil unless the selected content is fully materialized.
 The oracle independently renders the committed snapshot, preserving opaque
@@ -735,7 +744,7 @@ Each sample loop checks a 30-second deadline between motions."
                                  measurement)))
                           (princ
                            (format
-                            "%s scroll %s %s mean=%.3fms p95=%.3fms max=%.3fms gc=%d/%.3fms roots=%d node-styles=%d style-computations=%d prefix-renders=%d materializations=%d parity=%S\n"
+                            "%s scroll %s %s mean=%.3fms p95=%.3fms max=%.3fms gc=%d/%.3fms roots=%d document-preparations=%d surface-plans=%d node-styles=%d style-computations=%d prefix-renders=%d materializations=%d parity=%S\n"
                             (if parity "PASS" "FAIL")
                             (file-name-nondirectory file) position
                             (plist-get measurement :mean-ms)
@@ -744,6 +753,8 @@ Each sample loop checks a 30-second deadline between motions."
                             (plist-get measurement :gc-count)
                             (plist-get measurement :gc-ms)
                             (plist-get measurement :root-renders)
+                            (plist-get measurement :document-preparations)
+                            (plist-get measurement :surface-plans)
                             (plist-get measurement :node-styles)
                             (plist-get measurement :style-computations)
                             (plist-get measurement :prefix-renders)

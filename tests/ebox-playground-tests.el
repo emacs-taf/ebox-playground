@@ -447,6 +447,7 @@
                     (should (plist-get report :fresh-render-parity))
                     (should (= (plist-get report :steps) 3))
                     (dolist (key '(:mean-ms :p95-ms :max-ms :root-renders
+                                   :document-preparations :surface-plans
                                    :node-styles :style-computations
                                    :prefix-renders :materializations))
                       (should (>= (plist-get report key) 0))))
@@ -470,6 +471,8 @@
         (functions
          (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
                  '(ebox-surface--render-candidate
+                   ebox-incremental-prepare-scoped-commit
+                   ebox-surface--surface-plan
                    ebox-surface--apply-node-style
                    ebox-surface--compute-node-style
                    ebox--render-scroll-window-source
