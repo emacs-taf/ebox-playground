@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-09-08
+- Last refreshed: 2026-09-11
 - Primary product surfaces: The `.ebox` files under `examples/`, the buffer opened by `ebox-playground-open`, and the generic file mode.
 - Evidence reviewed: `ebox-playground.el`, the `.ebox` fixtures under `examples/`, `tests/ebox-playground-tests.el`, `README.md`, `README.zh-CN.md`, and rendered gallery/reference previews.
 
@@ -13,7 +13,7 @@
 
 ## Product goals
 - Goals: Demonstrate Ebox Grid and composition in a polished standalone example; give the low-level package a visual quality bar consistent with the Flex reference.
-- Non-goals: ETAF Components, application state, browser imitation, or a second Playground framework.
+- Non-goals: ETAF Components, a general application framework, or a second Playground runner. Interactive examples keep their own small state in a same-basename companion.
 - Success signals: The first frame clearly communicates hierarchy and Grid behavior; every tinted block has readable text; no content crosses the visible viewport.
 
 ## Personas and jobs
@@ -82,3 +82,36 @@
 
 ## Open questions
 - [ ] Add more standalone `.ebox` fixtures only when each teaches a distinct public Ebox responsibility / maintainer / prevents fixture sprawl.
+
+## Parallax desktop example
+
+- Surface: `examples/desktop-reference.ebox` and its companion. This dedicated
+  direct-manipulation example complements the existing static/property-oriented
+  layer reference; it does not replace it.
+- Job: move five overlapping text windows, reveal covered content, and bring any
+  window forward by clicking its exposed body/title or its persistent dock entry.
+- Visual direction: midnight blue workspace, cool readable ink, violet Studio,
+  cyan Signal, amber Notes, mint Terminal and rose Palette accents. One configured
+  font size throughout. Use contrasting title bars and compact pane content,
+  rather than fake close controls, images or additional font packages.
+- Structure: compact identity/utility bar, clipped desktop with five independent
+  sibling windows, then persistent dock and status. Keep the workspace dominant;
+  each pane contains a distinct editorial/code/task/signal composition.
+- Interaction: raise on press, preserve grab offset, repaint changed positions
+  during native mouse tracking, apply the final release position, and retain the
+  last accepted position after interruption. No inertial or decorative animation.
+  The current Ebox layer contract uses pixel X and host-text-row Y coordinates.
+- Keyboard: RET/SPC activates a pane or dock entry; title-bar Alt+arrows move it.
+  Reset restores the original arrangement. No changes to global Emacs bindings.
+- Responsive behavior: use viewport-relative positions and bounded pane widths;
+  overflow is clipped at the desktop boundary. Dock entries remain available for
+  covered panes. Target at least 40 columns and 20 text rows; smaller workspaces
+  prioritize the dock, and reopening/resetting restores the initial arrangement.
+- State and failure: one independent companion state per preview. Commit state
+  only after public Ebox publication succeeds. Mouse tracking owns no persistent
+  timer, advice or global map and releases its transient state on exit/error/quit.
+- Verification: real commands retrieved from rendered native keymaps, synthetic
+  motion/release streams with intermediate-publication checks, stacking/covered
+  ownership and committed-input render parity, plus compact and wide renders.
+  The standing restriction on operating the user's GUI Emacs remains in force;
+  batch checks do not establish native redisplay latency or screenshot fidelity.

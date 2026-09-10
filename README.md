@@ -1,6 +1,6 @@
 # ebox-playground
 
-`ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu.
+`ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu. `desktop-reference.ebox` provides five directly draggable, overlapping text windows.
 
 ECSS 0.1.0 and TP 1.0.1 are independent packages and may be installed in either order. Install both before Ebox 2.0.1, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
 
@@ -30,6 +30,44 @@ Run `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` to chec
 the core size contracts and the actual example declarations, known arithmetic
 results, painted sizing differences, complete rendering, and retained viewport updates. `make check` also
 includes the example's regression tests.
+
+## PARALLAX draggable desktop
+
+Open `examples/desktop-reference.ebox` and press `C-c C-c`, or use:
+
+```elisp
+(ebox-playground-open-file
+ (expand-file-name "examples/desktop-reference.ebox"
+                   ebox-playground-directory))
+```
+
+Five independent panes share a midnight-blue desktop: violet Studio, paper
+Notes, cyan Signal, mint Terminal, and rose Palette. Each contains its own
+text and layered artwork. All text uses the configured font size.
+
+- Click any exposed pane, including its blank body area, to bring the entire
+  window forward. Other windows keep their relative stacking order.
+- Hold the primary button on a title bar and move it. Positions are published
+  while the button is held, preserving the initial grab offset; release applies
+  the final position. Windows can partially or fully cover one another.
+- The five dock entries raise windows even when they are completely covered.
+  **CYCLE** brings the backmost window forward; **RESET** restores all initial
+  positions and the original stack, including panes clipped off the desktop.
+- `RET`/`SPC` activates the control at point. `Alt+arrows` on a title or dock
+  entry moves its pane; point follows the same native control for key repeat.
+  `C-g` stops a drag and keeps the last accepted position.
+
+Horizontal dragging uses pixel positions; vertical movement follows Ebox's
+host text rows. This is live text-window composition, not sub-row raster motion.
+Use at least 40 columns and 20 rows; larger previews leave more room to arrange
+the five panes. Reopening the file creates an independent desktop state.
+
+Run `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
+native command, intermediate motion, release, overlap, rollback, independent
+preview and render-parity regressions. Normal `make check` includes this suite.
+For repeated movement publication timing, use the shared interaction evaluator
+with this file, dock label `"01 ST"` and key `"M-<right>"`; it measures the same
+position publisher without OS event delivery or GUI redisplay.
 
 ## ORBIT spatial desktop and layer lab
 

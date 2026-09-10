@@ -23,3 +23,12 @@ Keep necessary business functions and variables in a same-basename `.el` file be
 For native help, pointer, hover-style, or keymap demonstration work, maintain `examples/interaction-reference.el` and `examples/interaction-reference.ebox`, then run `make interaction-tests` (with `EMACS` set to the intended executable). Extend `tests/ebox-playground-interaction-tests.el` for capability, command, replacement, and removal regressions. Use `ebox-help-create` and `ebox-keymap-create` for zero-argument business callbacks and native help/command buffer context, and use `ebox-region-update` with semantic IDs in that buffer. These reusable adapters belong to Ebox; moving local adapters into the companion is not a substitute. Raw native callbacks and keymaps remain supported and own their event-context handling. Extend the generic runner tests for companion reload behavior rather than adding an example-specific loading mechanism.
 
 For layer, overlap, positioning, or anchored-menu demonstrations, maintain `examples/layer-reference.ebox` and its same-basename companion, preserve `examples/layer-minimal.ebox` as the minimal fixture, and run `make layer-tests`. Extend `tests/ebox-playground-layer-tests.el` for actual native commands and committed-snapshot render parity instead of creating another demo runner or probe. Keep layout in the DSL, business state/actions in the companion, and one font size throughout positioned content. Use the shared interaction evaluator above for repeated layer-command timing. Each parent creates its local stacking group automatically; use `:layer root` on a nested absolute node when root projection is required, with semantic `:anchor` and `:placement` declarations for anchored menus.
+
+For direct-manipulation desktop windows, click-to-front, and title-bar dragging,
+maintain `examples/desktop-reference.ebox` with its companion and run
+`make desktop-tests`. Reuse `tests/ebox-playground-desktop-tests.el` for native
+press/motion/release streams, intermediate publication and fresh-render parity.
+Use the shared interaction evaluator with the desktop's `"01 ST"` dock label
+and `"M-<right>"` for repeated position publication timing. Keep native gesture
+state in the companion, use public Ebox updates, and preserve the existing layer
+reference instead of turning the generic runner into a window manager.

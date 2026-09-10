@@ -24,6 +24,33 @@ ECSS 0.1.0 与 TP 1.0.1 是互相独立的包，安装顺序任意；两者都�
 运行 `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，可检查核心尺寸契约、
 示例的实际属性覆盖、已知计算结果、背景所指示的尺寸差异、完整渲染及保留状态的视口更新。`make check` 也包含此示例的回归测试。
 
+## PARALLAX 可拖拽桌面
+
+打开 `examples/desktop-reference.ebox`，按 `C-c C-c`，或执行：
+
+```elisp
+(ebox-playground-open-file
+ (expand-file-name "examples/desktop-reference.ebox"
+                   ebox-playground-directory))
+```
+
+深蓝工作台中放置五个内容各异的窗口：Studio、Notes、Signal、Terminal、Palette。
+点击露出的标题、正文或空白区域，会将整窗置顶；按住标题栏拖动时持续更新位置，
+保留抓取偏移，松手时应用最终位置。窗口可以部分或完全覆盖其他窗口，原有内容始终保留。
+
+底部五个窗口入口可以找回被完全遮住的窗口；**CYCLE** 将最下面的窗口放到最上面，
+**RESET** 恢复原始位置和次序，也能找回拖出桌面裁剪边界的窗口。RET/SPC 激活当前
+控件，标题或窗口入口上的 Alt+方向键移动对应窗口并支持连续按键；C-g 结束拖拽，
+保留最后成功发布的位置。每次打开的预览状态互相独立。
+
+横向按像素移动，纵向遵循 Ebox 的文本行网格。推荐至少 40 列、20 行，更大的预览
+有更多摆放空间。所有文本保持当前字体大小，不使用额外字体或图片依赖。
+
+运行 `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`
+检查真实 keymap 命令、中间运动帧、松手、遮挡归属、失败回滚和渲染一致性；
+`make check` 已包含该套件。重复位置发布的耗时使用共享 interaction evaluator，
+传入该示例、窗口入口 `"01 ST"` 和按键 `"M-<right>"`，不将其冒充 GUI 重绘延迟。
+
 ## 滚动性能验证
 
 使用共享 `scripts/ebox-playground-flex-resize-evaluator.el` 的入口：

@@ -1,0 +1,178 @@
+;; Layout and initial geometry live here; native gestures live in the companion.
+(let* ((studio (desktop-demo-window-create
+                :id "desk-studio" :label "STUDIO" :accent "#BBA9FF" :ink "#241B40"
+                :left '(% 5) :top '(lh 1)))
+       (notes (desktop-demo-window-create
+               :id "desk-notes" :label "NOTES" :accent "#F6C879" :ink "#3B2917"
+               :left '(% 45) :top '(% 4)))
+       (signal (desktop-demo-window-create
+                :id "desk-signal" :label "SIGNAL" :accent "#8DE1E4" :ink "#15383D"
+                :left '(% 57) :top '(% 32)))
+       (terminal (desktop-demo-window-create
+                  :id "desk-terminal" :label "TERMINAL" :accent "#A7E8BB" :ink "#1B3826"
+                  :left '(% 8) :top '(% 46)))
+       (palette (desktop-demo-window-create
+                 :id "desk-palette" :label "PALETTE" :accent "#F3A8C9" :ink "#402438"
+                 :left '(% 43) :top '(% 65)))
+       (panes (list studio notes signal terminal palette))
+       (demo (desktop-demo-create :windows panes
+                                  :order (mapcar #'desktop-demo-window-id panes)
+                                  :active "desk-palette")))
+  `(column :width (vw 100) :height (vh 100) :overflow hidden
+           :background-color "#0B1020" :color "#CFD8EA"
+     (box :height (lh 3) :padding-inline (ch 1)
+          (row :height (lh 1)
+               (box :color "#BBA9FF" :font-weight bold "P A R A L L A X")
+               (box :padding-left (ch 2) :color "#657899" "DESKTOP / 05"))
+          (box :color "#F1F5FF" "A little space. A lot of possibilities.")
+          (box :color "#8F9FBD" "Click to focus. Drag a title bar to move."))
+     (flex :height (lh 1) :gap ((lh 0) (ch 1)) :padding-inline (ch 1)
+          (box :padding-inline (ch 1) :color "#D7E3F8" :background-color "#25324B"
+               :pointer hand :hover-style (:background-color "#354662")
+               :help-echo "Restore the five original positions and stacking order."
+               :keymap ,(desktop-demo-control demo 'reset) "RESET")
+          (box :padding-inline (ch 1) :color "#D7E3F8" :background-color "#25324B"
+               :pointer hand :hover-style (:background-color "#354662")
+               :help-echo "Bring the backmost window to the front."
+               :keymap ,(desktop-demo-control demo 'next) "CYCLE")
+          (box :color "#657899" "FIVE IDEAS / ONE SHARED SPACE"))
+
+     (box :id "desktop-canvas" :height (calc (- (vh 100) (lh 7)))
+          :overflow hidden :background-color "#111A2C"
+          (box :position absolute :left (ch 1) :top (lh 0)
+               :color "#3F5273" "WORKSPACE 01    +    +    +    +    +")
+          (box :position absolute :left (% 68) :top (% 78)
+               :width (% 30) :color "#334866"
+               "+  .  +  .  +\n.  +  .  +  .\n+  .  +  .  +\n.  +  .  +  .")
+          (box :position absolute :left (ch 2) :top (% 93)
+               :color "#5A6D8E" "MOVE THINGS AROUND. MAKE IT YOURS.")
+
+          (box :id "desk-studio" :position absolute :left ,(desktop-demo-window-left studio)
+               :top ,(desktop-demo-window-top studio) :width (min (ch 44) (% 55))
+               :height (lh 13) :z-index 1 :overflow hidden
+               :background-color "#26223B" :color "#D6CDEF" :pointer arrow
+               :help-echo "Studio. Click any exposed area to bring this whole window forward."
+               :keymap ,(desktop-demo-keymap demo "desk-studio")
+               (box :id "desk-studio-title" :height (lh 1) :padding-inline (ch 1)
+                    :background-color "#25324B" :color "#C1CBE0" :font-weight bold
+                    :pointer hand :keymap ,(desktop-demo-keymap demo "desk-studio" t)
+                    :help-echo "Drag Studio. Alt+arrows moves it from the keyboard."
+                    "STUDIO / 01    ::")
+               (box :padding ((lh 1) (ch 2))
+                    (box :font-weight bold :color "#F5F0FF" "Make space for the unexpected.")
+                    (box :padding-top (lh 1) :color "#A999C8" "EXPERIMENT 024 / SOFT STRUCTURES")
+                    (box :height (lh 5) :padding-top (lh 1)
+                         (box :position absolute :left (ch 0) :top (lh 1)
+                              :width (ch 13) :height (lh 3) :background-color "#7561AC"
+                              :color "#EAE1FF" :text-align center "\nFORM / 01")
+                         (box :position absolute :left (ch 9) :top (lh 0)
+                              :width (ch 13) :height (lh 3) :z-index 1
+                              :background-color "#BBA9FF" :color "#302449"
+                              :text-align center "\nSPACE / 02")
+                         (box :position absolute :left (ch 18) :top (lh 2)
+                              :width (ch 12) :height (lh 3) :z-index 2
+                              :background-color "#D8EAAB" :color "#303D22"
+                              :text-align center "\nPLAY / 03"))
+                    (box :color "#B8A9D0" "Fragments become a composition.")
+                    (box :padding-top (lh 1) :color "#85799F" "COLLECTION / UNFINISHED POSSIBILITIES")))
+
+          (box :id "desk-notes" :position absolute :left ,(desktop-demo-window-left notes)
+               :top ,(desktop-demo-window-top notes) :width (min (ch 34) (% 43))
+               :height (lh 11) :z-index 2 :overflow hidden
+               :background-color "#EEE3CB" :color "#514430" :pointer arrow
+               :help-echo "Notes. The content remains here even when another window covers it."
+               :keymap ,(desktop-demo-keymap demo "desk-notes")
+               (box :id "desk-notes-title" :height (lh 1) :padding-inline (ch 1)
+                    :background-color "#25324B" :color "#C1CBE0" :font-weight bold
+                    :pointer hand :keymap ,(desktop-demo-keymap demo "desk-notes" t)
+                    :help-echo "Drag Notes. Alt+arrows moves it from the keyboard."
+                    "NOTES / 02    ::")
+               (box :padding ((lh 1) (ch 1))
+                    (box :font-weight bold "A quieter kind of focus.")
+                    (box :padding-top (lh 1) :color "#8C744E" "TODAY / THINGS WORTH MAKING")
+                    (box :padding-top (lh 1)
+                         "[x] Collect the small ideas\n[ ] Give the good ones room\n[ ] Leave something unfinished")
+                    (box :padding-top (lh 1) :color "#887651" "Less noise. More intention.")
+                    (box :color "#A18B61" "------------------------------")
+                    (box :color "#746345" "03 NOTES / SAVED IN THE MOMENT")))
+
+          (box :id "desk-signal" :position absolute :left ,(desktop-demo-window-left signal)
+               :top ,(desktop-demo-window-top signal) :width (min (ch 32) (% 39))
+               :height (lh 10) :z-index 3 :overflow hidden
+               :background-color "#17343E" :color "#BFE5E9" :pointer arrow
+               :help-echo "Signal. Raise the entire player, including its overlapping waveform."
+               :keymap ,(desktop-demo-keymap demo "desk-signal")
+               (box :id "desk-signal-title" :height (lh 1) :padding-inline (ch 1)
+                    :background-color "#25324B" :color "#C1CBE0" :font-weight bold
+                    :pointer hand :keymap ,(desktop-demo-keymap demo "desk-signal" t)
+                    :help-echo "Drag Signal. Alt+arrows moves it from the keyboard."
+                    "SIGNAL / 03    ::")
+               (box :padding ((lh 1) (ch 2))
+                    (box :font-weight bold :color "#E4FBF9" "AFTER HOURS")
+                    (box :color "#7BAEB9" "A soundtrack for the in-between.")
+                    (flex :height (lh 3) :gap ((lh 0) (ch 1)) :padding-top (lh 1)
+                         (box :width (ch 2) :height (lh 1) :background-color "#518F9D")
+                         (box :width (ch 2) :height (lh 2) :background-color "#8DE1E4")
+                         (box :width (ch 2) :height (lh 1) :background-color "#518F9D")
+                         (box :width (ch 2) :height (lh 2) :background-color "#BBA9FF")
+                         (box :width (ch 2) :height (lh 1) :background-color "#8DE1E4")
+                         (box :width (ch 2) :height (lh 2) :background-color "#BBA9FF")
+                         (box :width (ch 2) :height (lh 1) :background-color "#518F9D"))
+                    (box :color "#8DE1E4" "========------------   03:42")
+                    (box :padding-top (lh 1) :color "#699CA9" "SIDE B / SLOWER ORBITS")))
+
+          (box :id "desk-terminal" :position absolute :left ,(desktop-demo-window-left terminal)
+               :top ,(desktop-demo-window-top terminal) :width (min (ch 48) (% 60))
+               :height (lh 11) :z-index 4 :overflow hidden
+               :background-color "#101F22" :color "#B6D7CC" :pointer arrow
+               :help-echo "Terminal. This sample transcript is part of the movable text window."
+               :keymap ,(desktop-demo-keymap demo "desk-terminal")
+               (box :id "desk-terminal-title" :height (lh 1) :padding-inline (ch 1)
+                    :background-color "#25324B" :color "#C1CBE0" :font-weight bold
+                    :pointer hand :keymap ,(desktop-demo-keymap demo "desk-terminal" t)
+                    :help-echo "Drag Terminal. Alt+arrows moves it from the keyboard."
+                    "TERMINAL / 04    ::")
+               (box :padding ((lh 1) (ch 2))
+                    (box :color "#A7E8BB" "$ build something good")
+                    (box :padding-top (lh 1) :color "#608C7F" "  session: creative / local\n  workspace: parallax")
+                    (box :padding-top (lh 1) "  + ideas connected\n  + room for experiments\n  + all five windows ready")
+                    (box :padding-top (lh 1) :color "#A7E8BB" "  READY  /  follow your curiosity")))
+
+          (box :id "desk-palette" :position absolute :left ,(desktop-demo-window-left palette)
+               :top ,(desktop-demo-window-top palette) :width (min (ch 29) (% 36))
+               :height (lh 9) :z-index 5 :overflow hidden
+               :background-color "#39283D" :color "#EBCBDE" :pointer arrow
+               :help-echo "Palette starts in front. Click a window underneath to change the stack."
+               :keymap ,(desktop-demo-keymap demo "desk-palette")
+               (box :id "desk-palette-title" :height (lh 1) :padding-inline (ch 1)
+                    :background-color "#F3A8C9" :color "#402438" :font-weight bold
+                    :pointer hand :keymap ,(desktop-demo-keymap demo "desk-palette" t)
+                    :help-echo "Drag Palette. Alt+arrows moves it from the keyboard."
+                    "PALETTE / 05    ::")
+               (box :padding ((lh 1) (ch 1))
+                    (box :font-weight bold "Objects in conversation.")
+                    (box :padding-top (lh 1) :color "#AF8DA9" "FIVE TONES / ONE ATMOSPHERE")
+                    (flex :height (lh 2) :padding-top (lh 1) :gap ((lh 0) (ch 1))
+                         (box :width (ch 4) :height (lh 1) :background-color "#BBA9FF")
+                         (box :width (ch 4) :height (lh 1) :background-color "#F6C879")
+                         (box :width (ch 4) :height (lh 1) :background-color "#8DE1E4")
+                         (box :width (ch 4) :height (lh 1) :background-color "#A7E8BB")
+                         (box :width (ch 4) :height (lh 1) :background-color "#F3A8C9"))
+                    (box :padding-top (lh 1) :color "#F3A8C9" "MIDNIGHT / SOFT ELECTRIC"))))
+
+     (flex :height (lh 2) :gap ((lh 0) (ch 1)) :padding-top (lh 1)
+          ,@(cl-loop for pane in panes for index from 1
+                     for short in '("ST" "NT" "SG" "TM" "PL")
+                     for active = (equal (desktop-demo-window-id pane) (desktop-demo-active demo))
+                     collect
+                     `(box :id ,(concat (desktop-demo-window-id pane) "-dock")
+                           :padding-inline (ch 1)
+                           :background-color ,(if active (desktop-demo-window-accent pane) "#25324B")
+                           :color ,(if active (desktop-demo-window-ink pane) "#C1CBE0")
+                           :font-weight bold :pointer hand
+                           :help-echo ,(format "Bring %s to front, even when covered. Alt+arrows moves it."
+                                               (desktop-demo-window-label pane))
+                           :keymap ,(desktop-demo-keymap demo (desktop-demo-window-id pane))
+                           ,(format "%02d %s" index short))))
+     (box :id "desktop-status" :height (lh 1) :color "#8F9FBD"
+          ,(desktop-demo-status demo))))

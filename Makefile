@@ -7,7 +7,7 @@ EBOX_NATIVE_RELEASE_DIR = $(shell $(EMACS) -Q --batch $(LOAD_PATH) \
 	-l ../ebox/ebox-native-reflow.el \
 	--eval '(princ (expand-file-name (format "../ebox/native/target/%s/release/" (ebox-native-reflow--rust-target))))')
 
-.PHONY: all compile test size-tests interaction-tests layer-tests check checkdoc load performance performance-prepare \
+.PHONY: all compile test size-tests interaction-tests layer-tests desktop-tests check checkdoc load performance performance-prepare \
 	performance-evaluator clean
 
 all: check
@@ -26,7 +26,14 @@ test: compile
 		--eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
 		-l tests/ebox-playground-tests.el -l tests/ebox-playground-size-tests.el \
 		-l tests/ebox-playground-interaction-tests.el -l tests/ebox-playground-layer-tests.el \
+		-l tests/ebox-playground-desktop-tests.el \
 		-f ert-run-tests-batch-and-exit
+
+desktop-tests: compile
+	$(EMACS) -Q --batch $(LOAD_PATH) \
+		--eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
+		-l tests/ebox-playground-desktop-tests.el \
+		--eval '(ert-run-tests-batch-and-exit "^ebox-playground-desktop-")'
 
 layer-tests: compile
 	$(MAKE) -C ../ebox layer-tests EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
