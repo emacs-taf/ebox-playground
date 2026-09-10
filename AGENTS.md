@@ -24,10 +24,12 @@ For native help, pointer, hover-style, or keymap demonstration work, maintain `e
 
 For layer, overlap, positioning, or anchored-menu demonstrations, maintain `examples/layer-reference.ebox` and its same-basename companion, preserve `examples/layer-minimal.ebox` as the minimal fixture, and run `make layer-tests`. Extend `tests/ebox-playground-layer-tests.el` for actual native commands and committed-snapshot render parity instead of creating another demo runner or probe. Keep layout in the DSL, business state/actions in the companion, and one font size throughout positioned content. Use the shared interaction evaluator above for repeated layer-command timing. Each parent creates its local stacking group automatically; use `:layer root` on a nested absolute node when root projection is required, with semantic `:anchor` and `:placement` declarations for anchored menus.
 
-For direct-manipulation desktop windows, click-to-front, and title-bar dragging,
+For direct-manipulation desktop windows, click-to-front, title-bar dragging,
+complete light/dark palettes, and desktop-only mouse selection policy,
 maintain `examples/desktop-reference.ebox` with its companion and run
 `make desktop-tests`. Reuse `tests/ebox-playground-desktop-tests.el` for native
-press/motion/release streams, intermediate publication and fresh-render parity.
+press/motion/release streams, gap/end-of-buffer selection fallbacks, palette
+round trips, intermediate publication and fresh-render parity.
 Use the shared interaction evaluator with the desktop's `"01 ST"` dock label
 and `"M-<right>"` for repeated position publication timing. Keep native gesture
 state in the companion, use public Ebox updates, and preserve the existing layer

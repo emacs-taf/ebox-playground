@@ -53,6 +53,13 @@ text and layered artwork. All text uses the configured font size.
 - The five dock entries raise windows even when they are completely covered.
   **CYCLE** brings the backmost window forward; **RESET** restores all initial
   positions and the original stack, including panes clipped off the desktop.
+- **LIGHT/DARK** switches the complete palette: workspace, all five card bodies,
+  text, title bars, dock, artwork, swatches and hover colors. Light mode uses
+  pastel cards with dark ink. Window positions and stacking survive a toggle;
+  **RESET** keeps the chosen theme.
+- Mouse clicks and drags do not select text, including between dock buttons and
+  at line/buffer ends. This policy belongs only to the Desktop preview; ordinary
+  buffers and other examples keep their normal mouse behavior.
 - `RET`/`SPC` activates the control at point. `Alt+arrows` on a title or dock
   entry moves its pane; point follows the same native control for key repeat.
   `C-g` stops a drag and keeps the last accepted position.

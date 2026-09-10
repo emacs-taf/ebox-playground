@@ -65,6 +65,7 @@
     (list (copy-sequence (desktop-demo-order demo))
           (desktop-demo-active demo) (desktop-demo-serial demo)
           (desktop-demo-dragging demo)
+          (desktop-demo-theme demo)
           (mapcar (lambda (window)
                     (list (desktop-demo-window-id window)
                           (desktop-demo-window-x window)
@@ -133,6 +134,175 @@ TYPE defaults to `down-mouse-1'; repeated presses use their native event type."
       (ebox-playground-layer-test--click (car entry))
       (should (equal (desktop-demo-active ebox-playground-desktop-test--demo)
                      (cdr entry))))))
+
+(ert-deftest ebox-playground-desktop-gaps-and-endpoints-do-not-select-text ()
+  "Desktop gaps, newlines and buffer end consume native selection commands."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (should desktop-demo-input-mode)
+    (let* ((dock (ebox-playground-layer-test--position "01 ST"))
+           (gap (next-single-property-change dock 'keymap nil (point-max)))
+           (newline (save-excursion (goto-char dock) (line-end-position)))
+           (transient-mark-mode t))
+      (save-window-excursion
+        (set-window-buffer (selected-window) buffer)
+        (dolist (position (list (point-min) gap newline (point-max)))
+          (dolist (type '(down-mouse-1 mouse-1 drag-mouse-1 S-mouse-1
+                         M-down-mouse-1 M-mouse-1 M-drag-mouse-1))
+            (goto-char position)
+            (set-mark (if (= position (point-min)) (point-max) (point-min)))
+            (setq mark-active t)
+            (let* ((event (ebox-playground-desktop-test--event
+                           type (selected-window) position '(0 . 0)))
+                   (command (key-binding (vector type)))
+                   (last-input-event event))
+              (should (eq command #'desktop-demo--dismiss-mouse-selection))
+              (call-interactively command)
+              (should-not mark-active))))))))
+
+(ert-deftest ebox-playground-desktop-fast-dock-clicks-remain-controls ()
+  "Single, double and triple dock click sequences never activate a region."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (let ((transient-mark-mode t))
+      (save-window-excursion
+        (set-window-buffer (selected-window) buffer)
+        (dolist (label '("01 ST" "02 NT" "03 SG" "04 TM" "05 PL"))
+          (dolist (type '(down-mouse-1 mouse-1 double-down-mouse-1 double-mouse-1
+                         triple-down-mouse-1 triple-mouse-1 drag-mouse-1
+                         double-drag-mouse-1 triple-drag-mouse-1))
+            (let* ((position (ebox-playground-layer-test--position label))
+                   (event (ebox-playground-desktop-test--event
+                           type (selected-window) position '(0 . 0)))
+                   (last-input-event event))
+              (goto-char position)
+              (set-mark (point-min))
+              (setq mark-active t)
+              (run-hooks 'pre-command-hook)
+              (let ((command (key-binding (vector type))))
+                (should (commandp command))
+                (should-not (memq command '(mouse-drag-region mouse-set-region mouse-set-point)))
+                (call-interactively command))
+              (should-not mark-active))))))
+    (ebox-playground-layer-test--parity)))
+
+(ert-deftest ebox-playground-desktop-mouse-policy-is-local-and-released ()
+  "Other buffers and replacement previews retain ordinary Emacs selection."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (with-temp-buffer
+      (should-not desktop-demo-input-mode)
+      (should (eq (key-binding [down-mouse-1]) 'mouse-drag-region)))
+    (ebox-playground-open-file ebox-playground-layer-test--file (buffer-name buffer))
+    (should-not desktop-demo-input-mode)
+    (should-not (memq #'desktop-demo--clear-mouse-mark pre-command-hook))
+    (ebox-playground-open-file ebox-playground-desktop-test--file (buffer-name buffer))
+    (should desktop-demo-input-mode)
+    (ebox-unmount-buffer buffer)
+    (should-not desktop-demo-input-mode)))
+
+(ert-deftest ebox-playground-desktop-theme-adapts-all-card-and-chrome-styles ()
+  "A theme toggle changes every semantic paint role without moving windows."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (let* ((demo ebox-playground-desktop-test--demo)
+           (before (ebox-playground-desktop-test--state))
+           (revision (ebox-playground-desktop-test--revision)))
+      (ebox-playground-layer-test--activate "LIGHT")
+      (should (eq (desktop-demo-theme demo) 'light))
+      (should (= (ebox-playground-desktop-test--revision) (1+ revision)))
+      (dolist (entry (desktop-demo-styles demo))
+        (let ((matches (ebox-selector-query-buffer
+                        buffer (concat "." (symbol-name (car entry))))))
+          (should matches)
+          (unless (eq (car entry) 'desktop-chrome)
+            (dolist (match matches)
+              (let ((node (plist-get match :node)) (style (nth 2 entry)))
+                (while style
+                  (let ((property (pop style)) (expected (pop style)))
+                    (unless (eq property :hover-style)
+                      (should (equal (ebox-get node (if (eq property :background-color)
+                                                       :bgcolor property))
+                                     expected))))))))))
+      (should (string-match-p "DARK" (buffer-string)))
+      (should (member "#B9C9DE"
+                      (flatten-tree (get-text-property
+                                     (ebox-playground-layer-test--position "DARK") 'mouse-face))))
+      (ebox-playground-layer-test--activate "DARK")
+      (should (equal before (ebox-playground-desktop-test--state)))
+      (should (eq (desktop-demo-theme demo) 'dark)))))
+
+(ert-deftest ebox-playground-desktop-light-theme-keeps-focus-move-and-reset ()
+  "Light cards and active chrome stay light after normal window operations."
+  (ebox-playground-desktop-test--with-preview (buffer 40 20)
+    (ebox-playground-layer-test--activate "LIGHT")
+    (ebox-playground-layer-test--activate "01 ST")
+    (let* ((demo ebox-playground-desktop-test--demo)
+           (position (ebox-playground-layer-test--position "01 ST"))
+           (face (flatten-tree (get-text-property position 'face))))
+      (should (member "#6D4AA2" face))
+      (should (member "#FFFFFF" face))
+      (ebox-playground-layer-test--activate "01 ST" (kbd "M-<right>"))
+      (ebox-playground-layer-test--activate "RESET")
+      (should (eq (desktop-demo-theme demo) 'light))
+      (should (equal (desktop-demo-active demo) "desk-palette"))
+      (should (member "#875270" (flatten-tree
+                                 (get-text-property
+                                  (ebox-playground-layer-test--position "05 PL") 'face))))
+      (dolist (label '("01 ST" "02 NT" "03 SG" "04 TM" "05 PL" "DARK"))
+        (should (ebox-playground-layer-test--position label))))))
+
+(ert-deftest ebox-playground-desktop-failed-theme-keeps-palette-and-state ()
+  "Rejected theme publication rolls back the complete palette and state."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (dolist (failure-step '(text client-state))
+      (let ((before (buffer-string))
+            (state (ebox-playground-desktop-test--state))
+            (tp--surface-publication-step-function
+             (lambda (step _surface)
+               (when (eq step failure-step) (error "Reject theme")))))
+        (should-error (ebox-playground-layer-test--activate "LIGHT"))
+        (should (equal state (ebox-playground-desktop-test--state)))
+        (should (equal-including-properties before (buffer-string)))))
+    (ebox-playground-layer-test--activate "LIGHT")))
+
+(ert-deftest ebox-playground-desktop-light-palette-has-pale-cards-and-dark-ink ()
+  "Every light card is pale and its body/caption text has useful contrast."
+  (ebox-playground-desktop-test--with-preview (buffer)
+    (let ((styles (desktop-demo-styles ebox-playground-desktop-test--demo)))
+      (cl-labels
+          ((light (role) (nth 2 (assq role styles)))
+           (luminance (hex)
+             (cl-loop for start in '(1 3 5) for weight in '(0.2126 0.7152 0.0722)
+                      for value = (/ (string-to-number (substring hex start (+ start 2)) 16) 255.0)
+                      sum (* weight (if (<= value 0.04045) (/ value 12.92)
+                                      (expt (/ (+ value 0.055) 1.055) 2.4)))))
+           (contrast (fg bg)
+             (let ((a (luminance fg)) (b (luminance bg)))
+               (/ (+ (max a b) 0.05) (+ (min a b) 0.05)))))
+        (dolist (role '(desktop-root desktop-workspace desktop-studio desktop-notes
+                       desktop-signal desktop-terminal desktop-palette))
+          (let ((style (light role)))
+            (should (> (luminance (plist-get style :background-color)) 0.7))
+            (when (plist-get style :color)
+              (should (> (contrast (plist-get style :color)
+                                   (plist-get style :background-color)) 4.5)))))
+        (dolist (pair '((desktop-studio-muted . desktop-studio)
+                        (desktop-notes-caption . desktop-notes)
+                        (desktop-signal-caption . desktop-signal)
+                        (desktop-terminal-muted . desktop-terminal)
+                        (desktop-palette-caption . desktop-palette)))
+          (should (> (contrast (plist-get (light (car pair)) :color)
+                               (plist-get (light (cdr pair)) :background-color)) 4.5)))))))
+
+(ert-deftest ebox-playground-desktop-previews-have-independent-themes ()
+  "Changing one desktop palette cannot recolor a second preview."
+  (ebox-playground-desktop-test--with-preview (first)
+    (let ((first-demo ebox-playground-desktop-test--demo))
+      (ebox-playground-desktop-test--with-preview (second)
+        (let ((before (buffer-string)))
+          (with-current-buffer first
+            (desktop-demo-toggle-theme first-demo)
+            (ebox-playground-layer-test--parity))
+          (should (equal-including-properties before (buffer-string)))
+          (should (eq (desktop-demo-theme ebox-playground-desktop-test--demo) 'dark))
+          (should (eq (desktop-demo-theme first-demo) 'light)))))))
 
 (ert-deftest ebox-playground-desktop-repeated-keyboard-nudges-retain-dock-binding ()
   "Repeated arrow commands keep their native dock binding without repositioning."

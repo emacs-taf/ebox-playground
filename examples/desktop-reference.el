@@ -9,14 +9,72 @@
 
 (require 'cl-lib)
 (require 'ebox)
+(require 'ebox-selector)
+
+(defun desktop-demo--dismiss-mouse-selection ()
+  "Consume a native text-selection command in a desktop preview."
+  (interactive)
+  (deactivate-mark))
+
+(defvar desktop-demo-input-mode-map
+  (let ((map (make-sparse-keymap)))
+    (dolist (command '(mouse-drag-region mouse-set-region mouse-set-point
+                      mouse-save-then-kill mouse-drag-secondary
+                      mouse-start-secondary mouse-set-secondary
+                      mouse-secondary-save-then-kill))
+      (define-key map (vector 'remap command) #'desktop-demo--dismiss-mouse-selection))
+    map)
+  "Desktop-local fallbacks for mouse events outside individual controls.")
+
+(defun desktop-demo--clear-mouse-mark ()
+  "Clear a preceding text selection when a desktop mouse command starts."
+  (when (mouse-event-p last-input-event)
+    (deactivate-mark)))
+
+(define-minor-mode desktop-demo-input-mode
+  "Keep desktop gestures from entering native text selection.
+Control text keymaps retain their own activation and title-drag commands."
+  :lighter nil :keymap desktop-demo-input-mode-map
+  (if desktop-demo-input-mode
+      (progn
+        (deactivate-mark)
+        (add-hook 'pre-command-hook #'desktop-demo--clear-mouse-mark nil t))
+    (remove-hook 'pre-command-hook #'desktop-demo--clear-mouse-mark t)))
+
+(defun desktop-demo--sync-input-mode ()
+  "Apply the desktop mouse policy only to a successfully mounted desktop."
+  (desktop-demo-input-mode
+   (if (and ebox-buffer-mode
+            (condition-case nil
+                (ebox-region-resolve (current-buffer) "desktop-root")
+              (user-error nil)))
+       1 -1)))
+
+(add-hook 'ebox-buffer-mode-hook #'desktop-demo--sync-input-mode)
 
 (cl-defstruct (desktop-demo-window (:constructor desktop-demo-window-create))
   "A desktop pane's identity, palette, initial offsets and pixel displacement."
-  id label accent ink left top (x 0) (y 0))
+  id label accent ink light-accent light-ink left top (x 0) (y 0))
 
 (cl-defstruct (desktop-demo (:constructor desktop-demo-create))
   "Independent state captured by the native commands of one desktop preview."
-  windows order active (serial 5) dragging)
+  windows order active styles (theme 'dark) (serial 5) dragging)
+
+(defun desktop-demo-style (demo role)
+  "Return DEMO's current theme declarations for the semantic style ROLE."
+  (let ((entry (assq role (desktop-demo-styles demo))))
+    (unless entry (error "Unknown desktop style: %s" role))
+    (nth (if (eq (desktop-demo-theme demo) 'light) 2 1) entry)))
+
+(defun desktop-demo-chrome-style (demo pane active)
+  "Return DEMO's themed title/dock declarations for PANE and ACTIVE state."
+  (if active
+      (if (eq (desktop-demo-theme demo) 'light)
+          (list :background-color (desktop-demo-window-light-accent pane)
+                :color (desktop-demo-window-light-ink pane))
+        (list :background-color (desktop-demo-window-accent pane)
+              :color (desktop-demo-window-ink pane)))
+    (desktop-demo-style demo 'desktop-chrome)))
 
 (defun desktop-demo--window (demo id)
   "Return DEMO's pane with semantic ID."
@@ -31,13 +89,11 @@
             (desktop-demo-window-label pane)
             (desktop-demo-window-x pane) (desktop-demo-window-y pane))))
 
-(defun desktop-demo--chrome (pane active)
-  "Return title and dock updates for PANE, highlighted when ACTIVE."
-  (let ((background (if active (desktop-demo-window-accent pane) "#25324B"))
-        (foreground (if active (desktop-demo-window-ink pane) "#C1CBE0")))
+(defun desktop-demo--chrome (demo pane active)
+  "Return DEMO's themed title and dock updates for PANE and ACTIVE state."
+  (let ((style (desktop-demo-chrome-style demo pane active)))
     (mapcar (lambda (suffix)
-              (list (concat (desktop-demo-window-id pane) suffix)
-                    :background-color background :color foreground))
+              (cons (concat (desktop-demo-window-id pane) suffix) style))
             '("-title" "-dock"))))
 
 (defun desktop-demo--keyboard-anchor ()
@@ -75,6 +131,7 @@ Failed Ebox publication leaves the business state on its accepted generation."
     (setf (desktop-demo-windows demo) (desktop-demo-windows candidate)
           (desktop-demo-order demo) (desktop-demo-order candidate)
           (desktop-demo-active demo) (desktop-demo-active candidate)
+          (desktop-demo-theme demo) (desktop-demo-theme candidate)
           (desktop-demo-serial demo) (desktop-demo-serial candidate)
           (desktop-demo-dragging demo) (desktop-demo-dragging candidate))
     (desktop-demo--restore-keyboard-anchor anchor)))
@@ -92,8 +149,8 @@ Failed Ebox publication leaves the business state on its accepted generation."
          demo candidate
          (append (list (list id :z-index (desktop-demo-serial candidate)))
                  (desktop-demo--chrome
-                  (desktop-demo--window demo (desktop-demo-active demo)) nil)
-                 (desktop-demo--chrome pane t)))))
+                  demo (desktop-demo--window demo (desktop-demo-active demo)) nil)
+                 (desktop-demo--chrome demo pane t)))))
     (when dragging (setf (desktop-demo-dragging demo) id))))
 
 (defun desktop-demo-move (demo id x y &optional row-height)
@@ -223,10 +280,28 @@ or failure releases gesture state and keeps the last accepted geometry."
                          :top (desktop-demo-window-top pane) :z-index depth) updates)
              (setq updates
                    (append updates (desktop-demo--chrome
-                                    pane (equal active (desktop-demo-window-id pane))))))
+                                    demo pane (equal active (desktop-demo-window-id pane))))))
     (setf (desktop-demo-windows candidate) panes (desktop-demo-order candidate) ids
           (desktop-demo-active candidate) active (desktop-demo-serial candidate) (length ids))
     (desktop-demo--publish demo candidate updates)))
+
+(defun desktop-demo-toggle-theme (demo)
+  "Switch DEMO's complete palette without changing window geometry or order."
+  (let ((candidate (copy-desktop-demo demo)) updates)
+    (setf (desktop-demo-theme candidate)
+          (if (eq (desktop-demo-theme demo) 'dark) 'light 'dark))
+    (dolist (entry (desktop-demo-styles demo))
+      (dolist (match (ebox-selector-query-buffer
+                      (current-buffer) (concat "." (symbol-name (car entry)))))
+        (when-let* ((handle (plist-get match :region-handle)))
+          (push (cons handle (desktop-demo-style candidate (car entry))) updates))))
+    (desktop-demo--publish
+     demo candidate
+     (append (nreverse updates)
+             (desktop-demo--chrome
+              candidate (desktop-demo--window demo (desktop-demo-active demo)) t)
+             (list (list "desktop-theme" :content
+                         (if (eq (desktop-demo-theme candidate) 'light) "DARK" "LIGHT")))))))
 
 (defun desktop-demo-control (demo action)
   "Create a native toolbar command for DEMO's ACTION."
@@ -236,6 +311,7 @@ or failure releases gesture state and keeps the last accepted geometry."
      (pcase action
        ('reset (desktop-demo-reset demo))
        ('next (desktop-demo-activate demo (car (desktop-demo-order demo))))
+       ('theme (desktop-demo-toggle-theme demo))
        (_ (error "Unknown desktop action: %s" action))))))
 
 (provide 'desktop-demo-reference)

@@ -94,6 +94,12 @@
   cyan Signal, amber Notes, mint Terminal and rose Palette accents. One configured
   font size throughout. Use contrasting title bars and compact pane content,
   rather than fake close controls, images or additional font packages.
+- Light theme: a warm pale shell, blue-gray workspace, and five pastel card
+  bodies with dark ink. Retune every caption, active/inactive title, dock entry,
+  waveform, artwork and swatch; changing only the workspace background is not
+  an acceptable light theme. Keep text contrast strong and decorative dots quiet.
+  Palette declarations stay in the DSL; semantic classes connect them to the
+  companion's public selector/region updates, without a global stylesheet.
 - Structure: compact identity/utility bar, clipped desktop with five independent
   sibling windows, then persistent dock and status. Keep the workspace dominant;
   each pane contains a distinct editorial/code/task/signal composition.
@@ -101,8 +107,15 @@
   during native mouse tracking, apply the final release position, and retain the
   last accepted position after interruption. No inertial or decorative animation.
   The current Ebox layer contract uses pixel X and host-text-row Y coordinates.
+- Mouse selection: gaps, background rows, line endings and buffer end are desktop
+  surfaces too. A desktop-only minor mode remaps native selection fallbacks;
+  control keymaps keep their click/drag behavior. Remove the policy on unmount
+  or replacement by another example. Do not change global mouse bindings.
 - Keyboard: RET/SPC activates a pane or dock entry; title-bar Alt+arrows move it.
   Reset restores the original arrangement. No changes to global Emacs bindings.
+- LIGHT/DARK toggles the complete palette in one publication and keeps geometry,
+  stacking and active window. Reset keeps the chosen theme; fresh previews start
+  dark and keep independent theme state.
 - Responsive behavior: use viewport-relative positions and bounded pane widths;
   overflow is clipped at the desktop boundary. Dock entries remain available for
   covered panes. Target at least 40 columns and 20 text rows; smaller workspaces
