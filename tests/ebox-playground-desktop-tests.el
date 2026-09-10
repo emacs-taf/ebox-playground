@@ -216,7 +216,12 @@ TYPE defaults to `down-mouse-1'; repeated presses use their native event type."
               (let ((node (plist-get match :node)) (style (nth 2 entry)))
                 (while style
                   (let ((property (pop style)) (expected (pop style)))
-                    (unless (eq property :hover-style)
+                    (when (eq property :border)
+                      (dolist (edge '(top right bottom left))
+                        (should (equal (ebox-get node (intern (format ":border-%s-color" edge)))
+                                       expected))
+                        (should (> (ebox-get node (intern (format ":border-%s-pixel" edge))) 0))))
+                    (unless (memq property '(:hover-style :border))
                       (should (equal (ebox-get node (if (eq property :background-color)
                                                        :bgcolor property))
                                      expected))))))))))
