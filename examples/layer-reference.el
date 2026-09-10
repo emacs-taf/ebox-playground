@@ -59,75 +59,86 @@
   (ebox-keymap-create
    :activate
    (lambda ()
-     (pcase action
-       ('explode
-        (setf (layer-demo-exploded demo) (not (layer-demo-exploded demo)))
-        (let ((expanded (layer-demo-exploded demo)))
-          (ebox-region-update "orbit-violet"
-                              :left (if expanded '(ch 2) '(ch 4))
-                              :top (if expanded '(lh 1) '(lh 3)))
-          (ebox-region-update "orbit-signal"
-                              :left (if expanded '(ch 26) '(ch 20))
-                              :top (if expanded '(lh 11) '(lh 7)))
-          (ebox-region-update "orbit-lime"
-                              :left (if expanded '(ch 52) '(ch 46))
-                              :top (if expanded '(lh 0) '(lh 2)))))
-       ('focus
-        (setf (layer-demo-focus demo) (% (1+ (layer-demo-focus demo)) 3))
-        (cl-loop for id in '("orbit-violet" "orbit-lime" "orbit-signal")
-                 for index from 0
-                 do (ebox-region-update id :z-index
-                                        (if (= index (layer-demo-focus demo))
-                                            6 (+ index 2)))))
-       ('mood
-        (setf (layer-demo-warm demo) (not (layer-demo-warm demo)))
-        (cl-loop for id in '("orbit-violet" "orbit-signal" "orbit-lime")
-                 for color in (if (layer-demo-warm demo)
-                                  '("#FFADCF" "#FFD49B" "#B8F1CD")
-                                '("#A99BFF" "#B9E9F2" "#D7FA73"))
-                 do (ebox-region-update id :background-color color)))
-       ('toggle
-        (setf (layer-demo-visible demo) (not (layer-demo-visible demo)))
-        (ebox-region-update "panel-a" :visibility
-                            (if (layer-demo-visible demo) 'visible 'hidden)))
-       ('move
-        (setf (layer-demo-moved demo) (not (layer-demo-moved demo)))
-        (ebox-region-update "panel-a"
-                            :left (if (layer-demo-moved demo) '(ch 10) '(ch 4))
-                            :top (if (layer-demo-moved demo) '(lh 0) '(lh 2))))
-       ('raise
-        (setf (layer-demo-raised demo) (not (layer-demo-raised demo)))
-        (ebox-region-update "panel-a" :z-index
-                            (if (layer-demo-raised demo) 4 2)))
-       ('update-lower
-        (cl-incf (layer-demo-revision demo))
-        (ebox-region-update "lower-note" :content (layer-demo-lower-content demo)))
-       ('lower
-        (cl-incf (layer-demo-lower-clicks demo))
-        (ebox-region-update "lower-note" :content (layer-demo-lower-content demo)))
-       ('menu
-        (setf (layer-demo-menu-visible demo) (not (layer-demo-menu-visible demo)))
-        (ebox-region-update "root-menu" :visibility
-                            (if (layer-demo-menu-visible demo) 'visible 'hidden)))
-       ('placement
-        (setf (layer-demo-placement demo) (% (1+ (layer-demo-placement demo)) 4))
-        (ebox-region-update "root-menu" :placement
-                            (aref layer-demo-placements (layer-demo-placement demo))))
-       ('anchor
-        (setf (layer-demo-anchor-moved demo) (not (layer-demo-anchor-moved demo)))
-        (ebox-region-update "menu-trigger" :left
-                            (if (layer-demo-anchor-moved demo) '(ch 12) '(ch 4))))
-       ((or 'sage 'amber)
-        (setf (layer-demo-selection demo) (symbol-name action)
-              (layer-demo-menu-visible demo) nil)
-        (ebox-region-update "menu-result" :content
-                            (format "Selected %s from the anchored menu." action)
-                            :color (if (eq action 'sage) "#286347" "#895314"))
-        (ebox-region-update "root-menu" :visibility 'hidden))
-       (_ (error "Unknown layer-lab action: %S" action)))
-     (if (memq action '(explode focus mood))
-         (ebox-region-update "orbit-state" :content (layer-demo-orbit-status demo))
-       (ebox-region-update "layer-status" :content (layer-demo-status demo))))))
+     (ebox-call-with-update-batch
+      (lambda ()
+        (pcase action
+          ('explode
+           (setf (layer-demo-exploded demo) (not (layer-demo-exploded demo)))
+           (let ((expanded (layer-demo-exploded demo)))
+             (ebox-region-update "orbit-violet"
+                                 :left (if expanded '(ch 2) '(ch 4))
+                                 :top (if expanded '(lh 1) '(lh 3)))
+             (ebox-region-update "orbit-signal"
+                                 :left (if expanded '(ch 26) '(ch 20))
+                                 :top (if expanded '(lh 11) '(lh 7)))
+             (ebox-region-update "orbit-lime"
+                                 :left (if expanded '(ch 52) '(ch 46))
+                                 :top (if expanded '(lh 0) '(lh 2)))))
+          ('focus
+           (setf (layer-demo-focus demo) (% (1+ (layer-demo-focus demo)) 3))
+           (cl-loop for id in '("orbit-violet" "orbit-lime" "orbit-signal")
+                    for index from 0
+                    do (ebox-region-update id :z-index
+                                           (if (= index (layer-demo-focus demo))
+                                               6 (+ index 2)))))
+          ('mood
+           (setf (layer-demo-warm demo) (not (layer-demo-warm demo)))
+           (cl-loop for id in '("orbit-violet" "orbit-signal" "orbit-lime")
+                    for color in (if (layer-demo-warm demo)
+                                     '("#FFADCF" "#FFD49B" "#B8F1CD")
+                                   '("#A99BFF" "#B9E9F2" "#D7FA73"))
+                    do (ebox-region-update id :background-color color)))
+          ('toggle
+           (setf (layer-demo-visible demo) (not (layer-demo-visible demo)))
+           (ebox-region-update "panel-a" :visibility
+                               (if (layer-demo-visible demo) 'visible 'hidden)))
+          ('move
+           (setf (layer-demo-moved demo) (not (layer-demo-moved demo)))
+           (ebox-region-update "panel-a"
+                               :left (if (layer-demo-moved demo) '(ch 10) '(ch 4))
+                               :top (if (layer-demo-moved demo) '(lh 0) '(lh 2))))
+          ('raise
+           (setf (layer-demo-raised demo) (not (layer-demo-raised demo)))
+           (ebox-region-update "panel-a" :z-index
+                               (if (layer-demo-raised demo) 4 2)))
+          ('update-lower
+           (cl-incf (layer-demo-revision demo))
+           (ebox-region-update "lower-note" :content
+                               (layer-demo-lower-content demo)))
+          ('lower
+           (cl-incf (layer-demo-lower-clicks demo))
+           (ebox-region-update "lower-note" :content
+                               (layer-demo-lower-content demo)))
+          ('menu
+           (setf (layer-demo-menu-visible demo)
+                 (not (layer-demo-menu-visible demo)))
+           (ebox-region-update "root-menu" :visibility
+                               (if (layer-demo-menu-visible demo)
+                                   'visible 'hidden)))
+          ('placement
+           (setf (layer-demo-placement demo) (% (1+ (layer-demo-placement demo)) 4))
+           (ebox-region-update "root-menu" :placement
+                               (aref layer-demo-placements
+                                     (layer-demo-placement demo))))
+          ('anchor
+           (setf (layer-demo-anchor-moved demo)
+                 (not (layer-demo-anchor-moved demo)))
+           (ebox-region-update "menu-trigger" :left
+                               (if (layer-demo-anchor-moved demo)
+                                   '(ch 12) '(ch 4))))
+          ((or 'sage 'amber)
+           (setf (layer-demo-selection demo) (symbol-name action)
+                 (layer-demo-menu-visible demo) nil)
+           (ebox-region-update "menu-result" :content
+                               (format "Selected %s from the anchored menu." action)
+                               :color (if (eq action 'sage) "#286347" "#895314"))
+           (ebox-region-update "root-menu" :visibility 'hidden))
+          (_ (error "Unknown layer-lab action: %S" action)))
+        (if (memq action '(explode focus mood))
+            (ebox-region-update "orbit-state" :content
+                                (layer-demo-orbit-status demo))
+          (ebox-region-update "layer-status" :content
+                              (layer-demo-status demo))))))))
 
 (provide 'layer-demo-reference)
 

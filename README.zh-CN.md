@@ -24,6 +24,64 @@ ECSS 0.1.0 与 TP 1.0.1 是互相独立的包，安装顺序任意；两者都�
 运行 `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，可检查核心尺寸契约、
 示例的实际属性覆盖、已知计算结果、背景所指示的尺寸差异、完整渲染及保留状态的视口更新。`make check` 也包含此示例的回归测试。
 
+## 滚动性能验证
+
+使用共享 `scripts/ebox-playground-flex-resize-evaluator.el` 的入口：
+
+```sh
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+  --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
+  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  --eval '(ebox-playground-scroll-evaluator-run "examples/flex-reference.ebox" 104 6 36)'
+```
+
+参数依次为文件路径或路径列表、视口像素宽度、采样次数、视口行高及可选 options
+plist。默认完全缓存根滚动内容，再测量顶部和中间位置的往返单行滚动。传入
+`(:region-id "log")` 可选择声明了 `:id "log"` 的嵌套滚动框；`(:cold t)` 则从
+初始渲染开始连续向前滚动，不预热、不主动物化全部内容，也不跳到中间位置。
+两者可以组合，所选区域必须有足够的滚动空间完成采样。
+
+初始渲染可能已包含前瞻缓存行；要测量缓存未命中，采样次数应超过该前缀，并检查
+`:prefix-renders`（实际前缀渲染）和 `:materializations`（完整内容生产）计数。
+已完成缓存的空操作不计入完整物化次数。
+
+结果报告 mean/p95/max 毫秒、采样循环的 GC 次数／耗时、完整根渲染、样式计算及缓存生产次数，并与独立渲染已提交输入、
+恢复其滚动位置后的结果比较。比较保留 callback 和 keymap 身份，不重新加载业务
+状态；移动未完成或绘制不一致都会失败。测试使用临时 buffer，并清理挂载、advice
+和定时器，不改变现有预览。测量包含 Ebox/TP 发布，不包含 GUI 输入传递、原生窗口
+滚动或 Emacs redisplay。此入口取代临时的逐示例滚动探针。
+
+## 图层与原生菜单示例
+
+打开 `examples/layer-reference.ebox` 并按 `C-c C-c`，可查看 ORBIT 空间桌面、
+保留内容的重叠面板及锚定菜单；`examples/layer-minimal.ebox` 保留最小重叠示例。
+工具栏每个按钮支持点击、`RET` 和 `SPC`。悬停绘制仅覆盖按钮及其自身 padding，
+按钮间隙和行内剩余空间保持不变；被覆盖笔记、根菜单选项等有意设置为块级交互的
+区域仍保留自己的悬停绘制。
+
+`layer-reference.ebox` 保存布局，`layer-reference.el` 保存业务状态与操作。每个
+操作通过公共 `ebox-call-with-update-batch` 将 region 变化与状态栏更新合并。
+helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次待处理变化。
+回滚覆盖排队的 Ebox 更新，不撤销 companion 中任意业务状态变化，详见
+[批量更新契约](../ebox/docs/user/ebox-api-reference.zh.md#合并-region-更新)。
+
+运行 `make layer-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，
+验证图层契约、实际原生命令及已提交快照的独立渲染一致性，无需打开 GUI 窗口。
+
+使用共享入口测量桌面展开／收起路径：
+
+```sh
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+  --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
+  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
+```
+
+根菜单关闭时，桌面三个工具栏命令只将受影响的叠层宿主和状态文字一起发布，不再
+完整渲染候选树。宿主内部仍会重新合成堆叠组；这是 owner 级增量，还不是像素级
+最小脏矩形。可见根浮层和依赖内容的几何仍保留扩大合成范围的回退。回归测试要求
+每次命令只发布一次，并禁止完整候选渲染；耗时是诊断数据，不作为 CI 时间阈值。
+
 <a id="native-interaction-lab"></a>
 ## 原生交互实验室
 
@@ -94,6 +152,7 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 纯文本，以及与独立渲染已提交快照的结果是否一致。计算计数器 `:layout-calls`、
 `:surface-plans`、`:fragment-scans` 和 `:node-registrations` 分别统计布局渲染、
 surface 规划、fragment 提取（包含局部切片）和节点树注册的调用次数。
+局部补丁也会执行规划；`:full-surface-renders` 单独统计完整候选渲染次数。
 `:fragment-characters` 累计传给 fragment 提取的字符数；结合调用次数与字符总量，
 区分局部处理和全 surface 扫描。调用次数不是受影响节点数。快照对比不一致则检查失败。
 

@@ -48,6 +48,9 @@ application state:
 Visit the `.ebox` file and press `C-c C-c` for the source/preview split. Every
 control supports click, `RET`, and `SPC`, with native help and hover paint.
 All text uses one font size.
+Toolbar hover paint belongs to each button, including its own padding; gaps
+and unused row space stay unchanged. Deliberate block interaction areas, such
+as the covered note and root menu choices, retain their own hover paint.
 
 - **EXPLODE STACK** spreads the three cards apart and returns them to their
   original positions without moving the following sections.
@@ -73,7 +76,13 @@ All text uses one font size.
 
 `layer-reference.ebox` contains layout data and state references;
 `layer-reference.el` owns state and business actions. It uses only public
-`ebox-keymap-create`, `ebox-help-create`, and `ebox-region-update` APIs.
+`ebox-keymap-create`, `ebox-help-create`, `ebox-region-update`, and
+`ebox-call-with-update-batch` APIs. Each action groups its region changes into
+one batch, including the status update. The batch helper joins an existing
+batch without flushing and otherwise publishes its pending changes once.
+Its rollback covers queued Ebox updates, not arbitrary changes to the
+companion's business state; see the [batch API
+contract](../ebox/docs/user/ebox-api-reference.en.md#grouping-region-updates).
 Offsets use inline `ch` and block `lh` units. The text renderer composes whole
 rows, and positioned content must share its host's line height.
 
@@ -91,6 +100,23 @@ paint and native capabilities. `make check` includes the Playground tests.
 For repeated command timing, use the existing interaction evaluator with
 `"examples/layer-reference.ebox"` and a toolbar label such as
 `"UPDATE COVERED NOTE"`; see the invocation below.
+
+For the spatial desktop's expand/collapse path, run:
+
+```sh
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+  --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
+  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
+```
+
+With the root menu closed, the three desktop toolbar commands publish the
+affected layer host and status text together, without a full candidate render.
+The layer host still recomposes its stacking group; this is owner-level
+incremental work, not a minimal pixel rectangle. Visible root portals and
+content-dependent geometry keep the broader composition fallback. Regression
+tests require one publication per command and reject full candidate rendering;
+wall-clock timings are diagnostic, not a CI threshold.
 
 <a id="native-interaction-lab"></a>
 ## Native interaction lab
@@ -174,7 +200,8 @@ publication count, final plain text, and parity with an independent render of
 the committed snapshot. Work counters `:layout-calls`, `:surface-plans`,
 `:fragment-scans`, and `:node-registrations` count calls to layout rendering,
 surface planning, fragment extraction (including local slices), and node-tree
-registration. `:fragment-characters` sums the characters passed to fragment
+registration. Planning also runs for local patches; `:full-surface-renders`
+separately counts full candidate renders. `:fragment-characters` sums the characters passed to fragment
 extraction. Read the call counts alongside this character total to distinguish
 local work from full-surface scanning; call counts are not affected-node counts.
 A parity mismatch fails.
@@ -305,10 +332,13 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 ```
 
 The arguments are one file path or a list of paths, viewport width in pixels,
-sample count, and viewport height in lines. Each file needs a scrollable root.
+sample count, viewport height in lines, and an optional options plist.
+By default, each file needs a scrollable root.
 Content is fully cached before alternating one-line motions at the top and
-midpoint. Results report mean/p95/max milliseconds, full root renders, node style
-visits, style computations, and fresh-render parity; incomplete motion or changed
+midpoint. Results report mean/p95/max milliseconds, measurement-loop GC count/time,
+full root renders, node style
+visits, style computations, prefix rendering, full content materialization, and
+fresh-render parity; incomplete motion or changed
 output fails the run. The independent render comparison ignores runtime identity
 and zero-pixel spacers beside identical font faces; height carriers are retained.
 This measures retained TP scroll publication, excluding
@@ -317,6 +347,19 @@ metrics, load this evaluator and call the same function in the existing GUI
 Emacs. It uses undisplayed temporary buffers, preserves live previews and windows,
 and cleans its mounts, advice, and timers even on errors or interruption. This
 entry point supersedes temporary per-example scroll timing probes.
+
+Pass `(:region-id "log")` to measure a nested scroll box declared with
+`:id "log"`. Pass `(:cold t)` to measure consecutive forward steps from the
+initial render without materializing or warming the content first; combine
+both options for a nested cold run. Cold mode requires enough forward scroll
+capacity for the requested samples and does not seek to the midpoint. The
+initial render can already include lookahead rows; use enough steps to cross
+that prefix and inspect `:prefix-renders` and `:materializations` when measuring
+a cache miss. Completed-cache no-ops do not count as materialization. The
+fresh oracle renders the committed input with its scroll offsets, preserving
+callback and keymap identity. It does not reload companion application state.
+These checks cover Ebox publication work; use an actual displayed window when
+measuring input delivery and Emacs redisplay latency.
 
 Size data uses `(unit number)` with `px`, `%`, `vw`, `vh`, `ch`, and `lh`, plus
 `calc`, `min`, `max`, and `clamp`. The [shared unit-constraint

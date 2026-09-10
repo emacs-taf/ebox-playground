@@ -243,10 +243,13 @@ No files, windows, buffers, or persistent render state are modified."
         ebox-playground-flex-resize-evaluator--output-lines)
   condition)
 
-(defun ebox-playground-scroll-evaluator--measure (region-id steps)
-  "Measure STEPS alternating cached one-line scrolls of REGION-ID."
+(defun ebox-playground-scroll-evaluator--measure (region-id steps &optional cold)
+  "Measure STEPS one-line scrolls of REGION-ID.
+Alternate cached motion by default; COLD advances without retracing prior rows."
   (let ((root-renders 0) (node-styles 0) (style-computations 0)
-        samples installed)
+        (prefix-renders 0) (materializations 0)
+        (deadline (+ (float-time) 30))
+        samples installed gc-start gc-time-start)
     (unwind-protect
         (progn
           (dolist (entry
@@ -256,72 +259,163 @@ No files, windows, buffers, or persistent render state are modified."
                     (cons 'ebox-surface--apply-node-style
                           (lambda (&rest _) (cl-incf node-styles)))
                     (cons 'ebox-surface--compute-node-style
-                          (lambda (&rest _) (cl-incf style-computations)))))
+                          (lambda (&rest _) (cl-incf style-computations)))
+                    (cons 'ebox--render-scroll-window-source
+                          (lambda (&rest _) (cl-incf prefix-renders)))
+                    (cons 'ebox--scroll-state-materialize-lines
+                          (lambda (_region state)
+                            ;; The entry point also accepts already-complete
+                            ;; state; count only actual producer invocations.
+                            (when (plist-get state :materialize-content-lines)
+                              (cl-incf materializations))))))
             (advice-add (car entry) :before (cdr entry))
             (push entry installed))
+          (setq gc-start gcs-done gc-time-start gc-elapsed)
           (dotimes (index steps)
-            (let* ((delta (if (zerop (% index 2)) 1 -1))
+            (when (> (float-time) deadline)
+              (error "Scroll evaluator exceeded 30 seconds after %d/%d samples"
+                     index steps))
+            (let* ((delta (if (or cold (zerop (% index 2))) 1 -1))
                    (start (float-time))
                    (consumed (ebox--scroll-region-by region-id delta 1)))
               (push (* 1000.0 (- (float-time) start)) samples)
               (unless (equal consumed delta)
-                (error "Scroll evaluator moved %S lines, expected %S"
-                       consumed delta))))
-          (list :mean-ms (/ (apply #'+ samples) (float steps))
+                (if cold
+                    (error
+                     "Cold scroll stopped at sample %d/%d after %d completed steps: moved %S, expected 1 (capacity may be exhausted)"
+                     (1+ index) steps index consumed)
+                  (error "Scroll evaluator moved %S lines, expected %S"
+                         consumed delta)))))
+          (list :gc-count (- gcs-done gc-start)
+                :gc-ms (* 1000.0 (- gc-elapsed gc-time-start))
+                :mean-ms (/ (apply #'+ samples) (float steps))
                 :p95-ms (ebox-playground-flex-resize-evaluator--percentile
                          samples 0.95)
                 :max-ms (apply #'max samples)
                 :root-renders root-renders :node-styles node-styles
-                :style-computations style-computations))
+                :style-computations style-computations
+                :prefix-renders prefix-renders :materializations materializations))
       (dolist (entry installed)
         (advice-remove (car entry) (cdr entry))))))
 
 (defun ebox-playground-scroll-evaluator--fresh-parity (buffer file)
-  "Compare BUFFER with an independent FILE render at its root scroll offset."
+  "Compare BUFFER with its committed input at every committed scroll offset.
+FILE is retained for caller compatibility; the oracle never reloads source or
+recreates the companion's business state, callbacks, or keymaps."
+  (ignore file)
   (let* ((state (ebox--buffer-render-state buffer))
+         (snapshot (ebox-surface-buffer-snapshot buffer))
+         (input (plist-get snapshot :input))
          (ebox-viewport-width (plist-get state :viewport-width))
          (ebox-viewport-height (plist-get state :viewport-height))
-         (region-id (plist-get (plist-get state :root-node) :region-id))
-         (offset (plist-get (gethash region-id (plist-get state :scroll-state-table))
-                            :scroll-offset))
-         offset-set
-         (set-offset
+         (published-root (plist-get state :root-node))
+         (offsets (make-hash-table :test #'eql))
+         (source-ids (make-hash-table :test #'eq))
+         (rendered-owners (make-hash-table :test #'eql))
+         rendered-root
+         (set-offsets
           (lambda (root)
-            (unless offset-set
-              (setq offset-set t)
-              (ebox-put root :scroll-offset (or offset 0))
-              (ebox-put root :ebox-scroll-offset-controlled-p t))))
+            (unless rendered-root
+              (when (eq root published-root)
+                (error "Fresh scroll oracle reached the published root"))
+              (setq rendered-root root)
+              ;; Snapshots omit runtime node IDs.  Preserved opaque source
+              ;; handles bridge each committed ID to its detached counterpart.
+              (cl-labels
+                  ((visit (node)
+                     (when-let* ((node-id (gethash (ebox-node-source-handle node)
+                                                  source-ids)))
+                       (when (gethash node-id rendered-owners)
+                         (error "Fresh scroll oracle found duplicate owner %s" node-id))
+                       (ebox-put node :scroll-offset (gethash node-id offsets))
+                       (ebox-put node :ebox-scroll-offset-controlled-p t)
+                       (puthash node-id node rendered-owners))
+                     (ebox-tree-for-each-direct-child node #'visit)))
+                (visit root)))))
          expected)
+    (maphash
+     (lambda (region scroll-state)
+       (let* ((node-id (ebox-runtime-index-get
+                       region (plist-get state :region-node-table)))
+              (node (and node-id (ebox-runtime-index-get
+                                 node-id (plist-get state :node-table))))
+              (source (and node (ebox-node-source-handle node)))
+              (offset (plist-get scroll-state :scroll-offset)))
+         (unless (and source (integerp offset) (>= offset 0)
+                      (equal offset (ebox-get node :scroll-offset)))
+           (error "Fresh scroll oracle requires a consistent committed offset for region %s"
+                  region))
+         (when (gethash source source-ids)
+           (error "Fresh scroll oracle found ambiguous source for region %s" region))
+         (puthash node-id offset offsets)
+         (puthash source node-id source-ids)))
+     (plist-get state :scroll-state-table))
     ;; Scroll offset is runtime state, not an authorable DSL style property.
     ;; Set it on the independent candidate immediately before its first render.
     (unwind-protect
         (progn
-          (advice-add 'ebox--render-layout :before set-offset)
-          (setq expected (ebox-render (ebox-playground-view
-                                       file ebox-viewport-width)))
-          (unless offset-set
-            (error "Fresh scroll oracle did not reach the root layout")))
-      (advice-remove 'ebox--render-layout set-offset))
+          (advice-add 'ebox--render-layout :before set-offsets)
+          (setq expected (ebox-render input))
+          (unless (and rendered-root
+                       (= (hash-table-count offsets)
+                          (hash-table-count rendered-owners)))
+            (error "Fresh scroll oracle did not reach every committed scroll owner"))
+          (maphash
+           (lambda (node-id offset)
+             (unless (equal offset (ebox-get (gethash node-id rendered-owners)
+                                            :scroll-offset))
+               (error "Fresh scroll oracle changed offset for owner %s" node-id)))
+           offsets))
+      (advice-remove 'ebox--render-layout set-offsets))
     (with-current-buffer buffer
       (let* ((actual (ebox-playground-scroll-evaluator--visual-text
                       (buffer-string)))
              (fresh (ebox-playground-scroll-evaluator--visual-text expected))
              (same (equal-including-properties actual fresh)))
         (unless same
-          (let ((position
-                 (cl-loop for index below (min (length actual) (length fresh))
-                          unless (equal-including-properties
-                                  (substring actual index (1+ index))
-                                  (substring fresh index (1+ index)))
-                          return index))
-                (print-level 4) (print-length 12))
-            (princ (format "  render lengths=%s/%s first-difference=%S %S -> %S\n"
-                           (length actual) (length fresh) position
-                           (and position (substring actual position
-                                                    (1+ position)))
-                           (and position (substring fresh position
-                                                    (1+ position)))))))
+          (ebox-playground-scroll-evaluator--report-mismatch actual fresh))
         same))))
+
+(defun ebox-playground-scroll-evaluator--report-mismatch (actual fresh)
+  "Print bounded differences between ACTUAL and FRESH without opaque values.
+Report character codes, changed property names, line widths, and face summaries;
+never print callback environments or keymap contents."
+  (let* ((limit (min (length actual) (length fresh)))
+         (position
+          (or (cl-loop for index below limit
+                       unless (equal-including-properties
+                               (substring actual index (1+ index))
+                               (substring fresh index (1+ index)))
+                       return index)
+              limit))
+         (left (and (< position (length actual))
+                    (text-properties-at position actual)))
+         (right (and (< position (length fresh))
+                     (text-properties-at position fresh)))
+         (keys (delete-dups
+                (append (cl-loop for (key _value) on left by #'cddr collect key)
+                        (cl-loop for (key _value) on right by #'cddr collect key))))
+         (changed (cl-remove-if
+                   (lambda (key) (equal (plist-get left key) (plist-get right key)))
+                   keys)))
+    (cl-labels
+        ((bounded (value)
+           (let* ((print-level 3) (print-length 8) (print-circle t)
+                  (print-escape-newlines t)
+                  (text (prin1-to-string value)))
+             (if (> (length text) 160) (concat (substring text 0 157) "...") text)))
+         (line-width (text)
+           (let ((start (or (cl-position ?\n text :end position :from-end t) -1))
+                 (end (or (cl-position ?\n text :start position) (length text))))
+             (ebox-string-pixel-width (substring text (1+ start) end)))))
+      (princ
+       (format
+        "  render lengths=%d/%d first-difference=%d char-codes=%S/%S changed-properties=%s line-widths=%s/%s faces=%s -> %s\n"
+        (length actual) (length fresh) position
+        (and (< position (length actual)) (aref actual position))
+        (and (< position (length fresh)) (aref fresh position))
+        (bounded changed) (line-width actual) (line-width fresh)
+        (bounded (plist-get left 'face)) (bounded (plist-get right 'face)))))))
 
 (defun ebox-playground-scroll-evaluator--visual-text (text)
   "Normalize visible TEXT, ignoring identity and inert zero-pixel spacers.
@@ -420,7 +514,8 @@ Cleanup runs on success, error and quit; stop between samples after 30 seconds."
         (ebox--deferred-render-gc-timer nil)
         (ebox--deferred-render-gc-depth 0)
         (ebox--deferred-render-gc-generation 0)
-        (work (list :layout-calls 0 :surface-plans 0 :fragment-scans 0
+        (work (list :layout-calls 0 :surface-plans 0 :full-surface-renders 0
+                    :fragment-scans 0
                     :fragment-characters 0
                     :node-registrations 0))
         samples installed)
@@ -447,6 +542,7 @@ Cleanup runs on success, error and quit; stop between samples after 30 seconds."
                        (key-description keys)))
               (dolist (entry '((ebox--render-layout . :layout-calls)
                                (ebox-surface--surface-plan . :surface-plans)
+                               (ebox-surface--render-candidate . :full-surface-renders)
                                (ebox-surface--ensure-node-tree . :node-registrations)))
                 (let* ((key (cdr entry))
                        (advice (lambda (&rest _)
@@ -500,30 +596,68 @@ Cleanup runs on success, error and quit; stop between samples after 30 seconds."
       (when (timerp ebox--deferred-render-gc-timer)
         (cancel-timer ebox--deferred-render-gc-timer)))))
 
+(defun ebox-playground-scroll-evaluator--max-offset (state)
+  "Return STATE's final maximum offset, or nil for an incomplete lazy prefix."
+  (when (or (plist-get state :content-lines-complete-p)
+            (not (or (plist-get state :render-content-prefix)
+                     (plist-get state :materialize-content-lines))))
+    (max 0 (- (length (plist-get state :content-lines))
+              (plist-get state :content-height)))))
+
 (defun ebox-playground-scroll-evaluator-run
-    (files &optional width steps height)
-  "Profile cached root scrolling for FILES at WIDTH with STEPS and HEIGHT.
+    (files &optional width steps height options)
+  "Profile scrolling for FILES at WIDTH with STEPS, HEIGHT, and OPTIONS.
 FILES is one `.ebox' path or a list of paths.  WIDTH defaults to 720 pixels,
 STEPS to 20 alternating one-line motions, and HEIGHT to 36 viewport lines.
-Each file must have a scrollable root.  Fully materialize its content outside
-the samples, then measure cached top and midpoint motion.  Return bounded
-plists with mean, p95 and maximum milliseconds, full root render counts, node
-style visits, style computations, and fresh-render parity for each position.
+OPTIONS accepts :region-id, an author semantic ID resolved in each mount,
+and :cold, either t or nil.  An omitted or nil ID selects the root.  Runtime
+numeric region metadata is not accepted as an address; integer IDs mean author
+IDs.  The selected node must be scrollable.
+
+By default fully materialize selected content outside the samples, then measure
+cached top and midpoint motion.  With :cold t, measure only forward one-line
+motion from the initial mounted offset, with no explicit prewarming,
+materialization, or seek.  Signal an error identifying the failed sample if
+capacity runs out before STEPS completes; do not report incomplete success.
+
+Return bounded plists with :mode, semantic :region-id, :start-offset,
+:end-offset, :content-complete-p, timings, full root render counts, node style
+visits, style computations, and fresh-render parity for each position.
+:prefix-renders counts calls to the bounded scroll source renderer;
+:materializations counts full-content producer invocations during samples.
+:position is top/middle for cached samples or cold for advancing samples.
+:max-offset is nil unless the selected content is fully materialized.
+The oracle independently renders the committed snapshot, preserving opaque
+callbacks and keymaps, and reapplies every committed scroll owner's offset.
 Signal an error on missing scroll capacity, incomplete motion or render drift.
 
 Use the current Emacs frame's font metrics without displaying temporary
 buffers or changing windows.  This measures retained TP publication; native
 window scrolling, idle prewarming and redisplay are excluded.  Existing live
 buffers, timers and runtime tables are preserved.  Temporary mounts and advice
-are cleaned on success, error or quit; no global runtime reset is performed."
+are cleaned on success, error or quit; no global runtime reset is performed.
+Each sample loop checks a 30-second deadline between motions."
   (setq files (if (stringp files) (list files) files)
         width (or width 720) steps (or steps 20) height (or height 36))
   (unless (and files (proper-list-p files) (cl-every #'stringp files))
     (error "Scroll evaluator needs a file path or nonempty list of paths"))
+  (unless (and (proper-list-p options) (zerop (% (length options) 2)))
+    (error "Scroll evaluator OPTIONS must be an even property list"))
+  (let (seen)
+    (cl-loop for (key _value) on options by #'cddr do
+             (unless (and (memq key '(:region-id :cold)) (not (memq key seen)))
+               (error "Scroll evaluator OPTIONS has an unknown or repeated key"))
+             (push key seen)))
+  (unless (and (memq (plist-get options :cold) '(nil t))
+               (let ((id (plist-get options :region-id)))
+                 (or (null id) (stringp id) (symbolp id) (integerp id))))
+    (error "Scroll evaluator needs a semantic :region-id and boolean :cold"))
   (dolist (value (list width steps height))
     (unless (and (integerp value) (> value 0))
       (error "Scroll evaluator dimensions and steps must be positive integers")))
-  (let ((ebox-viewport-width width)
+  (let ((selected-id (plist-get options :region-id))
+        (cold (plist-get options :cold))
+        (ebox-viewport-width width)
         (ebox-viewport-height height)
         (ebox-native-buffer-scroll nil)
         (ebox-runtime-idle-prewarm nil)
@@ -545,33 +679,45 @@ are cleaned on success, error or quit; no global runtime reset is performed."
                   (ebox-playground-open-file file (buffer-name buffer))
                   (with-current-buffer buffer
                     (let* ((runtime (ebox--buffer-render-state buffer))
-                           (region-id (plist-get (plist-get runtime :root-node)
-                                                 :region-id))
+                           (region-id
+                            (if selected-id
+                                (cdr (ebox-selector--region-target
+                                      (ebox-region-resolve buffer selected-id)))
+                              (plist-get (plist-get runtime :root-node) :region-id)))
                            (table (plist-get runtime :scroll-state-table))
                            (state (and region-id (gethash region-id table)))
                            max-offset)
                       (unless state
-                        (error "Scroll evaluator requires a scrollable root: %s"
+                        (error "Scroll evaluator requires a scrollable selected owner: %s"
                                file))
-                      (setq state (ebox--scroll-state-materialize-lines
-                                   region-id state))
-                      (puthash region-id state table)
-                      (setq max-offset
-                            (max 0 (- (length (plist-get state :content-lines))
-                                      (plist-get state :content-height))))
-                      (unless (> max-offset 0)
-                        (error "Scroll evaluator root has no scroll capacity: %s"
-                               file))
-                      ;; Publish warmed content before measuring cached motion.
-                      (ebox--scroll-region-by region-id 1 1)
-                      (ebox--scroll-region-by region-id -1 1)
-                      (dolist (position '(top middle))
-                        (ebox--surface-scroll-to-offset
-                         buffer region-id
-                         (if (eq position 'top) 0 (/ max-offset 2)))
-                        (let* ((measurement
+                      (unless cold
+                        (setq state (ebox--scroll-state-materialize-lines
+                                     region-id state))
+                        (puthash region-id state table)
+                        (setq max-offset
+                              (ebox-playground-scroll-evaluator--max-offset state))
+                        (unless max-offset
+                          (error "Scroll evaluator could not materialize selected content"))
+                        (unless (> max-offset 0)
+                          (error "Scroll evaluator selected owner has no scroll capacity: %s"
+                                 file))
+                        ;; Publish warmed content before measuring cached motion.
+                        (ebox--scroll-region-by region-id 1 1)
+                        (ebox--scroll-region-by region-id -1 1))
+                      (dolist (position (if cold '(cold) '(top middle)))
+                        (unless cold
+                          (ebox--surface-scroll-to-offset
+                           buffer region-id
+                           (if (eq position 'top) 0 (/ max-offset 2))))
+                        (let* ((start-offset
+                                (plist-get (ebox--scroll-get-state region-id)
+                                           :scroll-offset))
+                               (measurement
                                 (ebox-playground-scroll-evaluator--measure
-                                 region-id steps))
+                                 region-id steps cold))
+                               (final-state (ebox--scroll-get-state region-id))
+                               (final-max-offset
+                                (ebox-playground-scroll-evaluator--max-offset final-state))
                                (parity
                                 (ebox-playground-scroll-evaluator--fresh-parity
                                  buffer file))
@@ -579,20 +725,29 @@ are cleaned on success, error or quit; no global runtime reset is performed."
                                 (append
                                  (list :file (expand-file-name file)
                                        :width width :height height :steps steps
-                                       :position position :max-offset max-offset
+                                       :region-id selected-id :mode (if cold 'cold 'cached)
+                                       :position position
+                                       :start-offset start-offset
+                                       :end-offset (plist-get final-state :scroll-offset)
+                                       :content-complete-p (numberp final-max-offset)
+                                       :max-offset final-max-offset
                                        :fresh-render-parity parity)
                                  measurement)))
                           (princ
                            (format
-                            "%s scroll %s %s mean=%.3fms p95=%.3fms max=%.3fms roots=%d node-styles=%d style-computations=%d parity=%S\n"
+                            "%s scroll %s %s mean=%.3fms p95=%.3fms max=%.3fms gc=%d/%.3fms roots=%d node-styles=%d style-computations=%d prefix-renders=%d materializations=%d parity=%S\n"
                             (if parity "PASS" "FAIL")
                             (file-name-nondirectory file) position
                             (plist-get measurement :mean-ms)
                             (plist-get measurement :p95-ms)
                             (plist-get measurement :max-ms)
+                            (plist-get measurement :gc-count)
+                            (plist-get measurement :gc-ms)
                             (plist-get measurement :root-renders)
                             (plist-get measurement :node-styles)
-                            (plist-get measurement :style-computations) parity))
+                            (plist-get measurement :style-computations)
+                            (plist-get measurement :prefix-renders)
+                            (plist-get measurement :materializations) parity))
                           (push result results)
                           (unless parity
                             (error "Scroll evaluator fresh-render mismatch: %s %s"

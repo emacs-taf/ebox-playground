@@ -14,15 +14,17 @@
          (box :padding-top (lh 1) :color "#AEB6CE"
               "A desktop of intersecting ideas.\nPull it apart. Shift the focus. Change the atmosphere."))
     (flex :flex-wrap wrap :gap ((lh 1) (ch 1)) :padding-block (lh 1)
-          :pointer hand :font-weight bold :color "#101117"
-          :hover-style (:background-color "#FFFFFF")
+          :font-weight bold :color "#101117"
           (box :padding-inline (ch 1) :background-color "#D7FA73"
+               :pointer hand :hover-style (:background-color "#FFFFFF")
                :help-echo "Separate the three cards, then bring them back into their original stack."
                :keymap ,(layer-demo-action demo 'explode) "EXPLODE STACK")
           (box :padding-inline (ch 1) :background-color "#A99BFF"
+               :pointer hand :hover-style (:background-color "#FFFFFF")
                :help-echo "Bring Studio, Next, and Signal to the front in turn."
                :keymap ,(layer-demo-action demo 'focus) "CYCLE FOCUS")
           (box :padding-inline (ch 1) :background-color "#B9E9F2"
+               :pointer hand :hover-style (:background-color "#FFFFFF")
                :help-echo "Switch between electric violet / ice / lime and a warmer studio palette."
                :keymap ,(layer-demo-action demo 'mood) "SWITCH MOOD"))
 
@@ -142,17 +144,20 @@
 
     (box "01 / LAYERED DESK   absolute position + local stacking")
     (flex :flex-wrap wrap :gap ((lh 1) (ch 1)) :padding-block (lh 1)
-          :pointer hand :hover-style (:background-color "#505B7A")
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Hide or show Panel A. Revealing a lower layer shows its latest content."
                :keymap ,(layer-demo-action demo 'toggle) "TOGGLE PANEL A")
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Move Panel A between left 4ch / top 2lh and left 10ch / top 0lh."
                :keymap ,(layer-demo-action demo 'move) "MOVE PANEL A")
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Switch Panel A between z=2 and z=4; Panel B stays at z=3."
                :keymap ,(layer-demo-action demo 'raise) "RAISE / LOWER A")
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Update the lower note even when every part of it is covered."
                :keymap ,(layer-demo-action demo 'update-lower) "UPDATE COVERED NOTE"))
     (box :id "layer-desk" :height (lh 10) :background-color "#222637"
@@ -201,12 +206,13 @@
     (box :padding-block (lh 1)
          "The owner below clips to one row. Its menu stays a logical child\n"
          "but paints in the root layer, outside that local clip.")
-    (flex :gap ((lh 0) (ch 1)) :padding-bottom (lh 1) :pointer hand
-          :hover-style (:background-color "#505B7A")
+    (flex :gap ((lh 0) (ch 1)) :padding-bottom (lh 1)
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Cycle bottom-start, bottom-end, top-start, and top-end. Open the menu to compare."
                :keymap ,(layer-demo-action demo 'placement) "CYCLE PLACEMENT")
           (box :padding-inline (ch 1) :background-color "#343B52"
+               :pointer hand :hover-style (:background-color "#505B7A")
                :help-echo "Move the relative trigger from left 4ch to 12ch. The open menu follows its anchor."
                :keymap ,(layer-demo-action demo 'anchor) "MOVE ANCHOR"))
     (box :height (lh 3) :background-color "#1C2430"

@@ -394,7 +394,8 @@
             (should (string-match-p "03" (plist-get report :text)))
             (should (= (plist-get report :publications) 3))
             (dolist (key '(:mean-ms :p95-ms :max-ms :gc-count :gc-ms :cons-cells
-                           :layout-calls :surface-plans :fragment-scans
+                           :layout-calls :surface-plans :full-surface-renders
+                           :fragment-scans
                            :fragment-characters :node-registrations))
               (should (>= (plist-get report key) 0))))
           (cl-letf (((symbol-function 'ebox-region-update)
@@ -446,7 +447,8 @@
                     (should (plist-get report :fresh-render-parity))
                     (should (= (plist-get report :steps) 3))
                     (dolist (key '(:mean-ms :p95-ms :max-ms :root-renders
-                                   :node-styles :style-computations))
+                                   :node-styles :style-computations
+                                   :prefix-renders :materializations))
                       (should (>= (plist-get report key) 0))))
                   (should (eq runtime (ebox--buffer-render-state live)))
                   (should (eq scroll-state (ebox--scroll-get-state region-id)))
@@ -469,7 +471,9 @@
          (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
                  '(ebox-surface--render-candidate
                    ebox-surface--apply-node-style
-                   ebox-surface--compute-node-style)))
+                   ebox-surface--compute-node-style
+                   ebox--render-scroll-window-source
+                   ebox--scroll-state-materialize-lines)))
         (buffers (buffer-list)))
     (unwind-protect
         (progn
@@ -517,6 +521,216 @@
     (should (> (length (ebox-playground-scroll-evaluator--visual-text
                        (concat carrier "\nA")))
                2))))
+
+(ert-deftest ebox-playground-scroll-evaluator-selects-nested-owner-in-both-modes ()
+  "Semantic selection profiles only the nested owner, including cold forward work."
+  (let ((file (make-temp-file "ebox-scroll-evaluator-nested-" nil ".ebox"))
+        (buffers (buffer-list)))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (prin1
+             ''(column :width (px 120)
+                (box "Before")
+                (row
+                  (box :id "selected" :width (px 60) :height (lh 3) :overflow scroll
+                    "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11")
+                  (box :width (px 40) :height (lh 3) :overflow scroll
+                    "a\nb\nc\nd\ne\nf\ng"))
+                (box "After"))
+             (current-buffer)))
+          (dolist (cold '(nil t))
+            (let* ((standard-output (lambda (_character)))
+                   (scroll (symbol-function 'ebox--scroll-region-by))
+                   (materialize (symbol-function 'ebox--scroll-state-materialize-lines))
+                   (measure (symbol-function 'ebox-playground-scroll-evaluator--measure))
+                   (open (symbol-function 'ebox-playground-open-file))
+                   mounted measuring calls reports)
+              (cl-letf (((symbol-function 'ebox-playground-open-file)
+                         (lambda (&rest arguments)
+                           (prog1 (apply open arguments) (setq mounted t))))
+                        ((symbol-function 'ebox-playground-scroll-evaluator--measure)
+                         (lambda (&rest arguments)
+                           (setq measuring t)
+                           (unwind-protect (apply measure arguments)
+                             (setq measuring nil))))
+                        ((symbol-function 'ebox--scroll-state-materialize-lines)
+                         (lambda (&rest arguments)
+                           (when (and cold mounted (not measuring))
+                             (ert-fail "Cold evaluator eagerly materialized content"))
+                           (apply materialize arguments)))
+                        ((symbol-function 'ebox--scroll-region-by)
+                         (lambda (region delta &optional budget)
+                           (when cold (should measuring))
+                           (push delta calls)
+                           (funcall scroll region delta budget))))
+                (setq reports (ebox-playground-scroll-evaluator-run
+                               file 121 3 8 (list :region-id "selected" :cold cold))))
+              (should (= (length reports) (if cold 1 2)))
+              (when cold (should (equal calls '(1 1 1))))
+              (dolist (report reports)
+                (should (plist-get report :fresh-render-parity))
+                (should (equal (plist-get report :region-id) "selected"))
+                (should (eq (plist-get report :mode) (if cold 'cold 'cached)))
+                (should (= (- (plist-get report :end-offset)
+                              (plist-get report :start-offset))
+                           (if cold 3 1)))
+                (when cold
+                  (should (eq (plist-get report :position) 'cold))
+                  (should (= (plist-get report :start-offset) 0)))
+                (when (plist-get report :content-complete-p)
+                  (should (= (plist-get report :max-offset) 9))))))
+          (should (equal buffers (buffer-list))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-cold-extends-initial-prefix ()
+  "Cold samples cross the mounted cache boundary without full materialization."
+  (let ((file (make-temp-file "ebox-scroll-evaluator-prefix-" nil ".ebox"))
+        (ebox-scroll-lazy-prefix-lookahead-lines 8)
+        (ebox-wheel-scroll-step 16)
+        (measure (symbol-function 'ebox-playground-scroll-evaluator--measure))
+        (buffers (buffer-list))
+        initial-capacity reports)
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (prin1
+             (list 'quote
+                   `(column :width (px 120) :height (vh 100) :overflow scroll
+                      ,@(cl-loop for row below 100
+                                 collect `(box ,(format "row-%02d" row)))))
+             (current-buffer)))
+          (let ((standard-output (lambda (_character))))
+            (cl-letf (((symbol-function 'ebox-playground-scroll-evaluator--measure)
+                       (lambda (region steps &optional cold)
+                         (let ((state (ebox--scroll-get-state region)))
+                           (should-not (plist-get state :content-lines-complete-p))
+                           (should (plist-get state :render-content-prefix))
+                           (setq initial-capacity
+                                 (- (length (plist-get state :content-lines))
+                                    (plist-get state :content-height)))
+                           (should (> steps initial-capacity)))
+                         (funcall measure region steps cold))))
+              (setq reports (ebox-playground-scroll-evaluator-run
+                             file 121 40 8 '(:cold t)))))
+          (should (= (length reports) 1))
+          (let ((report (car reports)))
+            (should (= (plist-get report :start-offset) 0))
+            (should (= (plist-get report :end-offset) 40))
+            (should (> (plist-get report :end-offset) initial-capacity))
+            (should (> (plist-get report :prefix-renders) 0))
+            (should (= (plist-get report :materializations) 0))
+            (should (= (plist-get report :root-renders) 0))
+            (should-not (plist-get report :content-complete-p))
+            (should-not (plist-get report :max-offset))
+            (should (plist-get report :fresh-render-parity)))
+          (should (equal buffers (buffer-list))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-counts-materialization-producers ()
+  "A full-content producer is counted once, and its completed-state no-op is not."
+  (let ((state (list :materialize-content-lines
+                     (lambda (&rest _)
+                       (list :content-lines '("0" "1" "2") :content-height 1))))
+        (ebox--scroll-global-state (make-hash-table :test 'eql)))
+    (cl-letf (((symbol-function 'ebox--scroll-region-by)
+               (lambda (region delta &optional _budget)
+                 (setq state (ebox--scroll-state-materialize-lines region state))
+                 delta)))
+      (let ((report (ebox-playground-scroll-evaluator--measure -1 2 t)))
+        (should (= (plist-get report :materializations) 1))
+        (should (= (plist-get report :prefix-renders) 0))
+        (should (plist-get state :content-lines-complete-p))))))
+
+(ert-deftest ebox-playground-scroll-oracle-replays-named-and-anonymous-offsets ()
+  "Fresh input restores root and nested offsets without depending on author IDs."
+  (let ((buffer (generate-new-buffer " *ebox-scroll-oracle-nested*")))
+    (unwind-protect
+        (progn
+          (ebox-render-to-buffer
+           buffer
+           (ebox-build
+            '(column :width (px 120) :height (lh 7) :overflow scroll
+               (box "before\nbefore")
+               (row
+                 (box :id "selected" :width (px 60) :height (lh 3) :overflow scroll
+                   "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11")
+                 (box :width (px 40) :height (lh 3) :overflow scroll
+                   "a\nb\nc\nd\ne\nf\ng"))
+               (box "after\nafter\nafter\nafter\nafter\nafter\nafter"))))
+          (let* ((state (ebox--buffer-render-state buffer))
+                 (root-region (plist-get (plist-get state :root-node) :region-id))
+                 (selected (cdr (ebox-selector--region-target
+                                 (ebox-region-resolve buffer "selected"))))
+                 (regions (hash-table-keys (plist-get state :scroll-state-table))))
+            (should (= (length regions) 3))
+            (dolist (region regions)
+              (unless (= region root-region)
+                (should (= (ebox--scroll-region-by region (if (= region selected) 2 1) 2)
+                           (if (= region selected) 2 1)))))
+            (should (= (ebox--scroll-region-by root-region 1 1) 1))
+            (should (ebox-playground-scroll-evaluator--fresh-parity buffer nil))
+            (let* ((state (ebox--buffer-render-state buffer))
+                   (node (ebox-runtime-index-get
+                          (ebox-runtime-index-get selected (plist-get state :region-node-table))
+                          (plist-get state :node-table)))
+                   (offset (ebox-get node :scroll-offset)))
+              (unwind-protect
+                  (progn
+                    (ebox-put node :scroll-offset 0)
+                    (should-error
+                     (ebox-playground-scroll-evaluator--fresh-parity buffer nil)))
+                (ebox-put node :scroll-offset offset)))
+            (should (ebox-playground-scroll-evaluator--fresh-parity buffer nil))))
+      (when (buffer-live-p buffer) (kill-buffer buffer)))))
+
+(ert-deftest ebox-playground-scroll-evaluator-cold-capacity-error-and-options ()
+  "Cold exhaustion reports the exact incomplete sample and releases resources."
+  (let ((file (make-temp-file "ebox-scroll-evaluator-capacity-" nil ".ebox"))
+        (buffers (buffer-list))
+        (render (symbol-function 'ebox--render-layout)))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (prin1 ''(column :width (px 120) :height (lh 2) :overflow scroll
+                       (box "0\n1\n2\n3"))
+                   (current-buffer)))
+          (let ((failure (should-error
+                          (ebox-playground-scroll-evaluator-run file 121 4 8 '(:cold t)))))
+            (should (string-match-p "sample 3/4 after 2 completed steps"
+                                    (error-message-string failure))))
+          (dolist (options '((:cold yes) (:cold) (:unknown t)
+                             (:region-id (invalid)) (:cold t :cold nil)))
+            (should-error (ebox-playground-scroll-evaluator-run file 121 3 8 options)))
+          (should-error (ebox-playground-scroll-evaluator-run
+                         file 121 3 8 '(:region-id "missing")))
+          (should (equal buffers (buffer-list)))
+          (should (eq render (symbol-function 'ebox--render-layout))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-scroll-evaluator-timeout-restores-instrumentation ()
+  "A deadline between motions fails explicitly and removes temporary counters."
+  (let ((clock 0)
+        (motions 0)
+        (functions
+         (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
+                 '(ebox-surface--render-candidate ebox-surface--apply-node-style
+                   ebox-surface--compute-node-style
+                   ebox--render-scroll-window-source
+                   ebox--scroll-state-materialize-lines))))
+    (cl-letf (((symbol-function 'float-time)
+               (lambda (&optional _) (cl-incf clock 11)))
+              ((symbol-function 'ebox--scroll-region-by)
+               (lambda (_region delta &optional _budget)
+                 (cl-incf motions)
+                 delta)))
+      (let ((failure (should-error
+                      (ebox-playground-scroll-evaluator--measure 0 3 t))))
+        (should (string-match-p "exceeded 30 seconds after 1/3 samples"
+                                (error-message-string failure)))))
+    (should (= motions 1))
+    (dolist (entry functions)
+      (should (eq (cdr entry) (symbol-function (car entry)))))))
 
 (ert-deftest ebox-playground-effective-viewport-prefers-window-text-width ()
   "Interactive viewport resolution should prefer the window text width."
@@ -1041,6 +1255,134 @@
       (ebox-playground-close preview)
       (ebox-playground-close (format "*Ebox Preview: %s*" file))
       (delete-directory directory t))))
+
+(ert-deftest ebox-playground-scroll-oracle-retains-committed-business-capabilities ()
+  "A scroll oracle keeps mutable callback identity and detects real property drift."
+  (ebox-playground-test--call-with-companion-files
+   (lambda (file companion preview)
+     (with-temp-file companion
+       (insert ";;; -*- lexical-binding: t; -*-\n")
+       (prin1
+        '(progn
+           (cl-incf ebox-playground-test--companion-loads)
+           (setq ebox-playground-test--companion-value
+                 (let ((business (list 0 (make-symbol "fresh-business-state"))))
+                   (list 'column :width '(px 120) :height '(lh 4) :overflow 'scroll
+                         :help-echo (ebox-help-create
+                                     (lambda () (format "state=%d" (car business))))
+                         :keymap (ebox-keymap-create
+                                  :activate (lambda () (cl-incf (car business))))
+                         (list 'box :id "message"
+                               "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11")))))
+        (current-buffer)))
+     (with-temp-file file (insert "ebox-playground-test--companion-value"))
+     (let* ((standard-output (lambda (_character)))
+            (reports (ebox-playground-scroll-evaluator-run file 121 3 8)))
+       (should (= ebox-playground-test--companion-loads 1))
+       (should (= (length reports) 2))
+       (dolist (report reports) (should (plist-get report :fresh-render-parity))))
+     (let* ((standard-output (lambda (_character)))
+            (reports (ebox-playground-scroll-evaluator-run file 121 3 8 '(:cold t))))
+       (should (= ebox-playground-test--companion-loads 2))
+       (should (= (length reports) 1))
+       (should (plist-get (car reports) :fresh-render-parity))
+       (should (= (plist-get (car reports) :end-offset) 3)))
+     (ebox-playground-open-file file preview)
+     (with-current-buffer preview
+       (let ((command (lookup-key (get-text-property (point-min) 'keymap)
+                                  (kbd "RET"))))
+         (call-interactively command)
+         (should (equal (funcall (get-text-property (point-min) 'help-echo)
+                                nil (current-buffer) (point-min))
+                        "state=1")))
+       (ebox-region-update "message" :color "#123456")
+       (let* ((state (ebox--buffer-render-state (current-buffer)))
+              (region (plist-get (plist-get state :root-node) :region-id)))
+         (should (= (ebox--scroll-region-by region 1 1) 1)))
+       (let* ((buffer (current-buffer))
+              (revision (ebox-surface-buffer-revision buffer))
+              (state (ebox--buffer-render-state buffer))
+              (root (plist-get state :root-node))
+              (offset (ebox-get root :scroll-offset))
+              (render (symbol-function 'ebox--render-layout))
+              (properties (copy-sequence (text-properties-at (point-min)))))
+         (cl-letf (((symbol-function 'ebox-playground-view)
+                    (lambda (&rest _) (ert-fail "Oracle reloaded source"))))
+           (should (ebox-playground-scroll-evaluator--fresh-parity buffer file)))
+         (should (= ebox-playground-test--companion-loads 3))
+         (should (eq state (ebox--buffer-render-state buffer)))
+         (should (= revision (ebox-surface-buffer-revision buffer)))
+         (should (= offset (ebox-get root :scroll-offset)))
+         (should (eq render (symbol-function 'ebox--render-layout)))
+         (dolist (change
+                  (list (cons 'keymap '(keymap (13 . ignore)))
+                        ;; This callback returns the same help as the committed
+                        ;; one.  Its different identity must still be detected.
+                        (cons 'help-echo (lambda (&rest _) "state=1"))
+                        (cons 'pointer 'hand)
+                        (cons 'face '(:foreground "#654321"))
+                        (cons 'display '(space :width (99)))))
+           (unwind-protect
+               (let ((inhibit-read-only t))
+                 (put-text-property (point-min) (1+ (point-min))
+                                    (car change) (cdr change))
+                 (let ((output
+                        (with-output-to-string
+                          (should-not
+                           (ebox-playground-scroll-evaluator--fresh-parity
+                            buffer file)))))
+                   (should (< (length output) 1000))
+                   (should (string-match-p "char-codes=" output))
+                   (should (string-match-p (symbol-name (car change)) output))
+                   (should (string-match-p "line-widths=" output))
+                   (should-not (string-match-p "closure\\|byte-code\\|fresh-business-state"
+                                               output))))
+             (let ((inhibit-read-only t))
+               (set-text-properties (point-min) (1+ (point-min)) properties))))
+         (should (ebox-playground-scroll-evaluator--fresh-parity buffer file)))))))
+
+(ert-deftest ebox-playground-scroll-oracle-offset-and-error-cleanup ()
+  "Reject inconsistent offsets and remove temporary advice after render errors."
+  (let ((buffer (generate-new-buffer " *ebox-scroll-oracle-error*"))
+        (render (symbol-function 'ebox--render-layout)))
+    (unwind-protect
+        (progn
+          (ebox-render-to-buffer
+           buffer (ebox-build '(column :width (px 120) :height (lh 2)
+                                :overflow scroll (box "0\n1\n2\n3\n4"))))
+          (let* ((state (ebox--buffer-render-state buffer))
+                 (root (plist-get state :root-node))
+                 (offset (ebox-get root :scroll-offset)))
+            (unwind-protect
+                (progn
+                  (ebox-put root :scroll-offset (1+ offset))
+                  (should-error
+                   (ebox-playground-scroll-evaluator--fresh-parity buffer nil)))
+              (ebox-put root :scroll-offset offset)))
+          (cl-letf (((symbol-function 'ebox-render)
+                     (lambda (_input) (error "Injected fresh render failure"))))
+            (should-error
+             (ebox-playground-scroll-evaluator--fresh-parity buffer nil)))
+          (should (eq render (symbol-function 'ebox--render-layout)))
+          (should (ebox-playground-scroll-evaluator--fresh-parity buffer nil)))
+      (when (buffer-live-p buffer) (kill-buffer buffer)))))
+
+(ert-deftest ebox-playground-scroll-oracle-mismatch-output-is-bounded ()
+  "Mismatch output omits opaque capability bodies and handles a missing suffix."
+  (let* ((payload (make-string 5000 ?x))
+         (callback (lambda () payload))
+         (actual (propertize "A" 'keymap (list 'keymap (cons 13 callback))
+                             'help-echo callback))
+         (fresh (propertize "A" 'keymap '(keymap (13 . ignore))
+                            'help-echo "different"))
+         (output (with-output-to-string
+                   (ebox-playground-scroll-evaluator--report-mismatch actual fresh)
+                   (ebox-playground-scroll-evaluator--report-mismatch "A" "AB"))))
+    (should (< (length output) 1000))
+    (should (string-match-p "changed-properties=.*keymap" output))
+    (should (string-match-p "help-echo" output))
+    (should (string-match-p "char-codes=nil/66" output))
+    (should-not (string-match-p "closure\\|byte-code\\|xxxxx" output))))
 
 (ert-deftest ebox-playground-companion-reloads-exact-source-before-file-evaluation ()
   "Reload an edited sibling source, regardless of bytecode or current directory."

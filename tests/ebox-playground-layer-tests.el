@@ -108,6 +108,77 @@
                 tail (cdr tail))))
       nodes)))
 
+(defun ebox-playground-layer-test--toolbar-hover (labels)
+  "Assert that LABELS own separate hover groups with inert toolbar gaps."
+  (let (groups bindings rows)
+    (dolist (label labels)
+      (let* ((position (ebox-playground-layer-test--position label))
+             (hover (get-text-property position 'mouse-face))
+             (map (get-text-property position 'keymap)))
+        (should hover)
+        (should (keymapp map))
+        (should (eq (get-text-property position 'pointer) 'hand))
+        ;; Equal colors still need separate native mouse-face identities.
+        (should-not (memq hover groups))
+        (push hover groups)
+        (push (cons map hover) bindings)
+        (save-excursion
+          (goto-char position)
+          (cl-pushnew (cons (line-beginning-position) (line-end-position))
+                      rows :test #'equal))))
+    (dolist (row rows)
+      (cl-loop for position from (car row) below (cdr row)
+               for map = (get-text-property position 'keymap)
+               do (if map
+                      (progn
+                        (should (assq map bindings))
+                        (should (eq (get-text-property position 'mouse-face)
+                                    (cdr (assq map bindings))))
+                        (should (eq (get-text-property position 'pointer) 'hand)))
+                    ;; This includes gaps between buttons and the row's tail.
+                    (dolist (property '(mouse-face pointer keymap))
+                      (should-not (get-text-property position property))))))))
+
+(defun ebox-playground-layer-test--lower-note-padding-hover (label)
+  "Assert that LABEL's intentional block hover includes its blank padding."
+  (let* ((position (ebox-playground-layer-test--position label))
+         (hover (get-text-property position 'mouse-face))
+         (map (get-text-property position 'keymap)))
+    (should hover)
+    (should (keymapp map))
+    (save-excursion
+      (goto-char position)
+      (let ((padding (cl-loop for at from (line-beginning-position)
+                             below (line-end-position)
+                             when (and (get-text-property at 'ebox-pl)
+                                       (eq map (get-text-property at 'keymap)))
+                             return at)))
+        (should padding)
+        (should (string-match-p
+                 "\\`[[:space:]]+\\'"
+                 (buffer-substring-no-properties padding (1+ padding))))
+        (should (eq hover (get-text-property padding 'mouse-face)))
+        (should (eq map (get-text-property padding 'keymap)))
+        (should (eq (get-text-property padding 'pointer) 'hand))))))
+
+(ert-deftest ebox-playground-layer-hover-matches-action-and-block-scopes ()
+  "Toolbar buttons hover separately while the note keeps its full surface."
+  (dolist (width '(60 720))
+    (ebox-playground-layer-test--with-preview (buffer width)
+      (let ((toolbars '(("EXPLODE STACK" "CYCLE FOCUS" "SWITCH MOOD")
+                        ("TOGGLE PANEL A" "MOVE PANEL A" "RAISE / LOWER A"
+                         "UPDATE COVERED NOTE")
+                        ("CYCLE PLACEMENT" "MOVE ANCHOR"))))
+        (dolist (labels toolbars)
+          (ebox-playground-layer-test--toolbar-hover labels))
+        (ebox-playground-layer-test--activate "EXPLODE STACK")
+        (dolist (labels toolbars)
+          (ebox-playground-layer-test--toolbar-hover labels)))
+      (ebox-playground-layer-test--activate "TOGGLE PANEL A")
+      (ebox-playground-layer-test--lower-note-padding-hover "LOWER REV 00")
+      (ebox-playground-layer-test--activate "UPDATE COVERED NOTE")
+      (ebox-playground-layer-test--lower-note-padding-hover "LOWER REV 01"))))
+
 (ert-deftest ebox-playground-layer-reference-declares-layers-with-one-font-size ()
   "Actual layout data contains the taught contracts and no font-size override."
   (let* ((form (ebox-playground--evaluate-form
@@ -302,6 +373,25 @@
       (ebox-playground-layer-test--activate "EXPLODE STACK")
       (dolist (line (ebox-string-lines (buffer-string)))
         (should (<= (ebox-string-pixel-width line) width))))))
+
+(ert-deftest ebox-playground-layer-orbit-commands-publish-local-owners-once ()
+  "Orbit commands publish once without preparing the unrelated full surface."
+  (ebox-playground-layer-test--with-preview (buffer 104)
+    (dolist (label '("EXPLODE STACK" "EXPLODE STACK"
+                     "CYCLE FOCUS" "CYCLE FOCUS" "CYCLE FOCUS"
+                     "CYCLE FOCUS" "CYCLE FOCUS" "CYCLE FOCUS"
+                     "SWITCH MOOD" "EXPLODE STACK" "CYCLE FOCUS"
+                     "EXPLODE STACK" "SWITCH MOOD"))
+      (let ((revision (plist-get (ebox-surface-buffer-snapshot buffer) :revision)))
+        (cl-letf (((symbol-function 'ebox-surface--render-candidate)
+                   (lambda (&rest _)
+                     (ert-fail "Orbit command prepared the full surface")))
+                  ((symbol-function 'ebox-playground-layer-test--parity)
+                   #'ignore))
+          (ebox-playground-layer-test--activate label))
+        (ebox-playground-layer-test--parity)
+        (should (= (plist-get (ebox-surface-buffer-snapshot buffer) :revision)
+                   (1+ revision)))))))
 
 (provide 'ebox-playground-layer-tests)
 ;;; ebox-playground-layer-tests.el ends here
