@@ -74,7 +74,7 @@ performance-prepare:
 
 performance-evaluator:
 	EBOX_NATIVE_REFLOW_MODULE_PATH="$(EBOX_NATIVE_RELEASE_DIR)" \
-	EMACS="$(EMACS)" ./scripts/flex-resize-evaluator.sh
+	EMACS="$(EMACS)" ./benchmarks/flex-resize-evaluator.sh
 
 checkdoc:
 	$(EMACS) -Q --batch --eval '(progn (require (quote checkdoc)) (dolist (directory (quote ("." "examples"))) (dolist (file (directory-files directory t)) (when (string-suffix-p ".el" file) (checkdoc-file file)))))'

@@ -16,7 +16,7 @@
 
 ## 验证
 
-`scripts/acceptance.json` 选择渲染输出、cascade、交互、预览隔离及 resize 场景。
+`tests/acceptance.json` 选择渲染输出、cascade、交互、预览隔离及 resize 场景。
 `make check` 编译后运行这些验收；`make test` 提供更广泛的回归。
 性能工作负载放在 `benchmarks/`。GUI 外观必须结合实际 Emacs 输出、字体和窗口尺寸检查，
 批处理通过不等于视觉验收完成。

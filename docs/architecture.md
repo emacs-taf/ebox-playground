@@ -20,7 +20,7 @@ in for running behavior. Product usage and entry points are in the [README](../R
 
 ## Validation
 
-`scripts/acceptance.json` selects rendered output, cascade, interaction, preview
+`tests/acceptance.json` selects rendered output, cascade, interaction, preview
 isolation and resize behavior. `make check` runs these scenarios after compilation.
 `make test` runs broader regressions. `benchmarks/` owns performance workloads;
 GUI appearance requires inspection of actual Emacs output under recorded fonts
