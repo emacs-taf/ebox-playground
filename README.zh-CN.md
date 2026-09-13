@@ -55,8 +55,17 @@ Desktop 中的鼠标点击与拖动不会选中文本，按钮之间、换行和
 
 运行 `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`
 检查真实 keymap 命令、中间运动帧、松手、遮挡归属、失败回滚和渲染一致性；
-`make check` 已包含该套件。重复位置发布的耗时使用共享 interaction evaluator，
-传入该示例、窗口入口 `"01 ST"` 和按键 `"M-<right>"`，不将其冒充 GUI 重绘延迟。
+`make check` 已包含该套件。重复位置发布的耗时和 CPU 采样使用共享 interaction
+evaluator；左右交替避免触及边界后只测到空操作，前四次预热不计入指标：
+
+```sh
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
+```
+
+它测量拖动所用的相同位置发布路径，不包括操作系统事件投递或 GUI redisplay。
+采样本身有开销；比较纯耗时时移除 `:profile t`。参数与指标说明见下文交互 evaluator。
 
 ## 滚动性能验证
 
@@ -176,24 +185,39 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
 
-函数签名为 `(FILE LABEL &optional KEY STEPS WIDTH HEIGHT)`。它创建全新的临时
+函数签名为 `(FILE LABEL &optional KEY STEPS WIDTH HEIGHT OPTIONS)`。它创建全新的临时
 预览，定位一次可见标签，然后在该 point 位置反复查找原生按键绑定，不在更新后重新
 定位；失去节点绑定时检查失败。`KEY` 接受按键描述字符串或事件向量，默认参数为
 `RET`、30 次命令、720 px 宽、200 行高；次数与尺寸必须为正整数。
+`OPTIONS` 可传 `:alternate-key`（同样的按键格式）、`:warmup`（非负整数，默认 0）
+和 `:profile`（布尔值，默认 nil）。两个按键都必须绑定在该标签上，预热与测量之间
+保持交替顺序；奇数次预热后，测量从第二个按键开始。未知或重复选项、无效值以及
+丢失绑定都会使检查失败。
 
 返回的 plist 包含命令耗时的 mean/p95/max 毫秒数、GC 次数与耗时、cons 分配总数
 （`:cons-cells`，用于观察分配压力）、发布次数、最终
 纯文本，以及与独立渲染已提交快照的结果是否一致。计算计数器 `:layout-calls`、
 `:surface-plans`、`:fragment-scans` 和 `:node-registrations` 分别统计布局渲染、
 surface 规划、fragment 提取（包含局部切片）和节点树注册的调用次数。
-局部补丁也会执行规划；`:full-surface-renders` 单独统计完整候选渲染次数。
+局部补丁也会执行规划；兼容保留的 `:full-surface-renders` 字段统计候选渲染调用，
+其中可能是局部候选，不能据此认定发生整根渲染。`:last-update` 仅保留最终公共更新
+报告中的四个标量字段：`:strategy`、`:projection-kind`、`:publication-scope` 和
+`:constraint-source`。
 `:fragment-characters` 累计传给 fragment 提取的字符数；结合调用次数与字符总量，
 区分局部处理和全 surface 扫描。调用次数不是受影响节点数。快照对比不一致则检查失败。
 
+`:profile t` 会增加 `:cpu-profile`，包含总样本数、采样间隔（纳秒），以及最多各
+15 行的 inclusive/exclusive CPU 样本；每行只包含函数名、样本数和占总样本的比例。
+inclusive 包含子调用，同一栈的递归帧只计一次；exclusive 只计栈顶。匿名帧合并为
+`<anonymous>`，不返回闭包、Runtime 对象或调用树。短运行可能没有采样命中。
+任何 CPU 或内存 profiler 正在运行时都会拒绝开启采样，并保留现有会话。已经停止的
+日志继续保留；尚未提取的底层 CPU 日志会在采样前并入 `profiler-cpu-log`。
+
 计时包括同步命令执行、发布和 GC。耗时、GC、发布次数及计算计数器都只覆盖命令
-循环，不包括初次挂载及最后的快照对比渲染。该入口也不测量 GUI redisplay、
-操作系统按键重复延迟或空闲预热。采样循环在命令之间检查 30 秒期限；成功、报错、
-超时或中断时都会清理临时预览和自身计时器，并保留现有预览与窗口。后续交互回归
+循环，不包括初次挂载、显式预热及最后的快照对比渲染。该入口也不测量 GUI redisplay、
+操作系统按键重复延迟或空闲预热。预热和采样共用 30 秒期限，在命令之间检查；
+成功、报错、超时或中断时都会清理临时预览、advice、自身 profiler 和计时器，
+并保留现有预览与窗口。后续交互回归
 复用此入口，不另建临时的重复按键计时脚本。
 
 诊断已有可见预览中的原生点击分派时，加载同一 evaluator 并调用

@@ -1,0 +1,19 @@
+'(box
+  (box :ecss (;; 当前 box 自身
+              ("&" :padding-inline (ch 1)
+               :background-color "#1e293b")
+              ;; 直接子节点 title
+              ("& > .title" :color "#f8fafc" :font-weight bold)
+              ;; group 中的三个 item，包括嵌套在 box 中的 item
+              (".group .item" :color "#cbd5e1")
+              ;; 同时具有 item 和 active class 的第二个 item
+              (".item.active" :color "#22c55e")
+              ;; 紧跟在第一个 item 后面的第二个 item
+              (".item + .item" :border-top-width (px 1)))
+       (box :class "title" "Tasks")
+       (box :class "group"
+            (box :class "item" "compile")
+            (box :class "item active" "test")
+            (box (box :class "item" "package"))))
+  ;; 位于 :ecss 作用域之外，不会被上面的选择器匹配
+  (box :class "item active" "outside scope"))

@@ -23,6 +23,44 @@
   "Read and evaluate the layout expression in FILE."
   (ebox-playground--evaluate-form (ebox-playground--read-file file) file))
 
+(defun ebox-playground-test--face-value (face attribute)
+  "Resolve ATTRIBUTE from FACE in Emacs face precedence order."
+  (cond ((null face) nil)
+        ((symbolp face)
+         (let ((value (face-attribute face attribute nil t)))
+           (unless (eq value 'unspecified) value)))
+        ((keywordp (car face)) (plist-get face attribute))
+        (t (cl-some (lambda (entry)
+                      (ebox-playground-test--face-value entry attribute)) face))))
+
+(ert-deftest ebox-playground-selector-cascade-colors ()
+  "Verify actual glyph paint for every annotated cascade example row."
+  (let* ((file (expand-file-name "examples/selector-cascade-reference.ebox"
+                                 ebox-playground-directory))
+         (rendered (ebox-render (ebox-build (ebox-playground-test--read-layout file)))))
+    (dolist (row '(("CASCADE LAB" "#FFFFFF" "#000000")
+                   ("ROOT item" "#0000FF" "#00FFFF")
+                   ("SCOPE A" "#000000" "#FFFF00")
+                   ("A item" "#FF0000" "#FFA500")
+                   ("A active" "#800080" "#00FF00")
+                   ("A strong" "#FF00FF" "#000000")
+                   ("SCOPE B" "#FFFFFF" "#800080")
+                   ("B item" "#FFFFFF" "#000080")
+                   ("B active" "#800080" "#00FF00")
+                   ("B late" "#000000" "#FFFF00")
+                   ("B inline" "#000000" "#FF69B4")
+                   ("SIBLING SCOPE C" "#FFFFFF" "#006400")
+                   ("C item" "#FFFFFF" "#FF0000")
+                   ("OUTSIDE A/B/C" "#0000FF" "#00FFFF")))
+      (let ((position (string-match (regexp-quote (car row)) rendered)))
+        (should position)
+        (let ((face (get-text-property position 'face rendered)))
+          (ert-info ((format "Row %s: %S" (car row) face))
+            (should (equal (ebox-playground-test--face-value face :foreground)
+                           (nth 1 row)))
+            (should (equal (ebox-playground-test--face-value face :background)
+                           (nth 2 row)))))))))
+
 (defun ebox-playground-test--boxes (form)
   "Return every nested BOX form in FORM."
   (when (consp form)
@@ -408,6 +446,228 @@
           (should (equal windows (window-state-get)))
           (dolist (entry functions)
             (should (eq (cdr entry) (symbol-function (car entry))))))
+      (delete-file file))))
+
+(defvar ebox-playground-test--evaluator-command nil
+  "Optional callback used by the interaction evaluator's temporary fixture.")
+
+(defun ebox-playground-test--interaction-fixture (file)
+  "Write a native two-key counter fixture to FILE."
+  (with-temp-file file
+    (prin1
+     '(let* ((count 0)
+             (move (lambda (delta)
+                     (when ebox-playground-test--evaluator-command
+                       (funcall ebox-playground-test--evaluator-command))
+                     (ebox-region-update
+                      "count" :content (format "%02d" (cl-incf count delta))))))
+        (list 'column :width '(px 120)
+              (list 'text :id "count" "00")
+              (list 'text :keymap
+                    (ebox-keymap-create
+                     :bindings `(("a" . ,(lambda () (funcall move 1)))
+                                 ("b" . ,(lambda () (funcall move -1)))))
+                    "Move")))
+     (current-buffer))))
+
+(ert-deftest ebox-playground-interaction-evaluator-alternates-and-excludes-warmup ()
+  "Odd warmup continues the key sequence and stays outside every work metric."
+  (let ((file (make-temp-file "ebox-interaction-options-" nil ".ebox"))
+        (gc-cons-threshold most-positive-fixnum)
+        (gc-cons-percentage 1.0)
+        (gcs-done 0) (gc-elapsed 0.0)
+        (cons-count 0) events)
+    (unwind-protect
+        (progn
+          (ebox-playground-test--interaction-fixture file)
+          (let ((ebox-playground-test--evaluator-command
+                 (lambda ()
+                   (push last-input-event events)
+                   (cl-incf gcs-done 2)
+                   (cl-incf gc-elapsed 0.001)
+                   (cl-incf cons-count 11))))
+            (cl-letf (((symbol-function 'memory-use-counts)
+                       (lambda () (list cons-count))))
+              (let ((report (ebox-playground-interaction-evaluator-run
+                             file "Move" "a" 3 120 8
+                             '(:alternate-key [98] :warmup 3))))
+                (should (equal (reverse events) '(97 98 97 98 97 98)))
+                (should (string-match-p "00" (plist-get report :text)))
+                (should (= (plist-get report :publications) 3))
+                (should (= (plist-get report :gc-count) 6))
+                (should (< (abs (- (plist-get report :gc-ms) 3.0)) 0.001))
+                (should (= (plist-get report :cons-cells) 33))
+                (should (equal (plist-get report :alternate-key) "b"))
+                (should (= (plist-get report :warmup) 3))
+                (should (= (plist-get report :steps) 3))
+                (should (plist-get report :fresh-parity))
+                (should-not (plist-member report :cpu-profile))
+                (let ((reference (ebox-playground-interaction-evaluator-run
+                                  file "Move" "a" 3 120 8
+                                  '(:alternate-key "b" :warmup 1))))
+                  (dolist (key '(:layout-calls :surface-plans :full-surface-renders
+                                 :fragment-scans :fragment-characters
+                                 :node-registrations))
+                    (should (= (plist-get report key) (plist-get reference key)))))))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-interaction-evaluator-validates-options ()
+  "Malformed options and empty or unbound alternate keys fail cleanly."
+  (let ((file (make-temp-file "ebox-interaction-invalid-" nil ".ebox"))
+        (buffers (buffer-list)))
+    (unwind-protect
+        (progn
+          (ebox-playground-test--interaction-fixture file)
+          (dolist (options '((:warmup) (:unknown t) (:warmup 0 :warmup 1)
+                             (:warmup -1) (:warmup 0.5) (:warmup nil)
+                             (:profile 1) (:alternate-key 2)
+                             (:alternate-key "") (:alternate-key [])
+                             (:alternate-key "z")))
+            (should-error (ebox-playground-interaction-evaluator-run
+                           file "Move" "a" 1 120 8 options)))
+          (should (equal buffers (buffer-list))))
+      (delete-file file))))
+
+(ert-deftest ebox-playground-interaction-evaluator-bounds-cpu-summary ()
+  "Recursive inclusive counts and anonymous closures cannot leak runtime data."
+  (let ((log (make-hash-table :test #'equal))
+        (secret (list "captured runtime must not be printed")))
+    (puthash [sample-leaf sample-parent sample-parent nil] 6 log)
+    (puthash (vector (lambda () secret) 'sample-parent nil) 4 log)
+    (let* ((report (ebox-playground-interaction-evaluator--cpu-summary log))
+           (inclusive (plist-get report :inclusive))
+           (exclusive (plist-get report :exclusive)))
+      (should (= (plist-get report :total-samples) 10))
+      (should (equal (car inclusive)
+                     '(:function "sample-parent" :samples 10 :percent 100.0)))
+      (should (equal (car exclusive)
+                     '(:function "sample-leaf" :samples 6 :percent 60.0)))
+      (should-not (string-match-p "captured runtime" (prin1-to-string report))))
+    (dotimes (index 30)
+      (puthash (vector (intern (format "sample-extra-%d" index))) 1 log))
+    (let ((report (ebox-playground-interaction-evaluator--cpu-summary log)))
+      (should (= (length (plist-get report :inclusive)) 15))
+      (should (= (length (plist-get report :exclusive)) 15)))
+    (should (equal (ebox-playground-interaction-evaluator--cpu-summary nil)
+                   '(:total-samples 0 :inclusive nil :exclusive nil)))))
+
+(ert-deftest ebox-playground-interaction-evaluator-profile-isolates-and-cleans ()
+  "Sampling excludes warmup and always releases advice, profiler and timers."
+  (let ((file (make-temp-file "ebox-interaction-profile-" nil ".ebox"))
+        (buffers (buffer-list))
+        (windows (window-state-get))
+        (live-timer (run-at-time 3600 nil #'ignore))
+        (functions (mapcar (lambda (symbol) (cons symbol (symbol-function symbol)))
+                           '(ebox--render-layout ebox-surface--surface-plan
+                             ebox-surface--render-candidate
+                             ebox-surface--rendered-fragments
+                             ebox-surface--ensure-node-tree))))
+    (unwind-protect
+        (progn
+          (ebox-playground-test--interaction-fixture file)
+          (dolist (failure '(nil error quit timeout warmup start-error start-quit))
+            (let* ((saved (make-hash-table :test #'equal))
+                   (profiler-cpu-log saved) (profiler-memory-log saved)
+                   (ebox--deferred-render-gc-timer live-timer)
+                   (clock 0.0) (active nil) (starts 0) (stops 0)
+                   (calls 0) owned-timer
+                   (snapshot-function (symbol-function 'ebox-surface-buffer-snapshot))
+                   (normalize-function
+                    (symbol-function 'ebox-playground-scroll-evaluator--visual-text))
+                   (ebox-playground-test--evaluator-command
+                    (lambda ()
+                      (cl-incf calls)
+                      (should (eq (and active t) (> calls 1)))
+                      (when (or (and (eq failure 'warmup) (= calls 1))
+                                (= calls 2))
+                        (setq owned-timer (run-at-time 3600 nil #'ignore)
+                              ebox--deferred-render-gc-timer owned-timer)
+                        (pcase failure
+                          ((or 'error 'warmup) (error "Injected command failure"))
+                          ('quit (signal 'quit nil))
+                          ('timeout (setq clock 31.0)))))))
+              (cl-letf (((symbol-function 'profiler-running-p) (lambda (&rest _) active))
+                        ((symbol-function 'profiler-cpu-start)
+                         (lambda (_)
+                           (cl-incf starts)
+                           (setq active t)
+                           (pcase failure
+                             ('start-error (error "Injected profiler start failure"))
+                             ('start-quit (signal 'quit nil)))))
+                        ((symbol-function 'profiler-cpu-stop)
+                         (lambda () (cl-incf stops) (setq active nil)))
+                        ((symbol-function 'profiler-cpu-log)
+                         (lambda () nil))
+                        ((symbol-function 'float-time) (lambda (&rest _) clock))
+                        ((symbol-function 'ebox-surface-buffer-snapshot)
+                         (lambda (&rest args)
+                           (should-not active)
+                           (apply snapshot-function args)))
+                        ((symbol-function 'ebox-playground-scroll-evaluator--visual-text)
+                         (lambda (&rest args)
+                           (should-not active)
+                           (apply normalize-function args))))
+                (let ((outcome
+                       (condition-case condition
+                           (ebox-playground-interaction-evaluator-run
+                            file "Move" "a" 3 120 8
+                            '(:alternate-key "b" :warmup 1 :profile t))
+                         (error (car condition)) (quit (car condition)))))
+                  (if failure
+                      (should (eq outcome (if (memq failure '(quit start-quit))
+                                             'quit 'error)))
+                    (should (plist-get outcome :fresh-parity))
+                    (should (equal (plist-get (plist-get outcome :cpu-profile)
+                                             :total-samples) 0))))
+                (should-not active)
+                (should (= starts (if (eq failure 'warmup) 0 1)))
+                (should (= stops starts)))
+              (should (eq profiler-cpu-log saved))
+              (should (eq profiler-memory-log saved))
+              (should (eq ebox--deferred-render-gc-timer live-timer))
+              (should (memq live-timer timer-list))
+              (should-not (memq owned-timer timer-list))
+              (should (equal buffers (buffer-list)))
+              (should (equal windows (window-state-get)))
+              (dolist (entry functions)
+                (should (eq (cdr entry) (symbol-function (car entry))))))))
+      (cancel-timer live-timer)
+      (delete-file file))))
+
+(ert-deftest ebox-playground-interaction-evaluator-preserves-profiler-logs ()
+  "A running profiler is untouched; stopped low-level samples remain available."
+  (let ((file (make-temp-file "ebox-interaction-logs-" nil ".ebox"))
+        (buffers (buffer-list)) (stops 0))
+    (unwind-protect
+        (progn
+          (ebox-playground-test--interaction-fixture file)
+          (dolist (mode '(cpu mem))
+            (cl-letf (((symbol-function 'profiler-running-p) (lambda (&rest _) mode))
+                      ((symbol-function 'profiler-cpu-stop)
+                       (lambda () (cl-incf stops))))
+              (should-error (ebox-playground-interaction-evaluator-run
+                             file "Move" "a" 2 120 8 '(:profile t)))))
+          (should (= stops 0))
+          (let* ((saved (make-hash-table :test #'equal))
+                 (pending (make-hash-table :test #'equal))
+                 (measured (make-hash-table :test #'equal))
+                 (profiler-cpu-log saved) (profiler-memory-log saved)
+                 (logs (list pending measured)))
+            (puthash [prior] 7 saved)
+            (puthash [pending] 11 pending)
+            (puthash [measured] 3 measured)
+            (cl-letf (((symbol-function 'profiler-running-p) (lambda (&rest _) nil))
+                      ((symbol-function 'profiler-cpu-start) #'ignore)
+                      ((symbol-function 'profiler-cpu-stop) #'ignore)
+                      ((symbol-function 'profiler-cpu-log) (lambda () (pop logs))))
+              (let ((report (ebox-playground-interaction-evaluator-run
+                             file "Move" "a" 2 120 8 '(:profile t))))
+                (should (= (plist-get (plist-get report :cpu-profile) :total-samples) 3))))
+            (should (= (gethash [prior] profiler-cpu-log) 7))
+            (should (= (gethash [pending] profiler-cpu-log) 11))
+            (should-not (gethash [measured] profiler-cpu-log))
+            (should (eq profiler-memory-log saved)))
+          (should (equal buffers (buffer-list))))
       (delete-file file))))
 
 (ert-deftest ebox-playground-scroll-evaluator-preserves-live-runtime ()

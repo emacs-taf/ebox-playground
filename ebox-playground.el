@@ -79,6 +79,10 @@
     (message "Rendered Ebox DSL into %s" name)
     buffer))
 
+;; Playground owns the richer split-window interaction while Ebox core owns
+;; the standalone file mode and single-buffer preview command.
+(define-key ebox-dsl-mode-map (kbd "C-c C-c") #'ebox-dsl-render)
+
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
 
@@ -158,6 +162,12 @@
   (unless (ebox-canonical-input-p input)
     (signal 'wrong-type-argument (list 'ebox-canonical-input-p input)))
   (with-current-buffer (get-buffer-create buffer)
+    ;; A preview name is stable across edits, while its canonical source
+    ;; generation is not.  Drop the retained surface before publishing the
+    ;; replacement so a failed/old generation can never remain visible.
+    (when (ebox-surface--live-buffer-surface (current-buffer))
+      (ebox-unmount-buffer (current-buffer)))
+    (erase-buffer)
     (let ((snapshot (ebox-playground--preview-display-snapshot))
           (published-p nil))
       (unwind-protect
@@ -181,37 +191,15 @@ Visible mounted buffers follow their window through Ebox's viewport controller."
   "Evaluate one Elisp FORM lexically to produce Ebox DSL data.
 When SOURCE-FILE names a .ebox file, load its optional same-basename .el
 companion first.  Reload that exact source file on every evaluation."
-  (when (and source-file
-             (equal (file-name-extension source-file) "ebox"))
-    (let ((companion (concat (file-name-sans-extension
-                              (expand-file-name source-file)) ".el")))
-      (when (file-exists-p companion)
-        (load companion nil t t))))
-  (eval form t))
+  (ebox-file-evaluate-form form source-file))
 
 (defun ebox-playground--read-form (source)
   "Read exactly one Elisp expression from SOURCE."
-  (when (string-empty-p (string-trim source))
-    (user-error "The Ebox DSL source is empty"))
-  (with-temp-buffer
-    (set-syntax-table emacs-lisp-mode-syntax-table)
-    (insert source)
-    (goto-char (point-min))
-    (let* ((read-eval nil)
-           (form (read (current-buffer))))
-      (forward-comment (point-max))
-      (unless (eobp)
-        (user-error "The Ebox source must contain one Elisp expression"))
-      form)))
+  (ebox-file-read-form source))
 
 (defun ebox-playground--read-file (file)
   "Read one Elisp expression from FILE."
-  (unless (file-readable-p file)
-    (user-error "Ebox DSL file is not readable: %s" file))
-  (with-temp-buffer
-    (insert-file-contents file)
-    (ebox-playground--read-form
-     (buffer-substring-no-properties (point-min) (point-max)))))
+  (ebox-file-read-file file))
 
 ;;;###autoload
 (defun ebox-playground-view (&optional file viewport-width)

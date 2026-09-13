@@ -10,7 +10,7 @@ For before/after example comparisons, use `ebox-playground-compare-example-direc
 
 For scrolling performance across examples, use `ebox-playground-scroll-evaluator-run` from that same evaluator. Pass one `.ebox` path or a list, viewport width, sample count, viewport height, and optional options (`:region-id` selects a semantic nested owner; `:cold t` measures forward steps without prewarming). It measures publication and verifies committed-input fresh-render parity while preserving existing GUI previews. Consult this entry point before adding another scroll probe, and extend it when the diagnostic coverage is missing. See README for the invocation and measurement boundaries.
 
-For repeated interaction behavior or command performance, use `ebox-playground-interaction-evaluator-run` from `scripts/ebox-playground-flex-resize-evaluator.el`. Pass the `.ebox` file and visible control label, with optional key, sample count, width, and height. It performs native key lookup without repositioning after updates, reports command-loop timings/GC/publications and layout/projection work counters, and verifies committed-snapshot render parity. Read fragment call counts with their input-character totals to distinguish local slices from full-surface work. For native click dispatch in an already visible buffer, use the same file's `ebox-playground-interaction-evaluator-click` with buffer, label, and optional in-label offset; it resolves an Emacs event and calls the interactive command, not an OS mouse click. Consult and extend these entry points before adding another interaction probe; see README for inputs, cleanup, the between-sample deadline, and measurement limits.
+For repeated interaction behavior or command performance, use `ebox-playground-interaction-evaluator-run` from `scripts/ebox-playground-flex-resize-evaluator.el`. Pass the `.ebox` file and visible control label, with optional key, sample count, width, height, and an options plist (`:alternate-key`, `:warmup`, `:profile`). It performs native key lookup without repositioning after updates, reports command-loop timings/GC/publications and layout/projection work counters, and verifies committed-snapshot render parity. Read fragment call counts with their input-character totals to distinguish local slices from full-surface work. For native click dispatch in an already visible buffer, use the same file's `ebox-playground-interaction-evaluator-click` with buffer, label, and optional in-label offset; it resolves an Emacs event and calls the interactive command, not an OS mouse click. Consult and extend these entry points before adding another interaction probe; see README for inputs, cleanup, the between-sample deadline, and measurement limits.
 
 Keep intentional spacer height explicit: use `(box :height (lh 1))` for a one-line separator, omitting width when ordinary block sizing already fills its parent. An otherwise empty Box with automatic height has zero content height.
 
@@ -31,6 +31,8 @@ maintain `examples/desktop-reference.ebox` with its companion and run
 press/motion/release streams, gap/end-of-buffer selection fallbacks, palette
 round trips, intermediate publication and fresh-render parity.
 Use the shared interaction evaluator with the desktop's `"01 ST"` dock label
-and `"M-<right>"` for repeated position publication timing. Keep native gesture
+and `"M-<right>"` with `(:alternate-key "M-<left>" :warmup 4 :profile t)`
+for repeated position publication timing and bounded CPU hot-function samples.
+This excludes GUI redisplay. Omit profiling for timing comparisons. Keep native gesture
 state in the companion, use public Ebox updates, and preserve the existing layer
 reference instead of turning the generic runner into a window manager.

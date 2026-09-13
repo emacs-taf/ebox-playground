@@ -72,9 +72,19 @@ the five panes. Reopening the file creates an independent desktop state.
 Run `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
 native command, intermediate motion, release, overlap, rollback, independent
 preview and render-parity regressions. Normal `make check` includes this suite.
-For repeated movement publication timing, use the shared interaction evaluator
-with this file, dock label `"01 ST"` and key `"M-<right>"`; it measures the same
-position publisher without OS event delivery or GUI redisplay.
+For repeated movement publication timing and CPU sampling, use the shared
+interaction evaluator. Alternating directions keeps each step moving instead
+of reaching the desktop boundary; four warmup commands are excluded:
+
+```sh
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
+```
+
+This measures the same position publisher used by dragging, without OS event
+delivery or GUI redisplay. Profiling adds sampling overhead; omit `:profile t`
+for a timing comparison. See the interaction evaluator contract below.
 
 ## ORBIT spatial desktop and layer lab
 
@@ -232,12 +242,17 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
 
-The signature is `(FILE LABEL &optional KEY STEPS WIDTH HEIGHT)`. It opens a
+The signature is `(FILE LABEL &optional KEY STEPS WIDTH HEIGHT OPTIONS)`. It opens a
 fresh temporary preview, finds the visible label once, and repeats native key
 lookup at the resulting point without repositioning after updates. Losing the
 node's binding fails the run. `KEY` accepts a key-description string or event
 vector; defaults are `RET`, 30 commands, 720 px width, and 200 lines of height.
-Sample count and dimensions must be positive integers.
+Sample count and dimensions must be positive integers. `OPTIONS` is an optional
+plist accepting `:alternate-key` (the same key formats), `:warmup` (nonnegative
+integer, default 0), and `:profile` (boolean, default nil). Both keys must be
+bound on the label. Alternation continues across warmup and measured commands,
+so an odd warmup starts measurement with the alternate key. Unknown or repeated
+option names, invalid values, or a lost binding fail the run.
 
 The returned plist reports mean/p95/max command milliseconds, GC count/time,
 allocated cons cells (`:cons-cells`, to track allocation pressure),
@@ -245,19 +260,32 @@ publication count, final plain text, and parity with an independent render of
 the committed snapshot. Work counters `:layout-calls`, `:surface-plans`,
 `:fragment-scans`, and `:node-registrations` count calls to layout rendering,
 surface planning, fragment extraction (including local slices), and node-tree
-registration. Planning also runs for local patches; `:full-surface-renders`
-separately counts full candidate renders. `:fragment-characters` sums the characters passed to fragment
-extraction. Read the call counts alongside this character total to distinguish
-local work from full-surface scanning; call counts are not affected-node counts.
+registration. Planning also runs for local patches; the legacy
+`:full-surface-renders` field counts candidate-render calls, which may render a
+scoped candidate. It does not prove a full-root render. `:last-update` includes
+only scalar `:strategy`, `:projection-kind`, `:publication-scope`, and
+`:constraint-source` fields from the final public update report.
+`:fragment-characters` sums the characters passed to fragment extraction. Read
+the call counts alongside this character total to distinguish local work from full-surface scanning; call counts are not affected-node counts.
 A parity mismatch fails.
 
+With `:profile t`, `:cpu-profile` adds `:total-samples`, the sampling interval in
+nanoseconds, and at most 15 rows each for inclusive and exclusive CPU samples.
+Each row contains only a function name, sample count, and percentage of the
+total. Inclusive counts include callees and count recursive frames once per
+stack; exclusive counts use the top frame. Unnamed frames share `<anonymous>`;
+no closures, runtime objects, or call trees are returned. A short run can have
+zero samples. Sampling refuses to start while any CPU or memory profiler is
+active, preserving that session. Existing stopped logs remain available; an
+undrained low-level CPU log is merged into `profiler-cpu-log` before sampling.
+
 Timing includes synchronous command execution, publication, and GC. Timings,
-GC, publication counts, and work counters cover only the command loop;
-initial mounting and the final parity render are excluded. The evaluator
-excludes GUI redisplay, OS key-repeat
-latency, and idle prewarming. The sampling loop checks a 30-second deadline
-between commands. Temporary preview and owned timer cleanup runs on success,
-error, timeout, or interruption, preserving existing previews and windows.
+GC, publication counts, and work counters cover only the command loop.
+Initial mounting, explicit warmup, and the final parity render are excluded.
+The evaluator excludes GUI redisplay, OS key-repeat latency, and idle prewarming.
+Warmup and samples share a 30-second deadline checked between commands. Temporary preview, advice, owned profiler, and owned
+timer cleanup runs on success, error, timeout, or interruption, preserving
+existing previews and windows.
 Reuse this entry point for interaction regressions instead of ad hoc key-repeat
 timing scripts.
 

@@ -12,6 +12,8 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'seq)
+(require 'profiler)
 (require 'ebox-playground)
 (require 'ebox-native-reflow)
 
@@ -486,118 +488,244 @@ Return the clicked position; the caller must verify the application's result."
     (let ((last-input-event event)) (call-interactively command))
     position))
 
+(defun ebox-playground-interaction-evaluator--cpu-summary (log)
+  "Return bounded function names and sample counts from CPU LOG.
+Count recursive frames once per stack for inclusive totals.  Anonymous frames
+share one name; never format closures or their captured runtime objects."
+  (let ((names (make-hash-table :test #'eq))
+        (inclusive (make-hash-table :test #'equal))
+        (exclusive (make-hash-table :test #'equal))
+        (total 0))
+    (mapatoms (lambda (symbol)
+                (when (fboundp symbol)
+                  (puthash (symbol-function symbol) (symbol-name symbol) names))))
+    (when log
+      (maphash
+       (lambda (stack count)
+         (cl-incf total count)
+         (let (seen)
+           (dotimes (index (length stack))
+             (when-let* ((frame (aref stack index)))
+               (let ((name (if (symbolp frame) (symbol-name frame)
+                             (gethash frame names "<anonymous>"))))
+                 (when (zerop index)
+                   (puthash name (+ count (gethash name exclusive 0)) exclusive))
+                 (unless (member name seen)
+                   (push name seen)
+                   (puthash name (+ count (gethash name inclusive 0)) inclusive)))))))
+       log))
+    (cl-labels
+        ((top (table)
+           (let (rows)
+             (maphash (lambda (name count)
+                        (push (list :function name :samples count
+                                    :percent (if (zerop total) 0.0
+                                               (/ (* 100.0 count) total))) rows))
+                      table)
+             (seq-take
+              (sort rows
+                    (lambda (left right)
+                      (let ((a (plist-get left :samples))
+                            (b (plist-get right :samples)))
+                        (if (= a b)
+                            (string-lessp (plist-get left :function)
+                                          (plist-get right :function))
+                          (> a b)))))
+              15))))
+      (list :total-samples total :inclusive (top inclusive)
+            :exclusive (top exclusive)))))
+
+(defun ebox-playground-interaction-evaluator--activate (binding deadline)
+  "Activate native BINDING before DEADLINE and return elapsed milliseconds."
+  (when (> (float-time) deadline)
+    (error "Interaction evaluator exceeded 30 seconds"))
+  (let ((keys (car binding)) (command (cdr binding)))
+    (unless (eq (key-binding keys) command)
+      (error "Repeated %s lost its node binding at point %d"
+             (key-description keys) (point)))
+    (let ((started (float-time))
+          (last-input-event (aref (vconcat keys) (1- (length keys)))))
+      (call-interactively command)
+      (* 1000 (- (float-time) started)))))
+
 (defun ebox-playground-interaction-evaluator-run
-    (file label &optional key steps width height)
-  "Measure repeated native KEY activation at LABEL in FILE.
+    (file label &optional key steps width height options)
+  "Measure repeated native KEY activation at LABEL in FILE with OPTIONS.
 KEY defaults to RET, STEPS to 30, WIDTH to 720 pixels and HEIGHT to 200 lines.
+OPTIONS accepts :alternate-key (a second native key), :warmup (a nonnegative
+command count, default zero), and :profile (boolean, default nil).  Alternate
+KEY and :alternate-key continuously across warmup and measured commands.
 Place point at LABEL once, then perform normal key lookup for every command;
 fail if an update loses that binding.  Return command timing in milliseconds,
 GC counts and time, allocated cons cells, publication count and work counts,
-and total characters scanned for fragment extraction (including local slices),
-final plain text and fresh-render parity.
-Rendering a committed snapshot independently must reproduce the mounted text.
+fragment extraction input characters, final plain text and fresh-render parity.
+:cpu-profile contains at most 15 inclusive and exclusive function names, sample
+counts and percentages plus :total-samples.  Existing profiler logs are kept;
+refuse CPU sampling when any profiler is running.  A stopped low-level CPU log
+is retained in `profiler-cpu-log' before starting isolated sampling.
 
 This measures synchronous commands and publication, including GC, without
-redisplay, OS key repeat or idle prewarming.  It uses current font metrics and
-a temporary preview, preserving existing buffers, windows and runtime state.
-Cleanup runs on success, error and quit; stop between samples after 30 seconds."
+redisplay, OS key repeat or idle prewarming.  Mounting, explicit warmup and
+final parity rendering are outside all measurements.  Use current font metrics
+and a temporary preview, preserving existing buffers, windows and runtime state.
+Cleanup runs on success, error and quit.  Check a 30-second command deadline."
   (setq key (or key "RET") steps (or steps 30)
         width (or width 720) height (or height 200))
   (unless (and (stringp file) (stringp label) (> (length label) 0)
                (or (stringp key) (vectorp key)))
     (error "Interaction evaluator needs a file, nonempty label and native key"))
+  (unless (and (proper-list-p options) (zerop (% (length options) 2)))
+    (error "Interaction evaluator OPTIONS must be an even property list"))
+  (let (seen)
+    (cl-loop for (option _value) on options by #'cddr do
+             (unless (and (memq option '(:alternate-key :warmup :profile))
+                          (not (memq option seen)))
+               (error "Interaction evaluator OPTIONS has an unknown or repeated key"))
+             (push option seen)))
+  (let ((alternate (plist-get options :alternate-key))
+        (warmup (if (plist-member options :warmup)
+                    (plist-get options :warmup) 0)))
+    (unless (and (or (null alternate) (stringp alternate) (vectorp alternate))
+                 (integerp warmup) (>= warmup 0)
+                 (memq (plist-get options :profile) '(nil t)))
+      (error "Interaction evaluator needs a native alternate key, nonnegative warmup and boolean profile")))
   (dolist (value (list steps width height))
     (unless (and (integerp value) (> value 0))
       (error "Interaction evaluator dimensions and steps must be positive integers")))
-  (let ((keys (if (stringp key) (kbd key) key))
-        (buffer (generate-new-buffer " *ebox-interaction-evaluator*"))
-        (ebox-viewport-width width) (ebox-viewport-height height)
-        (ebox-runtime-idle-prewarm nil)
-        (ebox-runtime-idle-reflow-cache-prewarm nil)
-        (ebox-scroll-lazy-idle-prefetch-lines 0)
-        (gc-cons-threshold gc-cons-threshold)
-        (gc-cons-percentage gc-cons-percentage)
-        (ebox--deferred-render-gc-state nil)
-        (ebox--deferred-render-gc-timer nil)
-        (ebox--deferred-render-gc-depth 0)
-        (ebox--deferred-render-gc-generation 0)
-        (work (list :layout-calls 0 :surface-plans 0 :full-surface-renders 0
-                    :fragment-scans 0
-                    :fragment-characters 0
-                    :node-registrations 0))
-        samples installed)
+  (when (plist-get options :profile)
+    (unless (fboundp 'profiler-cpu-start)
+      (error "CPU sampling is unavailable in this Emacs"))
+    (when (profiler-running-p)
+      (error "Interaction evaluator cannot sample while a profiler is running")))
+  (let* ((keys (if (stringp key) (kbd key) key))
+         (alternate (plist-get options :alternate-key))
+         (alternate-keys (if (stringp alternate) (kbd alternate) alternate))
+         (warmup (or (plist-get options :warmup) 0))
+         (profile (plist-get options :profile))
+         (buffer (generate-new-buffer " *ebox-interaction-evaluator*"))
+         (ebox-viewport-width width) (ebox-viewport-height height)
+         (ebox-runtime-idle-prewarm nil)
+         (ebox-runtime-idle-reflow-cache-prewarm nil)
+         (ebox-scroll-lazy-idle-prefetch-lines 0)
+         (gc-cons-threshold gc-cons-threshold)
+         (gc-cons-percentage gc-cons-percentage)
+         (ebox--deferred-render-gc-state nil)
+         (ebox--deferred-render-gc-timer nil)
+         (ebox--deferred-render-gc-depth 0)
+         (ebox--deferred-render-gc-generation 0)
+         (work (list :layout-calls 0 :surface-plans 0 :full-surface-renders 0
+                     :fragment-scans 0 :fragment-characters 0
+                     :node-registrations 0))
+         samples installed profile-owned profile-log)
     (unwind-protect
         (progn
-          (when (zerop (length keys))
-            (error "Interaction evaluator key must not be empty"))
+          (dolist (sequence (if alternate-keys (list keys alternate-keys) (list keys)))
+            (when (zerop (length sequence))
+              (error "Interaction evaluator key must not be empty")))
           (ebox-playground-open-file file (buffer-name buffer))
           (with-current-buffer buffer
             (goto-char (point-min))
             (unless (search-forward label nil t)
               (error "Interaction label is not visible: %s" label))
             (backward-char (length label))
-            (let* ((command (key-binding keys))
-                   (native (get-text-property (point) 'keymap))
-                   (revision (plist-get (ebox-surface-buffer-snapshot buffer)
-                                        :revision))
-                   (gc-count gcs-done) (gc-time gc-elapsed)
-                   (cons-count (car (memory-use-counts)))
-                   (deadline (+ (float-time) 30)))
-              (unless (and (keymapp native) (commandp command)
-                           (eq command (lookup-key native keys)))
-                (error "Interaction label has no native command for %s"
-                       (key-description keys)))
+            (let* ((bindings
+                    (mapcar
+                     (lambda (sequence)
+                       (let ((command (key-binding sequence))
+                             (native (get-text-property (point) 'keymap)))
+                         (unless (and (keymapp native) (commandp command)
+                                      (eq command (lookup-key native sequence)))
+                           (error "Interaction label has no native command for %s"
+                                  (key-description sequence)))
+                         (cons sequence command)))
+                     (if alternate-keys (list keys alternate-keys) (list keys))))
+                   (deadline (+ (float-time) 30)) revision)
+              (dotimes (index warmup)
+                (ebox-playground-interaction-evaluator--activate
+                 (nth (% index (length bindings)) bindings) deadline))
               (dolist (entry '((ebox--render-layout . :layout-calls)
                                (ebox-surface--surface-plan . :surface-plans)
                                (ebox-surface--render-candidate . :full-surface-renders)
                                (ebox-surface--ensure-node-tree . :node-registrations)))
-                (let* ((key (cdr entry))
+                (let* ((counter (cdr entry))
                        (advice (lambda (&rest _)
-                                 (plist-put work key (1+ (plist-get work key))))))
+                                 (cl-incf (plist-get work counter)))))
                   (advice-add (car entry) :before advice)
                   (push (cons (car entry) advice) installed)))
               (let ((advice
                      (lambda (text)
                        (cl-incf (plist-get work :fragment-scans))
-                       (cl-incf (plist-get work :fragment-characters)
-                                (length text)))))
+                       (cl-incf (plist-get work :fragment-characters) (length text)))))
                 (advice-add 'ebox-surface--rendered-fragments :before advice)
                 (push (cons 'ebox-surface--rendered-fragments advice) installed))
-              (dotimes (_ steps)
-                (when (> (float-time) deadline)
-                  (error "Interaction evaluator exceeded 30 seconds"))
-                (unless (eq (key-binding keys) command)
-                  (error "Repeated %s lost its node binding at point %d"
-                         (key-description keys) (point)))
-                (let ((started (float-time))
-                      (last-input-event (aref (vconcat keys) (1- (length keys)))))
-                  (call-interactively command)
-                  (push (* 1000 (- (float-time) started)) samples)))
-              (dolist (entry installed) (advice-remove (car entry) (cdr entry)))
-              (setq installed nil)
-              (let* ((cons-count (- (car (memory-use-counts)) cons-count))
-                     (gc-count (- gcs-done gc-count))
-                     (gc-ms (* 1000 (- gc-elapsed gc-time)))
-                     (snapshot (ebox-surface-buffer-snapshot buffer))
-                     (fresh (ebox-render (plist-get snapshot :input)))
-                     (actual (buffer-string))
-                     (parity (equal-including-properties
-                              (ebox-playground-scroll-evaluator--visual-text actual)
-                              (ebox-playground-scroll-evaluator--visual-text fresh))))
-                (unless parity
-                  (error "Repeated interaction differs from committed snapshot render"))
-                (append
-                 (list :file (expand-file-name file) :label label
-                      :key (key-description keys) :steps steps
-                      :mean-ms (/ (apply #'+ samples) (float steps))
-                      :p95-ms (ebox-playground-flex-resize-evaluator--percentile
-                               samples 0.95)
-                      :max-ms (apply #'max samples)
-                      :gc-count gc-count :gc-ms gc-ms
-                      :cons-cells cons-count
-                      :publications (- (plist-get snapshot :revision) (or revision 0))
-                       :fresh-parity parity :text (substring-no-properties actual))
-                 work)))))
+              (setq revision
+                    (plist-get (ebox-surface-buffer-snapshot buffer) :revision))
+              (when profile
+                (when (profiler-running-p)
+                  (error "Interaction evaluator cannot sample while a profiler is running"))
+                ;; Low-level stop retains a pending C log.  Move it to the
+                ;; ordinary report variable, preserving any previous samples.
+                (when-let* ((pending (profiler-cpu-log)))
+                  (let ((saved (if profiler-cpu-log
+                                   (copy-hash-table profiler-cpu-log)
+                                 (make-hash-table :test #'equal))))
+                    (maphash (lambda (stack count)
+                               (puthash stack (+ count (gethash stack saved 0)) saved))
+                             pending)
+                    (setq profiler-cpu-log saved)))
+                (let ((inhibit-quit t))
+                  (setq profile-owned t)
+                  (profiler-cpu-start profiler-sampling-interval)))
+              (let ((gc-count gcs-done) (gc-time gc-elapsed)
+                    (cons-count (car (memory-use-counts))))
+                (dotimes (index steps)
+                  (push (ebox-playground-interaction-evaluator--activate
+                         (nth (% (+ warmup index) (length bindings)) bindings) deadline)
+                        samples))
+                (setq cons-count (- (car (memory-use-counts)) cons-count)
+                      gc-count (- gcs-done gc-count)
+                      gc-time (* 1000 (- gc-elapsed gc-time)))
+                (when profile-owned
+                  (profiler-cpu-stop)
+                  (setq profile-log (profiler-cpu-log) profile-owned nil))
+                (dolist (entry installed) (advice-remove (car entry) (cdr entry)))
+                (setq installed nil)
+                (let* ((snapshot (ebox-surface-buffer-snapshot buffer))
+                       (update (ebox-buffer-update-report buffer))
+                       (last-update
+                        (cl-loop for field in '(:strategy :projection-kind
+                                               :publication-scope :constraint-source)
+                                 for value = (plist-get update field)
+                                 when (or (symbolp value) (numberp value))
+                                 append (list field value)))
+                       (fresh (ebox-render (plist-get snapshot :input)))
+                       (actual (buffer-string))
+                       (parity (equal-including-properties
+                                (ebox-playground-scroll-evaluator--visual-text actual)
+                                (ebox-playground-scroll-evaluator--visual-text fresh))))
+                  (unless parity
+                    (error "Repeated interaction differs from committed snapshot render"))
+                  (append
+                   (list :file (expand-file-name file) :label label
+                         :key (key-description keys)
+                         :alternate-key (and alternate-keys (key-description alternate-keys))
+                         :warmup warmup :steps steps
+                         :mean-ms (/ (apply #'+ samples) (float steps))
+                         :p95-ms (ebox-playground-flex-resize-evaluator--percentile samples 0.95)
+                         :max-ms (apply #'max samples)
+                         :gc-count gc-count :gc-ms gc-time :cons-cells cons-count
+                         :publications (- (plist-get snapshot :revision) (or revision 0))
+                         :last-update last-update
+                         :fresh-parity parity :text (substring-no-properties actual))
+                   (when profile
+                     (list :cpu-profile
+                           (append (list :sampling-interval-ns profiler-sampling-interval)
+                                   (ebox-playground-interaction-evaluator--cpu-summary
+                                    profile-log))))
+                   work))))))
+      (when profile-owned
+        (profiler-cpu-stop)
+        (profiler-cpu-log))
       (dolist (entry installed) (advice-remove (car entry) (cdr entry)))
       (when (buffer-live-p buffer) (ebox-playground-close (buffer-name buffer)))
       (when (timerp ebox--deferred-render-gc-timer)
