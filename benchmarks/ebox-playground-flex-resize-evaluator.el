@@ -900,8 +900,9 @@ Each sample loop checks a 30-second deadline between motions."
 (defun ebox-playground-flex-resize-evaluator--settle-preview
     (preview preview-window)
   "Publish PREVIEW at its settled PREVIEW-WINDOW viewport before measuring.
-The GUI frame can acquire its final pixel width after `ebox-playground-render' has
-mounted the split.  This setup publication is outside the measured splitter
+The GUI frame can acquire its final pixel width after
+`ebox-playground-render' has mounted the split.  This setup publication is
+outside the measured splitter
 action, so the action starts from a self-consistent runtime generation rather
 than charging initial frame settling to resize."
   (let* ((width (ebox-playground--window-viewport-width preview-window))
