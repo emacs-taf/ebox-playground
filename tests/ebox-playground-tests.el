@@ -280,7 +280,7 @@
                         (nreverse functions) :test #'equal)))))
         (runner (with-temp-buffer
                   (insert-file-contents
-                   (expand-file-name "benchmarks/flex-resize-evaluator.sh"
+                   (expand-file-name "scripts/flex-resize-evaluator.sh"
                                      ebox-playground-directory))
                   (buffer-string)))
         (makefile (with-temp-buffer
