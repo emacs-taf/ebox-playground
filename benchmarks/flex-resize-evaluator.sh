@@ -25,8 +25,8 @@ trap cleanup EXIT INT TERM
 
 require_fresh_elc "$root/ebox-playground.el" "$root/ebox-playground.elc"
 require_fresh_elc \
-    "$root/scripts/ebox-playground-flex-resize-evaluator.el" \
-    "$root/scripts/ebox-playground-flex-resize-evaluator.elc"
+    "$root/benchmarks/ebox-playground-flex-resize-evaluator.el" \
+    "$root/benchmarks/ebox-playground-flex-resize-evaluator.elc"
 require_fresh_elc "$root/../ebox/ebox.el" "$root/../ebox/ebox.elc"
 require_fresh_elc "$root/../ebox/ebox-surface.el" "$root/../ebox/ebox-surface.elc"
 require_fresh_elc "$root/../ecss/ecss.el" "$root/../ecss/ecss.elc"

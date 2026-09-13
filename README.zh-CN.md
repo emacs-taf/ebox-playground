@@ -60,7 +60,7 @@ evaluator；左右交替避免触及边界后只测到空操作，前四次预�
 
 ```sh
 emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
-  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
 
@@ -69,12 +69,12 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 
 ## 滚动性能验证
 
-使用共享 `scripts/ebox-playground-flex-resize-evaluator.el` 的入口：
+使用共享 `benchmarks/ebox-playground-flex-resize-evaluator.el` 的入口：
 
 ```sh
 emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
-  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run "examples/flex-reference.ebox" 104 6 36)'
 ```
 
@@ -106,7 +106,7 @@ plist。默认完全缓存根滚动内容，再测量顶部和中间位置的往
 操作通过公共 `ebox-call-with-update-batch` 将 region 变化与状态栏更新合并。
 helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次待处理变化。
 回滚覆盖排队的 Ebox 更新，不撤销 companion 中任意业务状态变化，详见
-[批量更新契约](../ebox/docs/user/ebox-api-reference.zh.md#合并-region-更新)。
+[批量更新契约](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md)。
 
 运行 `make layer-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，
 验证图层契约、实际原生命令及已提交快照的独立渲染一致性，无需打开 GUI 窗口。
@@ -116,7 +116,7 @@ helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次�
 ```sh
 emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
-  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
 ```
 
@@ -158,7 +158,7 @@ margin 及结构性换行符。同一渲染行内，一个 hover owner 的文字
 `mouse-face`；未指定属性取自 owner 的基础样式，即使子文本的正常样式不同。
 物理左右边框不参与悬停，水平边框线条保留自己的绘制。原生指针外观和帮助显示由
 Emacs 设置及窗口系统决定，
-见[公共能力契约](../ebox/docs/user/ebox-api-reference.zh.md#原生节点能力)。
+见[公共能力契约](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md)。
 
 `interaction-reference.el` 负责业务函数与状态，`interaction-reference.ebox` 负责
 布局；运行器在每次预览前重新加载对应 `.el`。Ebox 的 `ebox-help-create` 提供原生
@@ -181,7 +181,7 @@ make interaction-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 
 ```sh
 emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
-  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
 
@@ -226,7 +226,7 @@ inclusive 包含子调用，同一栈的递归帧只计一次；exclusive 只计
 `OFFSET` 是标签内从零开始的整数字符偏移，默认为零。例如，在预览 buffer 中求值：
 
 ```elisp
-(load (expand-file-name "scripts/ebox-playground-flex-resize-evaluator.el"
+(load (expand-file-name "benchmarks/ebox-playground-flex-resize-evaluator.el"
                         ebox-playground-directory) nil t t)
 (ebox-playground-interaction-evaluator-click (current-buffer) "ADD " 0)
 (ebox-playground-interaction-evaluator-click (current-buffer) "[-]" 1)
@@ -289,7 +289,7 @@ inclusive 包含子调用，同一栈的递归帧只计一次；exclusive 只计
 buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]`、`SPC`
 和 `[mouse-1]`。
 可选的 `:bindings` alist 将按键描述字符串或事件向量与零参数回调配对；也可以直接
-传入原生 keymap。详见[公共辅助函数契约](../ebox/docs/user/ebox-api-reference.zh.md#原生节点能力)。
+传入原生 keymap。详见[公共辅助函数契约](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md)。
 
 运行器每次渲染都以词法绑定求值一个 `.ebox` 表达式。反引号保留布局数据，`,` 插入
 值，`,@` 展开子节点列表。结果中的属性和子节点都是数据，运行器不会再单独求值。
@@ -297,14 +297,14 @@ buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]
 重复 DSL 属性列表而添加辅助函数。
 
 默认采用简洁写法：省略冗余默认值，把可继承的共同文字样式放到已有父节点，子节点只写差异。
-示例正在讲解的属性仍显式保留。[编写原则](../ebox/docs/user/ebox-user-guide.zh.md#优先利用默认值和继承)
+示例正在讲解的属性仍显式保留。[编写原则](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md#优先利用默认值和继承)
 说明了哪些属性可以继承。空 Box 的自动内容高度为零；一行分隔框显式设置 `:height (lh 1)`。
 
 简化示例时，使用已有 evaluator 对比保存的基准目录和当前 `examples` 目录：
 
 ```sh
 emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
-  -l scripts/ebox-playground-flex-resize-evaluator.el \
+  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```
 
@@ -313,13 +313,13 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 该入口不创建文件或 GUI 窗口，后续同类任务直接复用它，不再编写一次性比较脚本。
 
 尺寸数据统一使用 `(单位 数值)`，支持 `px`、`%`、`vw`、`vh`、`ch`、`lh`，
-以及 `calc`、`min`、`max`、`clamp`。[统一单位约束表](../ebox/docs/user/ebox-user-guide.zh.md#size-unit-constraints)
+以及 `calc`、`min`、`max`、`clamp`。[统一单位约束表](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md#size-unit-constraints)
 规定每个属性允许的单位；不能跨轴混用，嵌套函数的所有分支也遵循同一规则。
 无效组合在 Ebox 构造树时就报错。边框厚度采用表中独立的绘制单位规则。
 例如比视口少一个行高，写
 `:height (calc (- (vh 100) (lh 1)))`；Ebox 会在每次布局时解析这个表达式。
 `fit-content` 只作为裸关键词使用，不带参数。Ebox buffer 后端的纵向内容仍按
-完整行量化，具体规则见 [Ebox 尺寸契约](../ebox/docs/user/ebox-user-guide.zh.md#4-使用几何与绘制-property)。
+完整行量化，具体规则见 [Ebox 尺寸契约](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md#4-使用几何与绘制-property)。
 
 迁移旧的裸结构 `.ebox` 时，静态布局在最外层加 quote，并去掉内部 list 和 symbol
 属性的 quote，例如 `:padding '(1 2)` 改成 `:padding ((lh 1) (ch 2))`。动态值使用
@@ -335,3 +335,11 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 ```
 
 在该目录运行 `make check EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`。
+
+## 开发
+
+克隆后运行 `make setup-hooks`。提交变更前运行 `make check`；`make structure-check` 用于快速检查目录、命名和引用。统一开发规则见 [AGENTS.md](AGENTS.md)。
+
+[docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)
+
+`make check` 运行规范检查、编译及 [tests/acceptance.json](tests/acceptance.json) 中的公共验收场景。`make test` 运行更全面的回归测试；GUI 与性能验收使用独立入口。验收清单依据对外契约选择，不按当前能否通过筛选。

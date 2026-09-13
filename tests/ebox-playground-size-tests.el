@@ -11,7 +11,7 @@
 (require 'ebox-playground)
 (require 'ebox-size)
 (require 'ebox-playground-flex-resize-evaluator
-         (expand-file-name "scripts/ebox-playground-flex-resize-evaluator.el"
+         (expand-file-name "benchmarks/ebox-playground-flex-resize-evaluator.el"
                            ebox-playground-directory))
 
 (defconst ebox-playground-size-test--file

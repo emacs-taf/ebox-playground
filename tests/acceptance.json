@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "load_path": [
+    ".",
+    "tests",
+    "examples",
+    "benchmarks",
+    "../ebox",
+    "../ecss",
+    "../tp"
+  ],
+  "support": [],
+  "cases": [
+    {
+      "name": "ebox-playground-migrated-fixtures-render-at-the-canvas-width",
+      "file": "tests/ebox-playground-tests.el",
+      "purpose": "migrated fixtures render at the canvas width"
+    },
+    {
+      "name": "ebox-playground-selector-cascade-colors",
+      "file": "tests/ebox-playground-tests.el",
+      "purpose": "selector cascade colors"
+    },
+    {
+      "name": "ebox-playground-interaction-native-keys-replace-step-and-read-live-help",
+      "file": "tests/ebox-playground-interaction-tests.el",
+      "purpose": "interaction native keys replace step and read live help"
+    },
+    {
+      "name": "ebox-playground-interaction-previews-have-independent-state",
+      "file": "tests/ebox-playground-interaction-tests.el",
+      "purpose": "interaction previews have independent state"
+    },
+    {
+      "name": "ebox-playground-interaction-viewport-resize-retains-updated-binding",
+      "file": "tests/ebox-playground-interaction-tests.el",
+      "purpose": "interaction viewport resize retains updated binding"
+    }
+  ]
+}

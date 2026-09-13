@@ -1,7 +1,9 @@
+.DEFAULT_GOAL := check
+.NOTPARALLEL:
 EMACS ?= emacs
 ECSS_DIR ?= ../ecss
 TP_DIR ?= ../tp
-LOAD_PATH = -L . -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
+LOAD_PATH = -L . -L benchmarks -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
 EBOX_NATIVE_RELEASE_DIR = $(shell $(EMACS) -Q --batch $(LOAD_PATH) \
 	--eval '(setq native-comp-jit-compilation nil)' \
 	-l ../ebox/ebox-native-reflow.el \
@@ -19,7 +21,7 @@ compile:
 		--eval '(load-file "ebox-playground.el")' \
 		--eval '(byte-compile-file "ebox-playground.el")' \
 		--eval '(dolist (file (directory-files "examples" t)) (when (string-suffix-p ".el" file) (unless (byte-compile-file file) (error "Companion compilation failed: %s" file))))' \
-		--eval '(byte-compile-file "scripts/ebox-playground-flex-resize-evaluator.el")'
+		--eval '(byte-compile-file "benchmarks/ebox-playground-flex-resize-evaluator.el")'
 
 test: compile
 	$(EMACS) -Q --batch $(LOAD_PATH) \
@@ -72,12 +74,22 @@ performance-prepare:
 
 performance-evaluator:
 	EBOX_NATIVE_REFLOW_MODULE_PATH="$(EBOX_NATIVE_RELEASE_DIR)" \
-	EMACS="$(EMACS)" ./scripts/flex-resize-evaluator.sh
+	EMACS="$(EMACS)" ./benchmarks/flex-resize-evaluator.sh
 
 checkdoc:
 	$(EMACS) -Q --batch --eval '(progn (require (quote checkdoc)) (dolist (directory (quote ("." "examples"))) (dolist (file (directory-files directory t)) (when (string-suffix-p ".el" file) (checkdoc-file file)))))'
 
-check: checkdoc compile test
+check: structure-check compile acceptance
 
 clean:
 	rm -f *.elc tests/*.elc examples/*.elc
+
+.PHONY: structure-check setup-hooks
+structure-check:
+	python3 scripts/check-repository.py
+setup-hooks:
+	git config --local core.hooksPath .githooks
+
+.PHONY: acceptance
+acceptance:
+	python3 scripts/run-acceptance.py --emacs "$(EMACS)"

@@ -4,7 +4,7 @@
 (require 'cl-lib)
 (require 'ebox-playground)
 (require 'ebox-playground-flex-resize-evaluator
-         (expand-file-name "scripts/ebox-playground-flex-resize-evaluator.el"
+         (expand-file-name "benchmarks/ebox-playground-flex-resize-evaluator.el"
                            ebox-playground-directory))
 
 (defconst ebox-playground-test--fixtures
@@ -251,7 +251,7 @@
   (let* ((source (with-temp-buffer
                   (insert-file-contents
                    (expand-file-name
-                    "scripts/ebox-playground-flex-resize-evaluator.el"
+                    "benchmarks/ebox-playground-flex-resize-evaluator.el"
                     ebox-playground-directory))
                   (buffer-string)))
         (resize-source
@@ -280,7 +280,7 @@
                         (nreverse functions) :test #'equal)))))
         (runner (with-temp-buffer
                   (insert-file-contents
-                   (expand-file-name "scripts/flex-resize-evaluator.sh"
+                   (expand-file-name "benchmarks/flex-resize-evaluator.sh"
                                      ebox-playground-directory))
                   (buffer-string)))
         (makefile (with-temp-buffer
