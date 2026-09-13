@@ -3,10 +3,10 @@
 EMACS ?= emacs
 ECSS_DIR ?= ../ecss
 TP_DIR ?= ../tp
-LOAD_PATH = -L . -L benchmarks -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
+LOAD_PATH = -L . -L benchmarks -L ../ebox/lisp -L $(ECSS_DIR)/lisp -L $(TP_DIR)/lisp
 EBOX_NATIVE_RELEASE_DIR = $(shell $(EMACS) -Q --batch $(LOAD_PATH) \
 	--eval '(setq native-comp-jit-compilation nil)' \
-	-l ../ebox/ebox-native-reflow.el \
+	-l ../ebox/lisp/ebox-native-reflow.el \
 	--eval '(princ (expand-file-name (format "../ebox/native/target/%s/release/" (ebox-native-reflow--rust-target))))')
 
 .PHONY: all compile test size-tests interaction-tests layer-tests desktop-tests check checkdoc load performance performance-prepare \

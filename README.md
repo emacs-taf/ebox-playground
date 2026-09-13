@@ -77,7 +77,7 @@ interaction evaluator. Alternating directions keeps each step moving instead
 of reaching the desktop boundary; four warmup commands are excluded:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
@@ -159,7 +159,7 @@ For repeated command timing, use the existing interaction evaluator with
 For the spatial desktop's expand/collapse path, run:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
@@ -237,7 +237,7 @@ For repeated-key behavior and command timing, use the shared interaction
 evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
@@ -384,7 +384,7 @@ For example simplifications, compare a saved baseline directory with the
 current `examples` directory using the existing evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```
@@ -399,7 +399,7 @@ For scrolling regressions across examples, use the same evaluator's generic
 scroll entry point:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run (directory-files "examples" t "\\.ebox$") 721 20 45)'
 ```
