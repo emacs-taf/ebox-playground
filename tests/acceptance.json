@@ -3,38 +3,41 @@
   "load_path": [
     ".",
     "tests",
-    "examples",
-    "benchmarks",
     "../ebox",
     "../ecss",
+    "../ekp",
+    "../etaf",
+    "../etaf-db",
+    "../etaf-playground",
+    "../etaf-ui",
     "../tp"
   ],
   "support": [],
   "cases": [
     {
-      "name": "ebox-playground-migrated-fixtures-render-at-the-canvas-width",
+      "name": "ebox-playground-dsl-render-uses-window-width-for-viewport",
       "file": "tests/ebox-playground-tests.el",
-      "purpose": "migrated fixtures render at the canvas width"
+      "purpose": "C-c C-c should build viewport-dependent roots at the preview width."
     },
     {
-      "name": "ebox-playground-selector-cascade-colors",
+      "name": "ebox-playground-dsl-render-grid-reference-fits-preview-viewport",
       "file": "tests/ebox-playground-tests.el",
-      "purpose": "selector cascade colors"
+      "purpose": "C-c C-c should render the real Grid reference inside the preview viewport."
     },
     {
-      "name": "ebox-playground-interaction-native-keys-replace-step-and-read-live-help",
-      "file": "tests/ebox-playground-interaction-tests.el",
-      "purpose": "interaction native keys replace step and read live help"
+      "name": "ebox-playground-dsl-render-keeps-source-left-of-preview",
+      "file": "tests/ebox-playground-tests.el",
+      "purpose": "C-c C-c should keep the source left of its rendered preview."
     },
     {
-      "name": "ebox-playground-interaction-previews-have-independent-state",
-      "file": "tests/ebox-playground-interaction-tests.el",
-      "purpose": "interaction previews have independent state"
+      "name": "ebox-playground-registers-ebox-file-mode",
+      "file": "tests/ebox-playground-tests.el",
+      "purpose": "Open Ebox DSL files in the package-owned major mode."
     },
     {
-      "name": "ebox-playground-interaction-viewport-resize-retains-updated-binding",
-      "file": "tests/ebox-playground-interaction-tests.el",
-      "purpose": "interaction viewport resize retains updated binding"
+      "name": "ebox-playground-renders-ebox-file-mode-source",
+      "file": "tests/ebox-playground-tests.el",
+      "purpose": "Render a file-mode buffer through the public Ebox build path."
     }
   ]
 }

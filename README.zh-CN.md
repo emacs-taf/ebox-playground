@@ -21,7 +21,7 @@ ECSS 0.1.0 与 TP 1.0.1 是互相独立的包，安装顺序任意；两者都�
 高度内容关键词会明确标注当前渲染器中的等效关系；`min`、`max`、`clamp` 使用相同的低、中、高输入展示边界变化。
 实色矩形标明被测 Box 的完整范围（包含空白），浅色标尺表示父容器的可用宽度，白色卡片承载说明。
 
-运行 `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，可检查核心尺寸契约、
+运行 `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，可检查核心尺寸契约、
 示例的实际属性覆盖、已知计算结果、背景所指示的尺寸差异、完整渲染及保留状态的视口更新。`make check` 也包含此示例的回归测试。
 
 ## PARALLAX 可拖拽桌面
@@ -53,7 +53,7 @@ Desktop 中的鼠标点击与拖动不会选中文本，按钮之间、换行和
 横向按像素移动，纵向遵循 Ebox 的文本行网格。推荐至少 40 列、20 行，更大的预览
 有更多摆放空间。所有文本保持当前字体大小，不使用额外字体或图片依赖。
 
-运行 `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`
+运行 `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`
 检查真实 keymap 命令、中间运动帧、松手、遮挡归属、失败回滚和渲染一致性；
 `make check` 已包含该套件。重复位置发布的耗时和 CPU 采样使用共享 interaction
 evaluator；左右交替避免触及边界后只测到空操作，前四次预热不计入指标：
@@ -108,7 +108,7 @@ helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次�
 回滚覆盖排队的 Ebox 更新，不撤销 companion 中任意业务状态变化，详见
 [批量更新契约](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.zh-CN.md)。
 
-运行 `make layer-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，
+运行 `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，
 验证图层契约、实际原生命令及已提交快照的独立渲染一致性，无需打开 GUI 窗口。
 
 使用共享入口测量桌面展开／收起路径：
@@ -171,7 +171,7 @@ buffer 中运行。Ebox 不增加应用状态或焦点导航系统，使用键�
 在本目录运行交互检查：
 
 ```sh
-make interaction-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 ```
 
 该入口验证核心交互契约、示例渲染后的能力、命令效果、替换与清除/恢复。
@@ -342,4 +342,4 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 
 [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)
 
-`make check` 运行规范检查、编译及 [tests/acceptance.json](tests/acceptance.json) 中的公共验收场景。`make test` 运行更全面的回归测试；GUI 与性能验收使用独立入口。验收清单依据对外契约选择，不按当前能否通过筛选。
+`make check` 运行规范检查、编译及 [tests/acceptance.json](tests/acceptance.json) 中的公共验收场景。`make test` 运行同一套公共 API 测试。清单涵盖全部保留的 Lisp 测试；内部实现测试直接删除。GUI 与性能验收使用独立入口。

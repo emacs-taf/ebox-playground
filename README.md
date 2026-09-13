@@ -29,7 +29,7 @@ and `clamp` respond at their boundaries.
 Solid rectangles mark the measured Box's full extent, including empty space;
 pale rulers show available parent width, while white cards contain the labels.
 
-Run `make size-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` to check
+Run `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` to check
 the core size contracts and the actual example declarations, known arithmetic
 results, painted sizing differences, complete rendering, and retained viewport updates. `make check` also
 includes the example's regression tests.
@@ -72,7 +72,7 @@ host text rows. This is live text-window composition, not sub-row raster motion.
 Use at least 40 columns and 20 rows; larger previews leave more room to arrange
 the five panes. Reopening the file creates an independent desktop state.
 
-Run `make desktop-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
+Run `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
 native command, intermediate motion, release, overlap, rollback, independent
 preview and render-parity regressions. Normal `make check` includes this suite.
 For repeated movement publication timing and CPU sampling, use the shared
@@ -147,7 +147,7 @@ rows, and positioned content must share its host's line height.
 Run the batch checks without opening GUI windows:
 
 ```sh
-make layer-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 ```
 
 This target runs core layer contracts and the actual demo's native commands,
@@ -229,7 +229,7 @@ bindings requires replacing `:keymap`. Each evaluation creates a fresh demo.
 Run the interaction checks from this directory:
 
 ```sh
-make interaction-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 ```
 
 The target verifies the core interaction contracts and this fixture's rendered
@@ -485,7 +485,7 @@ After cloning, run `make setup-hooks`. Before submitting a change, run `make che
 
 [docs/architecture.md](docs/architecture.md)
 
-`make check` runs structure checks, compilation and the public acceptance scenarios listed in [tests/acceptance.json](tests/acceptance.json). `make test` runs the broader regression suite; GUI and performance checks remain explicit targets. The acceptance inventory is selected by user-visible contracts, not by current pass/fail status.
+`make check` runs structure checks, compilation and the public acceptance scenarios listed in [tests/acceptance.json](tests/acceptance.json). `make test` runs the same public API suite. The inventory covers every maintained Lisp test; private implementation tests are deleted. GUI and performance checks use separate targets.
 
 ## Source layout migration
 
