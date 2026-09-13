@@ -1025,8 +1025,8 @@
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-render.ebox")
             (insert "'(box :width (vw 100) :height (lh 1) \"viewport\")")
-            (ebox-dsl-mode)
-            (ebox-dsl-render)
+            (ebox-playground-mode)
+            (ebox-playground-render)
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
@@ -1050,8 +1050,8 @@
           (with-temp-buffer
             (setq buffer-file-name path)
             (insert-file-contents path)
-            (ebox-dsl-mode)
-            (ebox-dsl-render)
+            (ebox-playground-mode)
+            (ebox-playground-render)
             (with-current-buffer preview
               (should (cl-every
                        (lambda (width) (<= width viewport))
@@ -1072,12 +1072,12 @@
             (setq source (current-buffer)
                   buffer-file-name "/tmp/ebox-playground-two-window.ebox")
             (insert "'(box :width (vw 100) :height (lh 1) \"two windows\")")
-            (ebox-dsl-mode)
+            (ebox-playground-mode)
             (cl-letf (((symbol-function 'window-body-width)
                        (lambda (&optional _window _pixelwise) 987))
                       ((symbol-function 'frame-char-width)
                        (lambda (&optional _frame) 8)))
-              (ebox-dsl-render))
+              (ebox-playground-render))
             (let* ((windows
                     (sort (copy-sequence (window-list nil 'no-minibuf))
                           (lambda (left right)
@@ -1111,8 +1111,8 @@
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-resize.ebox")
             (insert "'(box :width (vw 100) :height (lh 1) \"viewport\")")
-            (ebox-dsl-mode)
-            (ebox-dsl-render)
+            (ebox-playground-mode)
+            (ebox-playground-render)
             (setq window-width 1234)
             (with-current-buffer preview
               (let ((window (get-buffer-window (current-buffer))))
@@ -1397,8 +1397,8 @@
   (with-temp-buffer
     (setq buffer-file-name "/tmp/ebox-playground-mode-test.ebox")
     (set-auto-mode)
-    (should (eq major-mode 'ebox-dsl-mode))
-    (should (eq (key-binding (kbd "C-c C-c")) #'ebox-dsl-render))
+    (should (eq major-mode 'ebox-playground-mode))
+    (should (eq (key-binding (kbd "C-c C-c")) #'ebox-playground-render))
     (should (string-match-p "C-c C-c" header-line-format))))
 
 (ert-deftest ebox-playground-renders-ebox-file-mode-source ()
@@ -1408,8 +1408,8 @@
         (with-temp-buffer
           (setq buffer-file-name "/tmp/ebox-playground-render-test.ebox")
           (insert "'(box :width (px 240) \"Rendered from .ebox\")")
-          (ebox-dsl-mode)
-          (ebox-dsl-render)
+          (ebox-playground-mode)
+          (ebox-playground-render)
           (should (eq (window-buffer (selected-window)) (current-buffer)))
           (should (get-buffer-window (get-buffer preview)))
           (with-current-buffer preview
@@ -1491,7 +1491,7 @@
     (unwind-protect
         (with-temp-buffer
           (insert source)
-          (ebox-dsl-mode)
+          (ebox-playground-mode)
           (let ((buffer-form (ebox-playground--source-form)))
             (should (equal buffer-form '(box :width (px 240) "Computed body")))
             (should (equal (ebox-render (ebox-playground-view file 720))
@@ -1684,7 +1684,7 @@
        (with-temp-buffer
          (setq buffer-file-name file)
          (insert "(list 'box ebox-playground-test--companion-value)")
-         (ebox-dsl-mode)
+         (ebox-playground-mode)
          (let ((default-directory temporary-file-directory)
                (preview (format "*Ebox Preview: %s*" file))
                (ebox-viewport-width 240))
@@ -1747,7 +1747,7 @@
      (with-temp-buffer
        (setq buffer-file-name file)
        (insert-file-contents file)
-       (ebox-dsl-mode)
+       (ebox-playground-mode)
        (should (equal (ebox-playground--source-form)
                       '(box "Standalone example")))))))
 

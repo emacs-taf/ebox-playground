@@ -27,10 +27,10 @@ require_fresh_elc "$root/ebox-playground.el" "$root/ebox-playground.elc"
 require_fresh_elc \
     "$root/benchmarks/ebox-playground-flex-resize-evaluator.el" \
     "$root/benchmarks/ebox-playground-flex-resize-evaluator.elc"
-require_fresh_elc "$root/../ebox/lisp/ebox.el" "$root/../ebox/lisp/ebox.elc"
-require_fresh_elc "$root/../ebox/lisp/ebox-surface.el" "$root/../ebox/lisp/ebox-surface.elc"
-require_fresh_elc "$root/../ecss/lisp/ecss.el" "$root/../ecss/lisp/ecss.elc"
-require_fresh_elc "$root/../tp/lisp/tp.el" "$root/../tp/lisp/tp.elc"
+require_fresh_elc "$root/../ebox/ebox.el" "$root/../ebox/ebox.elc"
+require_fresh_elc "$root/../ebox/ebox-surface.el" "$root/../ebox/ebox-surface.elc"
+require_fresh_elc "$root/../ecss/ecss.el" "$root/../ecss/ecss.elc"
+require_fresh_elc "$root/../tp/tp.el" "$root/../tp/tp.elc"
 
 : "${EBOX_NATIVE_REFLOW_MODULE_PATH:?run make performance-prepare first}"
 if [ ! -r "$EBOX_NATIVE_REFLOW_MODULE_PATH/libebox_native_reflow.dylib" ]; then
@@ -45,8 +45,8 @@ export EBOX_PLAYGROUND_FLEX_FIXTURE=$fixture
 # that directly affect this render path.  Loading the complete user init would
 # add unrelated packages, timers, and UI state to the performance gate.
 "$emacs" -Q --daemon="$server" \
-    -L "$root" -L "$root/../ebox/lisp" -L "$root/../ecss/lisp" \
-    -L "$root/../tp/lisp" \
+    -L "$root" -L "$root/../ebox" -L "$root/../ecss" \
+    -L "$root/../tp" \
     --eval '(setq load-prefer-newer t
                   native-comp-jit-compilation nil
                   ebox-native-reflow-module-path

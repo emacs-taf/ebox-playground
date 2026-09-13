@@ -15,7 +15,7 @@
 (require 'seq)
 (require 'profiler)
 (require 'ebox-playground)
-(require 'ebox-native-reflow)
+(require 'ebox)
 
 (defcustom ebox-playground-flex-resize-evaluator-fixture
   (or (getenv "EBOX_PLAYGROUND_FLEX_FIXTURE")
@@ -900,7 +900,7 @@ Each sample loop checks a 30-second deadline between motions."
 (defun ebox-playground-flex-resize-evaluator--settle-preview
     (preview preview-window)
   "Publish PREVIEW at its settled PREVIEW-WINDOW viewport before measuring.
-The GUI frame can acquire its final pixel width after `ebox-dsl-render' has
+The GUI frame can acquire its final pixel width after `ebox-playground-render' has
 mounted the split.  This setup publication is outside the measured splitter
 action, so the action starts from a self-consistent runtime generation rather
 than charging initial frame settling to resize."
@@ -960,8 +960,8 @@ concurrent cache warming CPU work."
                    ebox-playground-flex-resize-evaluator-fixture))
           (setq source
                 (find-file ebox-playground-flex-resize-evaluator-fixture))
-          (ebox-dsl-mode)
-          (setq preview (ebox-dsl-render)
+          (ebox-playground-mode)
+          (setq preview (ebox-playground-render)
                 preview-window (get-buffer-window preview (selected-frame)))
           (unless (and (buffer-live-p preview)
                        (window-live-p preview-window))

@@ -3,245 +3,62 @@
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Author: Ebox contributors
 ;; Version: 0.1.1
-;; Package-Requires: ((emacs "29.1") (ebox "2.0.1"))
+;; Package-Requires: ((emacs "29.1") (ebox "3.0.0"))
 ;; URL: https://github.com/ginqi7/ebox-playground
 
 ;;; Commentary:
 
-;; This package is intentionally small and public-only.  It demonstrates the
-;; Ebox contract without reaching into internal implementation details.  ETAF's
-;; application examples live in the sibling `etaf-playground' package.
+;; Public API
+;;
+;; Load this package with (require 'ebox-playground) after adding the repository
+;; root to load-path.
+;; Only the interfaces listed below are supported for use by other packages.
+;; All unlisted symbols and implementation features are internal, including
+;; names without a double hyphen. Do not require files below lisp/ from consumers.
+;; This Commentary is the authoritative export list; implementations and precise
+;; docstrings remain beside their definitions. The manual contains workflows.
+;;
+;; Function: ebox-playground-mode ()
+;;;###autoload (autoload 'ebox-playground-mode "ebox-playground" nil t)
+;; Major mode for Ebox DSL source files.
+;;
+;; In addition to any hooks its parent mode `emacs-lisp-mode' might have
+;; run, this mode runs the hook `ebox-playground-mode-hook', as the final or
+;; penultimate step during initialization.
+;;
+;; \{ebox-playground-mode-map}
+;;
+;; Variable: ebox-playground-mode-map
+;; Keymap used by `ebox-playground-mode'.
+;;
+;; Function: ebox-playground-render ()
+;;;###autoload (autoload 'ebox-playground-render "ebox-playground" nil t)
+;; Render the current DSL buffer beside its right-hand preview.
+;;
+;; Variable: ebox-playground-directory
+;; Directory containing the Ebox Playground package.
+;;
+;; Function: ebox-playground-open (&optional buffer-name)
+;;;###autoload (autoload 'ebox-playground-open "ebox-playground" nil t)
+;; Render the default Ebox DSL example into BUFFER-NAME and return its buffer.
+;;
+;; Function: ebox-playground-open-file (file &optional buffer-name)
+;;;###autoload (autoload 'ebox-playground-open-file "ebox-playground" nil t)
+;; Render Ebox DSL FILE into BUFFER-NAME and return its buffer.
+;;
 
 ;;; Code:
 
-(require 'ebox)
-(require 'cl-lib)
-(require 'elisp-mode)
-(require 'subr-x)
-(defvar read-eval)
-
-(defconst ebox-playground-buffer-name "*Ebox Playground*"
-  "Default buffer name used by `ebox-playground-open'.")
-
-(defvar ebox-dsl-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map emacs-lisp-mode-map)
-    (define-key map (kbd "C-c C-c") #'ebox-dsl-render)
-    map)
-  "Keymap used by `ebox-dsl-mode'.")
-
-(defconst ebox-playground--dsl-header-line
-  "Ebox DSL  |  C-c C-c  Render preview"
-  "Header line shown by `ebox-dsl-mode'.")
-
-(defun ebox-playground--source-form ()
-  "Read and evaluate the single Elisp expression in the current buffer."
-  (ebox-playground--evaluate-form
-   (ebox-playground--read-form
-    (buffer-substring-no-properties (point-min) (point-max)))
-   buffer-file-name))
-
 ;;;###autoload
-(define-derived-mode ebox-dsl-mode emacs-lisp-mode "EboxDSL"
-  "Major mode for Ebox DSL source files."
-  (setq-local header-line-format ebox-playground--dsl-header-line)
-  (setq-local truncate-lines nil)
-  (setq-local bidi-display-reordering nil)
-  (setq-local bidi-paragraph-direction 'left-to-right))
+(eval-and-compile
+  (add-to-list 'load-path
+               (expand-file-name "lisp"
+                                 (file-name-directory
+                                  (or load-file-name
+                                      (bound-and-true-p byte-compile-current-file)
+                                      buffer-file-name)))))
 
-;;;###autoload
-(defun ebox-dsl-render ()
-  "Render the current DSL buffer beside its right-hand preview."
-  (interactive)
-  (delete-other-windows)
-  (let* ((window-min-height 1)
-         (window-min-width 1)
-         (source-window (selected-window))
-         (preview-window (split-window-right))
-         (preview-width
-          (ebox-playground--window-viewport-width preview-window))
-         (bound-width (and (numberp ebox-viewport-width)
-                           (> ebox-viewport-width 0)
-                           (floor ebox-viewport-width)))
-         (viewport-width
-          (or bound-width preview-width
-              ebox-playground-default-viewport-width))
-         (ebox-viewport-width viewport-width)
-         (source-buffer (current-buffer))
-         (source-form (ebox-playground--source-form))
-         (name (format "*Ebox Preview: %s*"
-                       (or (buffer-file-name) (buffer-name))))
-         (node (ebox-build source-form))
-         (buffer (ebox-playground--render-to-preview-buffer name node)))
-    (set-window-buffer source-window source-buffer)
-    (set-window-buffer preview-window buffer)
-    (select-window source-window)
-    (message "Rendered Ebox DSL into %s" name)
-    buffer))
-
-;; Playground owns the richer split-window interaction while Ebox core owns
-;; the standalone file mode and single-buffer preview command.
-(define-key ebox-dsl-mode-map (kbd "C-c C-c") #'ebox-dsl-render)
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
-
-(defgroup ebox-playground nil
-  "Run Ebox DSL examples from source files."
-  :group 'ebox)
-
-(defconst ebox-playground-directory
-  (file-name-directory (or load-file-name buffer-file-name))
-  "Directory containing the Ebox Playground package.")
-
-(defcustom ebox-playground-default-file
-  (expand-file-name "examples/grid-reference.ebox"
-                    ebox-playground-directory)
-  "Ebox DSL file rendered by `ebox-playground-open'."
-  :type 'file
-  :group 'ebox-playground)
-
-(defcustom ebox-playground-default-viewport-width 720
-  "Viewport width used when a caller does not provide one explicitly."
-  :type 'positive-integer
-  :group 'ebox-playground)
-
-(defun ebox-playground--window-viewport-width (&optional window)
-  "Return Ebox's shared display-safe viewport width for WINDOW."
-  (ebox-viewport-window-width window))
-
-(defun ebox-playground--effective-viewport-width (&optional window)
-  "Return the caller's width, WINDOW's text width, or the compact default."
-  (cond
-   ((and (numberp ebox-viewport-width)
-         (> ebox-viewport-width 0))
-    (floor ebox-viewport-width))
-   ((ebox-playground--window-viewport-width window))
-   (t ebox-playground-default-viewport-width)))
-
-(defun ebox-playground--apply-preview-display-settings ()
-  "Apply text redisplay settings without overriding buffer chrome or faces."
-  (setq-local truncate-lines t)
-  (setq-local auto-hscroll-mode t)
-  (setq-local fringe-indicator-alist
-              (cl-remove-if
-               (lambda (entry)
-                 (memq (car-safe entry) '(truncation continuation)))
-               (copy-tree fringe-indicator-alist)))
-  (setq-local bidi-display-reordering nil)
-  (setq-local bidi-paragraph-direction 'left-to-right)
-  (setq-local bidi-inhibit-bpa t))
-
-(defconst ebox-playground--preview-display-variables
-  '(truncate-lines auto-hscroll-mode
-    fringe-indicator-alist bidi-display-reordering bidi-paragraph-direction
-    bidi-inhibit-bpa)
-  "Buffer-local display variables owned by a playground preview.")
-
-(defun ebox-playground--preview-display-snapshot ()
-  "Return the current values and locality of preview display variables."
-  (mapcar
-   (lambda (variable)
-     (list variable
-           (local-variable-p variable)
-           (and (boundp variable) (symbol-value variable))))
-   ebox-playground--preview-display-variables))
-
-(defun ebox-playground--restore-preview-display-snapshot (snapshot)
-  "Restore preview display variable SNAPSHOT in the current buffer."
-  (dolist (entry snapshot)
-    (let ((variable (nth 0 entry))
-          (was-local-p (nth 1 entry))
-          (value (nth 2 entry)))
-      (if was-local-p
-          (set (make-local-variable variable) value)
-        (kill-local-variable variable)))))
-
-(defun ebox-playground--render-to-preview-buffer (buffer input)
-  "Render canonical INPUT into BUFFER with transactional display settings."
-  (unless (ebox-canonical-input-p input)
-    (signal 'wrong-type-argument (list 'ebox-canonical-input-p input)))
-  (with-current-buffer (get-buffer-create buffer)
-    ;; A preview name is stable across edits, while its canonical source
-    ;; generation is not.  Drop the retained surface before publishing the
-    ;; replacement so a failed/old generation can never remain visible.
-    (when (ebox-surface--live-buffer-surface (current-buffer))
-      (ebox-unmount-buffer (current-buffer)))
-    (erase-buffer)
-    (let ((snapshot (ebox-playground--preview-display-snapshot))
-          (published-p nil))
-      (unwind-protect
-          (prog1
-              (progn
-                (ebox-playground--apply-preview-display-settings)
-                (ebox-render-to-buffer buffer input))
-            (setq published-p t))
-        (unless published-p
-          (ebox-playground--restore-preview-display-snapshot snapshot))))))
-
-(defun ebox-playground--render-input-to-buffer (buffer input viewport-width)
-  "Render canonical INPUT into BUFFER using VIEWPORT-WIDTH.
-Visible mounted buffers follow their window through Ebox's viewport controller."
-  (let ((ebox-viewport-width
-         (or viewport-width
-             (ebox-playground--effective-viewport-width))))
-    (ebox-playground--render-to-preview-buffer buffer input)))
-
-(defun ebox-playground--evaluate-form (form &optional source-file)
-  "Evaluate one Elisp FORM lexically to produce Ebox DSL data.
-When SOURCE-FILE names a .ebox file, load its optional same-basename .el
-companion first.  Reload that exact source file on every evaluation."
-  (ebox-file-evaluate-form form source-file))
-
-(defun ebox-playground--read-form (source)
-  "Read exactly one Elisp expression from SOURCE."
-  (ebox-file-read-form source))
-
-(defun ebox-playground--read-file (file)
-  "Read one Elisp expression from FILE."
-  (ebox-file-read-file file))
-
-;;;###autoload
-(defun ebox-playground-view (&optional file viewport-width)
-  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without publishing it.
-Reload FILE's optional same-basename .el companion before evaluating its DSL."
-  (let ((ebox-viewport-width
-         (or viewport-width (ebox-playground--effective-viewport-width)))
-        (file (expand-file-name (or file ebox-playground-default-file))))
-    (ebox-build
-     (ebox-playground--evaluate-form
-      (ebox-playground--read-file file) file))))
-
-;;;###autoload
-(defun ebox-playground-open (&optional buffer-name)
-  "Render the default Ebox DSL example into BUFFER-NAME and return its buffer."
-  (interactive)
-  (let ((viewport-width (ebox-playground--effective-viewport-width)))
-    (ebox-playground--render-input-to-buffer
-     (or buffer-name ebox-playground-buffer-name)
-     (ebox-playground-view nil viewport-width)
-     viewport-width)))
-
-;;;###autoload
-(defun ebox-playground-open-file (file &optional buffer-name)
-  "Render Ebox DSL FILE into BUFFER-NAME and return its buffer."
-  (interactive "fEbox DSL file: ")
-  (let ((viewport-width (ebox-playground--effective-viewport-width)))
-    (ebox-playground--render-input-to-buffer
-     (or buffer-name
-         (format "*Ebox Preview: %s*" (file-name-nondirectory file)))
-     (ebox-playground-view file viewport-width)
-     viewport-width)))
-
-;;;###autoload
-(defun ebox-playground-close (&optional buffer-name)
-  "Kill the playground BUFFER-NAME and return its former buffer."
-  (interactive)
-  (let ((buffer (get-buffer (or buffer-name ebox-playground-buffer-name))))
-    (when buffer
-      (kill-buffer buffer))
-    buffer))
+(require 'ebox-playground-runtime)
 
 (provide 'ebox-playground)
-
 ;;; ebox-playground.el ends here

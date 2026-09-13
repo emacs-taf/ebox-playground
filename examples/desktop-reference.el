@@ -9,7 +9,7 @@
 
 (require 'cl-lib)
 (require 'ebox)
-(require 'ebox-selector)
+(require 'ebox)
 
 (defun desktop-demo--dismiss-mouse-selection ()
   "Consume a native text-selection command in a desktop preview."

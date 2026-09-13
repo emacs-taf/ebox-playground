@@ -9,7 +9,7 @@
 (require 'ert)
 (require 'cl-lib)
 (require 'ebox-playground)
-(require 'ebox-size)
+(require 'ebox)
 (require 'ebox-playground-flex-resize-evaluator
          (expand-file-name "benchmarks/ebox-playground-flex-resize-evaluator.el"
                            ebox-playground-directory))

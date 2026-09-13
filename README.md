@@ -1,8 +1,11 @@
 # ebox-playground
 
+Add the repository root to `load-path` and use `(require 'ebox-playground)`.
+[`ebox-playground.el`](ebox-playground.el) documents the supported API; `lisp/` contains internal implementations.
+
 `ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu. `desktop-reference.ebox` provides five directly draggable, overlapping text windows.
 
-ECSS 0.1.0 and TP 1.0.1 are independent packages and may be installed in either order. Install both before Ebox 2.0.1, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
+ECSS 0.1.0 and TP 2.0.0 are independent packages and may be installed in either order. Install both before Ebox 3.0.0, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
 
 Standalone gallery entry points default to a definite 720 px canvas so nested examples have stable space in batch renders and one-window demos. Split-window `.ebox` previews instead resolve `(vw 100)` to the preview window's display-safe width. Section separators use their containing Column's available width, so they also fit a narrower root. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 
@@ -77,7 +80,7 @@ interaction evaluator. Alternating directions keeps each step moving instead
 of reaching the desktop boundary; four warmup commands are excluded:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
@@ -159,7 +162,7 @@ For repeated command timing, use the existing interaction evaluator with
 For the spatial desktop's expand/collapse path, run:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
@@ -237,7 +240,7 @@ For repeated-key behavior and command timing, use the shared interaction
 evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
@@ -309,10 +312,10 @@ the counter or event log separately to verify the business result.
 
 ## Author and render `.ebox` files
 
-The package also owns the `.ebox` file boundary. Visiting an Ebox DSL file selects `ebox-dsl-mode`; its header line shows `C-c C-c Render preview`. Press `C-c C-c` to evaluate the file's single Elisp expression, build its resulting layout data through `ebox-build`, and automatically display the source and preview side by side.
+The package also owns the `.ebox` file boundary. Visiting an Ebox DSL file selects `ebox-playground-mode`; its header line shows `C-c C-c Render preview`. Press `C-c C-c` to evaluate the file's single Elisp expression, build its resulting layout data through `ebox-build`, and automatically display the source and preview side by side.
 
 ```elisp
-(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
+(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-playground-mode))
 ```
 
 Write the same expression in `.ebox` that you would pass as the argument to
@@ -384,7 +387,7 @@ For example simplifications, compare a saved baseline directory with the
 current `examples` directory using the existing evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```
@@ -399,7 +402,7 @@ For scrolling regressions across examples, use the same evaluator's generic
 scroll entry point:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run (directory-files "examples" t "\\.ebox$") 721 20 45)'
 ```
@@ -483,3 +486,12 @@ After cloning, run `make setup-hooks`. Before submitting a change, run `make che
 [docs/architecture.md](docs/architecture.md)
 
 `make check` runs structure checks, compilation and the public acceptance scenarios listed in [tests/acceptance.json](tests/acceptance.json). `make test` runs the broader regression suite; GUI and performance checks remain explicit targets. The acceptance inventory is selected by user-visible contracts, not by current pass/fail status.
+
+## Source layout migration
+
+Replace checkout paths ending in `/ebox-playground/lisp` with `/ebox-playground` and require
+`ebox-playground`. Package archives must preserve the root entry and `lisp/` directory.
+Use only the public interfaces documented in the entry Commentary; internal
+feature imports and the former entry locations are removed.
+The preview mode and command are now `ebox-playground-mode` and
+`ebox-playground-render`; update key bindings using the old Playground names.

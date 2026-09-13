@@ -59,7 +59,7 @@ Desktop 中的鼠标点击与拖动不会选中文本，按钮之间、换行和
 evaluator；左右交替避免触及边界后只测到空操作，前四次预热不计入指标：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
@@ -72,7 +72,7 @@ emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
 使用共享 `benchmarks/ebox-playground-flex-resize-evaluator.el` 的入口：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run "examples/flex-reference.ebox" 104 6 36)'
@@ -114,7 +114,7 @@ helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次�
 使用共享入口测量桌面展开／收起路径：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
@@ -180,7 +180,7 @@ make interaction-tests EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 检查重复按键行为和命令耗时时，使用共享交互 evaluator：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
@@ -238,10 +238,10 @@ inclusive 包含子调用，同一栈的递归帧只计一次；exclusive 只计
 
 ## 编写和渲染 `.ebox` 文件
 
-这个包也拥有 `.ebox` 文件入口。访问 Ebox DSL 文件时会自动进入 `ebox-dsl-mode`，header line 会显示 `C-c C-c Render preview`；按 `C-c C-c` 会求值文件中的唯一一个 Elisp 表达式，将得到的布局数据传给 `ebox-build`，渲染并自动并排显示源文件和预览 buffer。
+这个包也拥有 `.ebox` 文件入口。访问 Ebox DSL 文件时会自动进入 `ebox-playground-mode`，header line 会显示 `C-c C-c Render preview`；按 `C-c C-c` 会求值文件中的唯一一个 Elisp 表达式，将得到的布局数据传给 `ebox-build`，渲染并自动并排显示源文件和预览 buffer。
 
 ```elisp
-(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-dsl-mode))
+(add-to-list 'auto-mode-alist '("\\.ebox\\'" . ebox-playground-mode))
 ```
 
 `.ebox` 中写的表达式与 Elisp 中传给 `(ebox-build ...)` 的参数完全一致。
@@ -303,7 +303,7 @@ buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]
 简化示例时，使用已有 evaluator 对比保存的基准目录和当前 `examples` 目录：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox/lisp -L ../ecss/lisp -L ../tp/lisp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```

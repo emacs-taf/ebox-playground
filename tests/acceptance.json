@@ -5,9 +5,9 @@
     "tests",
     "examples",
     "benchmarks",
-    "../ebox/lisp",
-    "../ecss/lisp",
-    "../tp/lisp"
+    "../ebox",
+    "../ecss",
+    "../tp"
   ],
   "support": [],
   "cases": [
