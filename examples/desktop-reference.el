@@ -58,7 +58,7 @@ Control text keymaps retain their own activation and title-drag commands."
 
 (cl-defstruct (desktop-demo (:constructor desktop-demo-create))
   "Independent state captured by the native commands of one desktop preview."
-  windows order active styles (theme 'dark) (serial 5) dragging)
+  windows order active styles (theme 'dark) (serial 5))
 
 (defun desktop-demo-style (demo role)
   "Return DEMO's current theme declarations for the semantic style ROLE."
@@ -100,7 +100,7 @@ Control text keymaps retain their own activation and title-drag commands."
   "Capture the native control at point for keyboard repeat, if applicable."
   (unless (mouse-event-p last-input-event)
     (let* ((map (get-text-property (point) 'keymap))
-           (command (and (keymapp map) (lookup-key map [mouse-1]))))
+           (command (and (keymapp map) (lookup-key map (kbd "RET")))))
       (when (commandp command)
         (list command
               (- (point) (previous-single-property-change
@@ -114,7 +114,7 @@ Control text keymaps retain their own activation and title-drag commands."
         (while (< position (point-max))
           (let ((map (get-text-property position 'keymap))
                 (end (next-single-property-change position 'keymap nil (point-max))))
-            (when (and (keymapp map) (eq (lookup-key map [mouse-1]) (car anchor)))
+            (when (and (keymapp map) (eq (lookup-key map (kbd "RET")) (car anchor)))
               (goto-char (+ position (min (cadr anchor) (1- (- end position)))))
               (throw 'restored t))
             (setq position end)))))))
@@ -132,12 +132,11 @@ Failed Ebox publication leaves the business state on its accepted generation."
           (desktop-demo-order demo) (desktop-demo-order candidate)
           (desktop-demo-active demo) (desktop-demo-active candidate)
           (desktop-demo-theme demo) (desktop-demo-theme candidate)
-          (desktop-demo-serial demo) (desktop-demo-serial candidate)
-          (desktop-demo-dragging demo) (desktop-demo-dragging candidate))
+          (desktop-demo-serial demo) (desktop-demo-serial candidate))
     (desktop-demo--restore-keyboard-anchor anchor)))
 
-(defun desktop-demo-activate (demo id &optional dragging)
-  "Bring DEMO's pane ID forward; DRAGGING begins a transient mouse gesture."
+(defun desktop-demo-activate (demo id)
+  "Bring DEMO's pane ID forward."
   (let ((pane (desktop-demo--window demo id)))
     (unless (equal id (desktop-demo-active demo))
       (let ((candidate (copy-desktop-demo demo)))
@@ -151,7 +150,7 @@ Failed Ebox publication leaves the business state on its accepted generation."
                  (desktop-demo--chrome
                   demo (desktop-demo--window demo (desktop-demo-active demo)) nil)
                  (desktop-demo--chrome demo pane t)))))
-    (when dragging (setf (desktop-demo-dragging demo) id))))
+    nil))
 
 (defun desktop-demo-move (demo id x y &optional row-height)
   "Move DEMO's pane ID to pixel displacement X, Y from its initial offsets.
@@ -174,75 +173,24 @@ Return non-nil only after a changed position has been published."
                      :top `(calc (+ ,(desktop-demo-window-top pane) (lh ,rows))))))
         t))))
 
-(defun desktop-demo--frame-point (position frame)
-  "Convert a supported mouse POSITION to pixels in FRAME, or return nil.
-Text-window positions and same-frame outside-window positions are supported;
-fringe, scrollbar and other area-specific coordinate systems are skipped."
-  (let ((where (posn-window position)) (xy (posn-x-y position)))
-    (when (and (consp xy) (numberp (car xy)) (numberp (cdr xy)))
-      (cond
-       ((eq where frame) xy)
-       ((and (window-live-p where) (eq (window-frame where) frame)
-             (null (posn-area position)))
-        (let ((edges (window-inside-pixel-edges where)))
-          (cons (+ (car edges) (car xy)) (+ (cadr edges) (cdr xy)))))))))
-
-(defun desktop-demo-drag (demo id event)
-  "Raise DEMO's pane ID and track its title-bar press EVENT until release.
-Publish each changed position before reading the next event.  Preserve the
-grab offset, consume the release endpoint and retain unrelated input.  Quit
-or failure releases gesture state and keeps the last accepted geometry."
-  (let* ((position (event-start event))
-         (window (posn-window position)))
-    (unless (and (window-live-p window) (null (posn-area position)))
-      (user-error "Drag a desktop title bar in a live text window"))
-    (let* ((buffer (window-buffer window))
-           (frame (window-frame window))
-           (start (desktop-demo--frame-point position frame))
-           (pane (desktop-demo--window demo id))
-           (origin-x (desktop-demo-window-x pane))
-           (origin-y (desktop-demo-window-y pane))
-           (row-height (max 1 (frame-char-height frame)))
-           (button (event-basic-type event))
-           (mouse-fine-grained-tracking t))
-      (unless start (user-error "The drag event has no text coordinates"))
-      (unwind-protect
-          (with-current-buffer buffer
-            (desktop-demo-activate demo id t)
-            (redisplay t)
-            (track-mouse
-              (let ((track-mouse 'dragging) done)
-                (while (and (not done) (window-live-p window)
-                            (buffer-live-p buffer) (eq (window-buffer window) buffer)
-                            (ebox-surface-buffer-mounted-p buffer))
-                  (let* ((next (read-event))
-                         (release
-                          (and (eq (event-basic-type next) button)
-                               (or (memq 'click (event-modifiers next))
-                                   (memq 'drag (event-modifiers next)))))
-                         (point (when (or release (mouse-movement-p next))
-                                  (desktop-demo--frame-point
-                                   (if release (event-end next) (event-start next)) frame))))
-                    (when (and point (window-live-p window) (buffer-live-p buffer)
-                               (eq (window-buffer window) buffer)
-                               (ebox-surface-buffer-mounted-p buffer))
-                      (let* ((edges (window-inside-pixel-edges window))
-                             ;; Keep the grab point in the original text window.
-                             (x (max (nth 0 edges) (min (1- (nth 2 edges)) (car point))))
-                             (y (max (nth 1 edges) (min (1- (nth 3 edges)) (cdr point)))))
-                        (with-current-buffer buffer
-                          (when (desktop-demo-move
-                                 demo id (+ origin-x (round (- x (car start))))
-                                 (+ origin-y (* row-height
-                                                (round (/ (- y (cdr start))
-                                                          (float row-height)))))
-                                 row-height)
-                            (redisplay t)))))
-                    (cond
-                     (release (setq done t))
-                     ((mouse-movement-p next) nil)
-                     (t (push next unread-command-events) (setq done t))))))))
-        (setf (desktop-demo-dragging demo) nil)))))
+(defun desktop-demo-drag-handler (demo id)
+  "Return a shared Ebox gesture callback moving DEMO's pane ID."
+  (let (origin-x origin-y row-height)
+    (lambda (gesture)
+      (pcase (plist-get gesture :phase)
+        ('start
+         (let ((pane (desktop-demo--window demo id)))
+           (setq origin-x (desktop-demo-window-x pane)
+                 origin-y (desktop-demo-window-y pane)
+                 row-height (max 1 (frame-char-height
+                                    (window-frame (plist-get gesture :window))))))
+         (desktop-demo-activate demo id))
+        ((or 'move 'end)
+         (let ((delta (plist-get gesture :delta)))
+           (desktop-demo-move
+            demo id (+ origin-x (round (car delta)))
+            (+ origin-y (* row-height (round (/ (cdr delta) (float row-height)))))
+            row-height)))))))
 
 (defun desktop-demo--nudge (demo id dx dy)
   "Activate DEMO's pane ID and move it DX columns and DY host rows."
@@ -253,19 +201,19 @@ or failure releases gesture state and keeps the last accepted geometry."
                        (+ (desktop-demo-window-y pane) (* dy (frame-char-height))))))
 
 (defun desktop-demo-keymap (demo id &optional title)
-  "Create DEMO's pane ID keymap; TITLE enables native live dragging."
-  (let ((press (if title (lambda () (desktop-demo-drag demo id last-input-event))
-                 (lambda () (desktop-demo-activate demo id)))))
-    (ebox-keymap-create
-     :activate (lambda () (desktop-demo-activate demo id))
-     :bindings
-     (append
-      (mapcar (lambda (event) (cons event press))
-              '([down-mouse-1] [double-down-mouse-1] [triple-down-mouse-1]))
-      (list (cons "M-<left>" (lambda () (desktop-demo--nudge demo id -1 0)))
-            (cons "M-<right>" (lambda () (desktop-demo--nudge demo id 1 0)))
-            (cons "M-<up>" (lambda () (desktop-demo--nudge demo id 0 -1)))
-            (cons "M-<down>" (lambda () (desktop-demo--nudge demo id 0 1))))))))
+  "Create DEMO's pane ID keymap; TITLE enables shared Ebox dragging."
+  (ebox-keymap-create
+   :activate (lambda () (desktop-demo-activate demo id))
+   :drag (when title (desktop-demo-drag-handler demo id))
+   :bindings
+   (append
+    (unless title
+      (mapcar (lambda (event) (cons event (lambda () (desktop-demo-activate demo id))))
+              '([down-mouse-1] [double-down-mouse-1] [triple-down-mouse-1])))
+    (list (cons "M-<left>" (lambda () (desktop-demo--nudge demo id -1 0)))
+          (cons "M-<right>" (lambda () (desktop-demo--nudge demo id 1 0)))
+          (cons "M-<up>" (lambda () (desktop-demo--nudge demo id 0 -1)))
+          (cons "M-<down>" (lambda () (desktop-demo--nudge demo id 0 1)))))))
 
 (defun desktop-demo-reset (demo)
   "Restore DEMO's original positions and document-order stack in one update."

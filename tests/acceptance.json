@@ -38,6 +38,11 @@
       "name": "ebox-playground-renders-ebox-file-mode-source",
       "file": "tests/ebox-playground-tests.el",
       "purpose": "Render a file-mode buffer through the public Ebox build path."
+    },
+    {
+      "name": "ebox-playground-desktop-drag-publishes-motion-and-release",
+      "file": "tests/desktop-reference-tests.el",
+      "purpose": "The shipped desktop uses shared dragging to publish intermediate and release positions."
     }
   ]
 }

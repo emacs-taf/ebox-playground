@@ -52,9 +52,11 @@ Desktop 中的鼠标点击与拖动不会选中文本，按钮之间、换行和
 
 横向按像素移动，纵向遵循 Ebox 的文本行网格。推荐至少 40 列、20 行，更大的预览
 有更多摆放空间。所有文本保持当前字体大小，不使用额外字体或图片依赖。
+Companion 使用 `ebox-keymap-create :drag`，由 Ebox 管理原生跟踪，示例只更新
+面板位置。指针离开原文本窗口时，在最后已接受的位置结束手势。
 
 运行 `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`
-检查真实 keymap 命令、中间运动帧、松手、遮挡归属、失败回滚和渲染一致性；
+检查公共文件渲染、viewport 行为、桌面中间移动和释放位置；
 `make check` 已包含该套件。重复位置发布的耗时和 CPU 采样使用共享 interaction
 evaluator；左右交替避免触及边界后只测到空操作，前四次预热不计入指标：
 

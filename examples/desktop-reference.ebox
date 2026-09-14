@@ -1,4 +1,4 @@
-;; Layout and initial geometry live here; native gestures live in the companion.
+;; Layout and initial geometry live here; the companion uses shared Ebox gestures.
 (let* ((styles
         '((desktop-root (:background-color "#0B1020" :color "#CFD8EA")
                         (:background-color "#F3F0E8" :color "#263347"))

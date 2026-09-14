@@ -69,12 +69,15 @@ text and layered artwork. All text uses the configured font size.
 
 Horizontal dragging uses pixel positions; vertical movement follows Ebox's
 host text rows. This is live text-window composition, not sub-row raster motion.
+The companion uses `ebox-keymap-create :drag`; Ebox owns native tracking and
+the companion applies pane positions. Leaving the original text window ends
+the gesture at its last accepted position.
 Use at least 40 columns and 20 rows; larger previews leave more room to arrange
 the five panes. Reopening the file creates an independent desktop state.
 
 Run `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
-native command, intermediate motion, release, overlap, rollback, independent
-preview and render-parity regressions. Normal `make check` includes this suite.
+public file rendering, viewport behavior, intermediate desktop motion and
+release positions. Normal `make check` includes this suite.
 For repeated movement publication timing and CPU sampling, use the shared
 interaction evaluator. Alternating directions keeps each step moving instead
 of reaching the desktop boundary; four warmup commands are excluded:
