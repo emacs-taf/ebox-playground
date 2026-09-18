@@ -30,7 +30,6 @@ require_fresh_elc \
 require_fresh_elc "$root/../ebox/ebox.el" "$root/../ebox/ebox.elc"
 require_fresh_elc "$root/../ebox/ebox-surface.el" "$root/../ebox/ebox-surface.elc"
 require_fresh_elc "$root/../ecss/ecss.el" "$root/../ecss/ecss.elc"
-require_fresh_elc "$root/../tp/tp.el" "$root/../tp/tp.elc"
 
 : "${EBOX_NATIVE_REFLOW_MODULE_PATH:?run make performance-prepare first}"
 if [ ! -r "$EBOX_NATIVE_REFLOW_MODULE_PATH/libebox_native_reflow.dylib" ]; then
@@ -46,7 +45,6 @@ export EBOX_PLAYGROUND_FLEX_FIXTURE=$fixture
 # add unrelated packages, timers, and UI state to the performance gate.
 "$emacs" -Q --daemon="$server" \
     -L "$root" -L "$root/../ebox" -L "$root/../ecss" \
-    -L "$root/../tp" \
     --eval '(setq load-prefer-newer t
                   native-comp-jit-compilation nil
                   ebox-native-reflow-module-path

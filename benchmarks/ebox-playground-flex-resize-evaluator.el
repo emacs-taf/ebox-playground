@@ -769,7 +769,7 @@ callbacks and keymaps, and reapplies every committed scroll owner's offset.
 Signal an error on missing scroll capacity, incomplete motion or render drift.
 
 Use the current Emacs frame's font metrics without displaying temporary
-buffers or changing windows.  This measures retained TP publication; native
+buffers or changing windows.  This measures retained Ebox publication publication; native
 window scrolling, idle prewarming and redisplay are excluded.  Existing live
 buffers, timers and runtime tables are preserved.  Temporary mounts and advice
 are cleaned on success, error or quit; no global runtime reset is performed.
@@ -973,7 +973,7 @@ concurrent cache warming CPU work."
            preview preview-window)
           (redisplay t)
           (sleep-for 0.2)
-          ;; Observe only accepted, completed Ebox publications.  TP emits its
+          ;; Observe only accepted, completed Ebox publications.  Ebox publication emits its
           ;; paired report first; filtering by provider keeps this evaluator on
           ;; the public Ebox boundary and avoids timing/advising the rerender
           ;; implementation itself.
@@ -1080,13 +1080,13 @@ concurrent cache warming CPU work."
                              (buffer-string))
                             (ebox-playground-flex-resize-evaluator--visual-text
                              fresh-rendered)))))
-                   (tp-operations (plist-get report :tp-operation-count))
+                   (publication-operations (plist-get report :publication-operation-count))
                    (projection-retained-p
                     (and (memq projection-kind
                                '(viewport-reflow
                                  viewport-reflow-mixed-scroll))
-                         (not (plist-get report :tp-full-root))
-                         (not (plist-get report :tp-scope-fallback)))))
+                         (not (plist-get report :publication-full-root))
+                         (not (plist-get report :publication-scope-fallback)))))
               (setq checks
                     (list
                      (ebox-playground-flex-resize-evaluator--check
@@ -1183,8 +1183,8 @@ concurrent cache warming CPU work."
                               projection-kind
                               (plist-get report :viewport-axes)
                               (plist-get report :reconciled-objects)
-                              (plist-get report :tp-full-root)
-                              (plist-get report :tp-scope-fallback)))
+                              (plist-get report :publication-full-root)
+                              (plist-get report :publication-scope-fallback)))
                      (ebox-playground-flex-resize-evaluator--check
                       "rendered output matches a fresh viewport render"
                       fresh-render-matches-p
@@ -1205,7 +1205,7 @@ concurrent cache warming CPU work."
                               elapsed
                               ebox-playground-flex-resize-evaluator-max-seconds))))
               (push (format
-                     "RESIZE warmups=%d samples=%d old-viewport-px=%S new-viewport-px=%S total=%.6fs p95-update=%.6fs max-update=%.6fs first=%.6fs max-gap=%.6fs final=%.6fs strategy=%S projection=%S axes=%S reconciled=%S tp-ops=%S cache-hits=%S cache-misses=%S"
+                     "RESIZE warmups=%d samples=%d old-viewport-px=%S new-viewport-px=%S total=%.6fs p95-update=%.6fs max-update=%.6fs first=%.6fs max-gap=%.6fs final=%.6fs strategy=%S projection=%S axes=%S reconciled=%S publication-ops=%S cache-hits=%S cache-misses=%S"
                      warmup-publications resize-count old-width viewport-width
                      elapsed p95-publication max-publication
                      (or first-publication 0.0) max-gap
@@ -1213,7 +1213,7 @@ concurrent cache warming CPU work."
                      (plist-get report :strategy) projection-kind
                      (plist-get report :viewport-axes)
                      (plist-get report :reconciled-objects)
-                     tp-operations
+                     publication-operations
                      (plist-get report :cache-hit-count)
                      (plist-get report :cache-miss-count))
                     ebox-playground-flex-resize-evaluator--output-lines)

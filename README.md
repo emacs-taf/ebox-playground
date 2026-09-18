@@ -5,7 +5,7 @@ Add the repository root to `load-path` and use `(require 'ebox-playground)`.
 
 `ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu. `desktop-reference.ebox` provides five directly draggable, overlapping text windows.
 
-ECSS 0.1.0 and TP 2.0.0 are independent packages and may be installed in either order. Install both before Ebox 3.0.0, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
+Install ECSS 0.1.0 before Ebox 3.0.0, then install Ebox Playground 0.1.1. Retained publication is part of Ebox. `ebox-playground` never reaches into those packages' private APIs.
 
 Standalone gallery entry points default to a definite 720 px canvas so nested examples have stable space in batch renders and one-window demos. Split-window `.ebox` previews instead resolve `(vw 100)` to the preview window's display-safe width. Section separators use their containing Column's available width, so they also fit a narrower root. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 
@@ -83,7 +83,7 @@ interaction evaluator. Alternating directions keeps each step moving instead
 of reaching the desktop boundary; four warmup commands are excluded:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
@@ -165,7 +165,7 @@ For repeated command timing, use the existing interaction evaluator with
 For the spatial desktop's expand/collapse path, run:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
@@ -243,7 +243,7 @@ For repeated-key behavior and command timing, use the shared interaction
 evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
@@ -390,7 +390,7 @@ For example simplifications, compare a saved baseline directory with the
 current `examples` directory using the existing evaluator:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```
@@ -405,7 +405,7 @@ For scrolling regressions across examples, use the same evaluator's generic
 scroll entry point:
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run (directory-files "examples" t "\\.ebox$") 721 20 45)'
 ```
@@ -420,7 +420,7 @@ node style visits, style computations, prefix rendering, full content materializ
 fresh-render parity; incomplete motion or changed
 output fails the run. The independent render comparison ignores runtime identity
 and zero-pixel spacers beside identical font faces; height carriers are retained.
-This measures retained TP scroll publication, excluding
+This measures retained Ebox publication scroll publication, excluding
 native window scrolling, idle prewarming, and redisplay. To compare GUI font
 metrics, load this evaluator and call the same function in the existing GUI
 Emacs. It uses undisplayed temporary buffers, preserves live previews and windows,
@@ -474,7 +474,7 @@ The reference fixtures live directly under `examples/`. For example:
 Run `make check EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` from this directory.
 
 Run `make performance` for the committed Flex resize gate.  It prepares ECSS,
-TP, Ebox, Playground bytecode, and the Rust module, then renders a read-only
+Ebox publication, Ebox, Playground bytecode, and the Rust module, then renders a read-only
 `HEAD:examples/flex-reference.ebox` snapshot without touching the working-tree
 fixture.  The GUI driver performs five warmups followed by 30 accepted viewport
 updates; requested and published widths must match exactly, and both p95 and max

@@ -2,7 +2,7 @@
 
 `ebox-playground` 是 Ebox DSL 的独立通用文件运行器，只使用 Ebox 公共 API；具体布局都放在 `examples/` 下易读的 `.ebox` fixture 中。`flex-reference.ebox`、`grid-reference.ebox` 和 `size-reference.ebox` 用克制的陶土色、鼠尾草绿、蓝色、紫色、赭石色和青绿色视觉语言，展示布局与尺寸规则。`interaction-reference.ebox` 展示 Ebox 原生交互及 retained 更新。
 
-ECSS 0.1.0 与 TP 1.0.1 是互相独立的包，安装顺序任意；两者都安装后再安装 Ebox 2.0.1，最后安装 Ebox Playground 0.1.1。`ebox-playground` 不调用这些依赖的私有 API。
+先安装 ECSS 0.1.0，再安装 Ebox 3.0.0，最后安装 Ebox Playground 0.1.1。保留式发布属于 Ebox 内部；`ebox-playground` 只使用 Ebox 公共接口。
 
 独立画廊入口默认使用明确的 720 px 画布，因此 batch 渲染和单窗口演示里的嵌套示例有稳定空间。分屏 `.ebox` 预览则会将 `(vw 100)` 解析为右侧预览窗口的显示安全宽度。章节分隔条使用所在 Column 的可用宽度，因此根容器缩窄时也会跟随。高层 Component/Runtime 展示仍由独立的 `etaf-playground` 提供。
 
@@ -61,7 +61,7 @@ Companion 使用 `ebox-keymap-create :drag`，由 Ebox 管理原生跟踪，示�
 evaluator；左右交替避免触及边界后只测到空操作，前四次预热不计入指标：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
 ```
@@ -74,7 +74,7 @@ emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
 使用共享 `benchmarks/ebox-playground-flex-resize-evaluator.el` 的入口：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-scroll-evaluator-run "examples/flex-reference.ebox" 104 6 36)'
@@ -93,7 +93,7 @@ plist。默认完全缓存根滚动内容，再测量顶部和中间位置的往
 结果报告 mean/p95/max 毫秒、采样循环的 GC 次数／耗时、完整根渲染、通用文档准备、surface 计划构造、样式计算及缓存生产次数，并与独立渲染已提交输入、
 恢复其滚动位置后的结果比较。比较保留 callback 和 keymap 身份，不重新加载业务
 状态；移动未完成或绘制不一致都会失败。测试使用临时 buffer，并清理挂载、advice
-和定时器，不改变现有预览。测量包含 Ebox/TP 发布，不包含 GUI 输入传递、原生窗口
+和定时器，不改变现有预览。测量包含 Ebox/Ebox publication 发布，不包含 GUI 输入传递、原生窗口
 滚动或 Emacs redisplay。此入口取代临时的逐示例滚动探针。
 
 ## 图层与原生菜单示例
@@ -116,7 +116,7 @@ helper 加入已有 batch 时不 flush；自己拥有 batch 时只发布一次�
 使用共享入口测量桌面展开／收起路径：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
@@ -182,7 +182,7 @@ make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 检查重复按键行为和命令耗时时，使用共享交互 evaluator：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
 ```
@@ -305,7 +305,7 @@ buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]
 简化示例时，使用已有 evaluator 对比保存的基准目录和当前 `examples` 目录：
 
 ```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss -L ../tp \
+emacs -Q --batch -L . -L ../ebox -L ../ecss \
   -l benchmarks/ebox-playground-flex-resize-evaluator.el \
   --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
 ```

@@ -2,8 +2,7 @@
 .NOTPARALLEL:
 EMACS ?= emacs
 ECSS_DIR ?= ../ecss
-TP_DIR ?= ../tp
-LOAD_PATH = -L . -L lisp -L benchmarks -L ../ebox -L $(ECSS_DIR) -L $(TP_DIR)
+LOAD_PATH = -L . -L lisp -L benchmarks -L ../ebox -L $(ECSS_DIR)
 EBOX_NATIVE_RELEASE_DIR = $(shell $(EMACS) -Q --batch $(LOAD_PATH) \
 	--eval '(setq native-comp-jit-compilation nil)' \
 	-l ../ebox/ebox.el \
@@ -30,15 +29,14 @@ load: compile
 		--eval '(princ "ebox-playground load OK\n")'
 
 performance:
-	$(MAKE) performance-prepare EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
-	$(MAKE) performance-evaluator EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
+	$(MAKE) performance-prepare EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)"
+	$(MAKE) performance-evaluator EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)"
 
 performance-prepare:
 	$(MAKE) -C $(ECSS_DIR) compile EMACS="$(EMACS)"
-	$(MAKE) -C $(TP_DIR) compile EMACS="$(EMACS)"
-	$(MAKE) -C ../ebox compile EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
-	$(MAKE) compile EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
-	$(MAKE) -C ../ebox native-build EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)" TP_DIR="$(TP_DIR)"
+	$(MAKE) -C ../ebox compile EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)"
+	$(MAKE) compile EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)"
+	$(MAKE) -C ../ebox native-build EMACS="$(EMACS)" ECSS_DIR="$(ECSS_DIR)"
 
 performance-evaluator:
 	EBOX_NATIVE_REFLOW_MODULE_PATH="$(EBOX_NATIVE_RELEASE_DIR)" \
@@ -65,7 +63,7 @@ acceptance:
 .PHONY: api-check
 api-check:
 	$(EMACS) -Q --batch -L . $(API_PROVIDER_PATH) --eval '(setq load-prefer-newer t)' -l scripts/check-api.el
-API_PROVIDER_PATH = -L ../ecss -L ../tp -L ../ekp -L ../ebox -L ../etaf -L ../etaf-ui -L ../etaf-db -L ../etaf-playground
+API_PROVIDER_PATH = -L ../ecss -L ../ekp -L ../ebox -L ../etaf -L ../etaf-ui -L ../etaf-db -L ../etaf-playground
 
 .PHONY: test
 test: acceptance
