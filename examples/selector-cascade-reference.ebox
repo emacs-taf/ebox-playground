@@ -1,0 +1,38 @@
+'(box :id "app"
+      :ecss (("&" :color "#000080" :background-color "#ADD8E6")
+             ("& > .header" :color "#FFFFFF" :background-color "#000000"
+              :font-weight bold)
+             (".item" :color "#0000FF" :background-color "#00FFFF")
+             (".item.active" :color "#006400" :background-color "#FFFF00")
+             ("#strong" :color "#FF00FF" :background-color "#000000"
+              :font-weight bold))
+      (box :class "header" "CASCADE LAB | WHITE on BLACK | three ECSS scopes")
+      (box :class "item" "ROOT item | BLUE on CYAN | root .item")
+      (box :ecss (("&" :color "#000000" :background-color "#FFFF00")
+                  (".item" :color "#FF0000" :background-color "#FFA500")
+                  (".item.active" :color "#800080" :background-color "#00FF00"))
+           (box "SCOPE A | BLACK on YELLOW | container background")
+           (box :class "item" "A item | RED on ORANGE | equal specificity: nearer scope wins")
+           (box :class '("item" "active")
+                "A active | PURPLE on GREEN | equal compound selector: nearer wins")
+           (box :id "strong" :class "item"
+                "A strong | MAGENTA on BLACK, BOLD | outer ID beats inner class")
+           (box :ecss (("&" :color "#FFFFFF" :background-color "#800080")
+                       (".item" :color "#FFFFFF" :background-color "#000080")
+                       (".late" :color "#000000" :background-color "#FF0000")
+                       (".late" :color "#000000" :background-color "#FFFF00"))
+                (box "SCOPE B | WHITE on PURPLE | nested container background")
+                (box :class "item"
+                     "B item | WHITE on NAVY | closest of three equal selectors wins")
+                (box :class '("item" "active")
+                     "B active | PURPLE on GREEN | A compound beats B simple selector")
+                (box :class "late"
+                     "B late | BLACK on YELLOW | equal scope and specificity: later wins")
+                (box :class "item" :color "#000000" :background-color "#FF69B4"
+                     "B inline | BLACK on PINK | inline declarations win")))
+      (box :ecss (("&" :color "#FFFFFF" :background-color "#006400")
+                  (".item" :color "#FFFFFF" :background-color "#FF0000"))
+           (box "SIBLING SCOPE C | WHITE on DARK GREEN")
+           (box :class "item" "C item | WHITE on RED | sibling A and B rules cannot match"))
+      (box :class "item"
+           "OUTSIDE A/B/C | BLUE on CYAN | only root .item applies"))
