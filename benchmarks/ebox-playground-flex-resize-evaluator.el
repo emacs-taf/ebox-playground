@@ -769,8 +769,8 @@ callbacks and keymaps, and reapplies every committed scroll owner's offset.
 Signal an error on missing scroll capacity, incomplete motion or render drift.
 
 Use the current Emacs frame's font metrics without displaying temporary
-buffers or changing windows.  This measures retained Ebox publication publication; native
-window scrolling, idle prewarming and redisplay are excluded.  Existing live
+buffers or changing windows. This measures retained Ebox publication; native
+window scrolling, idle prewarming and redisplay are excluded. Existing live
 buffers, timers and runtime tables are preserved.  Temporary mounts and advice
 are cleaned on success, error or quit; no global runtime reset is performed.
 Each sample loop checks a 30-second deadline between motions."
