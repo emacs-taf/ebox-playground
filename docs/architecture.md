@@ -15,8 +15,13 @@ layout. Each preview owns its own interaction state. Reopening or resizing a
 preview must preserve the public Ebox publication and teardown contracts.
 
 The examples cover flex, grid, explicit units, cascade, interaction and layers.
-They are executable acceptance inputs, not screenshots standing
-in for running behavior. Product usage and entry points are in the [README](../README.md).
+`desktop-reference.ebox` is an Ebox-only gesture and overlap fixture: it
+demonstrates how a companion can use Ebox's public keymap and incremental
+region APIs, but it is not a desktop manager or reusable framework service.
+Application-level registration, workspaces and window policy belong to the
+higher-level `etaf-desktop` package. These examples are executable acceptance
+inputs, not screenshots standing in for running behavior. Product usage and
+entry points are in the [README](../README.md).
 
 ## Validation
 

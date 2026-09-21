@@ -2,8 +2,8 @@
 
 ## Unreleased
 
-### Removed
+### Added
 
-- Removed the application-level draggable desktop fixture. Use the independent
-  `etaf-desktop` package through `etaf-playground`; this package remains an
-  Ebox-only layout and interaction playground.
+- Restored the standalone `desktop-reference.ebox` gesture sample. It remains
+  an Ebox-only layout and interaction fixture; application-level desktop
+  management belongs to the independent `etaf-desktop` package.
