@@ -14,8 +14,8 @@ interactive behavior. A preview loads its companion and builds the declared
 layout. Each preview owns its own interaction state. Reopening or resizing a
 preview must preserve the public Ebox publication and teardown contracts.
 
-The examples cover flex, grid, explicit units, cascade, interaction, layers and
-desktop windows. They are executable acceptance inputs, not screenshots standing
+The examples cover flex, grid, explicit units, cascade, interaction and layers.
+They are executable acceptance inputs, not screenshots standing
 in for running behavior. Product usage and entry points are in the [README](../README.md).
 
 ## Validation
