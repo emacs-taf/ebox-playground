@@ -11,6 +11,7 @@
 (ert-deftest ebox-playground-desktop-drag-publishes-motion-and-release ()
   "Dragging the shipped desktop updates the pane before release and at its endpoint."
   (let ((buffer (generate-new-buffer " *desktop-gesture*"))
+        (unread-command-events nil)
         (ebox-viewport-width 104) (ebox-viewport-height 36))
     (unwind-protect
         (save-window-excursion
@@ -24,14 +25,29 @@
             (let* ((window (selected-window)) (position (match-beginning 0))
                    (press (list 'down-mouse-1 (list window position '(1 . 1) 0)))
                    (last-input-event press)
-                   (events (list (list 'mouse-movement (list window position '(4 . 1) 1))
-                                 (list 'drag-mouse-1 (event-start press) (list window position '(7 . 1) 2))))
+                   ;; Empty nonblocking reads separate live motion from the
+                   ;; next input.  Inspect each accepted position before
+                   ;; supplying the following motion or release.
+                   (events
+                    (list (list 'mouse-movement (list window position '(4 . 1) 1))
+                          nil
+                          (lambda ()
+                            (should (string-match-p (regexp-quote "X +3") (buffer-string)))
+                            (list 'mouse-movement (list window position '(6 . 1) 2)))
+                          nil
+                          (lambda ()
+                            (should (string-match-p (regexp-quote "X +5") (buffer-string)))
+                            (list 'drag-mouse-1 (event-start press)
+                                  (list window position '(7 . 1) 3)))))
                    (command (key-binding (vector press) nil nil position)))
               (cl-letf (((symbol-function 'read-event)
-                         (lambda (&rest _)
-                           (when (= (length events) 1)
-                             (should (string-match-p (regexp-quote "X +3") (buffer-string))))
-                           (if events (pop events) ?q))))
+                         (lambda (&optional _prompt _inherit seconds)
+                           (cond
+                            (unread-command-events (pop unread-command-events))
+                            (events (let ((next (pop events)))
+                                      (if (functionp next) (funcall next) next)))
+                            ((equal seconds 0) nil)
+                            (t ?q)))))
                 (funcall command press))
               (should (string-match-p (regexp-quote "X +6") (buffer-string)))
               (should (string-match-p "DRAG A TITLE BAR" (buffer-string))))))
