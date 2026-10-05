@@ -19,23 +19,23 @@
   (apply #'max (ebox-playground-test--line-widths text)))
 
 (ert-deftest ebox-playground-dsl-render-uses-window-width-for-viewport ()
-  "C-c C-c should build viewport-dependent roots at the preview width."
-  (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-render.ebox*")
-        (window-width 987))
+  "C-c C-c should build viewport-dependent roots at the preview width.
+The viewport is the preview window's pixel content box, so the root fills
+the same width that window reports."
+  (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-render.ebox*"))
     (unwind-protect
-        (cl-letf (((symbol-function 'window-body-width)
-                   (lambda (&optional _window _pixelwise) window-width))
-                  ((symbol-function 'frame-char-width)
-                   (lambda (&optional _frame) 8)))
+        (progn
           (with-temp-buffer
             (setq buffer-file-name "/tmp/ebox-playground-viewport-render.ebox")
             (insert "'(box :width (vw 100) :height (lh 1) \"viewport\")")
             (ebox-playground-mode)
-            (ebox-playground-render)
+            (ebox-playground-render))
+          (let ((window (get-buffer-window preview)))
+            (should window)
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
-                         (- window-width 16))))))
+                         (window-pixel-width window))))))
       (when (get-buffer preview)
         (kill-buffer preview)))))
 
