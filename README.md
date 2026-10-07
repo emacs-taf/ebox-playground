@@ -144,7 +144,7 @@ one batch, including the status update. The batch helper joins an existing
 batch without flushing and otherwise publishes its pending changes once.
 Its rollback covers queued Ebox updates, not arbitrary changes to the
 companion's business state; see the [batch API
-contract](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md).
+contract](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md).
 Offsets use inline `ch` and block `lh` units. The text renderer composes whole
 rows, and positioned content must share its host's line height.
 
@@ -218,7 +218,7 @@ use that owner's base style, including when child text normally differs.
 Physical left/right borders are excluded from hover; horizontal border strokes
 keep their paint. Native pointer appearance and help display depend on Emacs
 settings and the window system. See the
-[public capability contract](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md).
+[public capability contract](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md).
 
 `interaction-reference.el` owns the business functions and state;
 `interaction-reference.ebox` owns the layout. The runner reloads the matching
@@ -372,7 +372,7 @@ or `nil` to native help with the hovered buffer as context. `ebox-keymap-create`
 handles `RET`, `[return]`, `SPC`, and `[mouse-1]` through
 `:activate`. Its optional `:bindings` alist pairs key-description strings or
 event vectors with zero-argument callbacks. Raw native keymaps are also accepted.
-See the [public helper contract](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md).
+See the [public helper contract](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md).
 
 The runner evaluates one `.ebox` expression with lexical bindings on each
 render. Backquote preserves layout data, `,` inserts a value, and `,@` inserts a
@@ -383,7 +383,7 @@ helpers merely to hide repeated DSL property lists.
 
 Prefer concise DSL: omit redundant defaults, put common inheritable text
 styles on an existing parent, and write child overrides only. Keep explicit
-values in panels that teach those properties. The [authoring rules](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md#prefer-defaults-and-inheritance)
+values in panels that teach those properties. The [authoring rules](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md#prefer-defaults-and-inheritance)
 explain which properties inherit. Empty Boxes have zero automatic content
 height; give one-line separators an explicit `:height (lh 1)`.
 
@@ -445,7 +445,7 @@ publication from scrolling that still enters the general document update path.
 
 Size data uses `(unit number)` with `px`, `%`, `vw`, `vh`, `ch`, and `lh`, plus
 `calc`, `min`, `max`, and `clamp`. The [shared unit-constraint
-table](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md#size-unit-constraints) defines which
+table](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md#size-unit-constraints) defines which
 units each property accepts; the axes cannot be mixed, including in nested
 function branches. Ebox rejects invalid combinations when it builds the tree.
 For example, the preview can stay one line
@@ -454,7 +454,7 @@ expression is resolved by Ebox on each layout. `fit-content` stays a bare
 keyword and does not take an argument. Border thickness has its own paint-unit
 rule in the same table. Ebox's buffer backend quantizes
 vertical content to complete lines. See the [Ebox sizing
-contract](https://gitea.gklazycat.heiyu.space/geekinney/ebox/src/branch/main/docs/manual.md#4-use-geometry-and-paint-properties).
+contract](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md#4-use-geometry-and-paint-properties).
 
 To migrate an old unquoted `.ebox` layout, quote the whole static list and
 remove the quotes around its list and symbol properties, for example
