@@ -5,11 +5,11 @@ Add the repository root to `load-path` and use `(require 'ebox-playground)`.
 
 `ebox-playground` is the independent, generic file runner for Ebox DSL examples. It uses only public Ebox APIs; concrete layouts live in readable `.ebox` fixtures under `examples/`. `flex-reference.ebox`, `grid-reference.ebox`, and `size-reference.ebox` demonstrate layout and sizing with a restrained terracotta, sage, blue, violet, ochre, and teal visual language. `interaction-reference.ebox` demonstrates native Ebox interaction and retained updates. `layer-reference.ebox` combines retained overlapping panels with a native anchored menu. `desktop-reference.ebox` provides a standalone Ebox-only sample with five draggable overlapping text panes.
 
-Install ECSS 0.1.0 before Ebox 3.0.0, then install Ebox Playground 0.1.1. Retained publication is part of Ebox. `ebox-playground` never reaches into those packages' private APIs.
+Install ECSS 0.1.0 before Ebox 3.0.0, then install Ebox Playground 0.1.1. `ebox-playground` never reaches into those packages' private APIs.
 
 Standalone gallery entry points default to a definite 720 px canvas so nested examples have stable space in batch renders and one-window demos. Split-window `.ebox` previews instead resolve `(vw 100)` to the preview window's display-safe width. Section separators use their containing Column's available width, so they also fit a narrower root. `etaf-playground` remains the separate higher-level Component and Runtime showcase.
 
-Standalone and batch fixture renders use the same compact 720 px default viewport unless the caller dynamically binds `ebox-viewport-width`; viewport-based references therefore stay inside the example canvas. When `C-c C-c` renders an `.ebox` source buffer, the command keeps the source on the left, opens the preview on the right, and resolves `(vw 100)` to Ebox's shared display-safe window width. Ebox's single serialized viewport controller publishes every window change immediately through its retained path; the Playground owns no second resize hook or timer.
+Standalone and batch fixture renders use the same compact 720 px default viewport unless the caller dynamically binds `ebox-viewport-width`; viewport-based references therefore stay inside the example canvas. When `C-c C-c` renders an `.ebox` source buffer, the command keeps the source on the left, opens the preview on the right, and resolves `(vw 100)` to Ebox's shared display-safe window width. Ebox's viewport controller relayouts the retained tree on every window change; the Playground owns no second resize hook or timer.
 
 ```elisp
 (require 'ebox-playground)
@@ -50,7 +50,7 @@ text and layered artwork. All text uses the configured font size.
 
 - Click any exposed pane, including its blank body area, to bring the entire
   window forward. Other windows keep their relative stacking order.
-- Hold the primary button on a title bar and move it. Positions are published
+- Hold the primary button on a title bar and move it. Positions update
   while the button is held, preserving the initial grab offset; release applies
   the final position. Windows can partially or fully cover one another.
 - The five dock entries raise windows even when they are completely covered.
@@ -78,19 +78,8 @@ the five panes. Reopening the file creates an independent desktop state.
 Run `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` for
 public file rendering, viewport behavior, intermediate desktop motion and
 release positions. Normal `make check` includes this suite.
-For repeated movement publication timing and CPU sampling, use the shared
-interaction evaluator. Alternating directions keeps each step moving instead
-of reaching the desktop boundary; four warmup commands are excluded:
-
-```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss \
-  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
-  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/desktop-reference.ebox" "01 ST" "M-<right>" 30 104 36 (quote (:alternate-key "M-<left>" :warmup 4 :profile t))))) (cl-remf r :text) (pp r))'
-```
-
-This measures the same position publisher used by dragging, without OS event
-delivery or GUI redisplay. Profiling adds sampling overhead; omit `:profile t`
-for a timing comparison. See the interaction evaluator contract below.
+Repeated keyboard movement is the `ebox-playground.desktop.nudge`
+[performance scenario](#performance-scenarios).
 
 
 ## ORBIT spatial desktop and layer lab
@@ -138,12 +127,10 @@ as the covered note and root menu choices, retain their own hover paint.
 
 `layer-reference.ebox` contains layout data and state references;
 `layer-reference.el` owns state and business actions. It uses only public
-`ebox-keymap-create`, `ebox-help-create`, `ebox-region-update`, and
-`ebox-call-with-update-batch` APIs. Each action groups its region changes into
-one batch, including the status update. The batch helper joins an existing
-batch without flushing and otherwise publishes its pending changes once.
-Its rollback covers queued Ebox updates, not arbitrary changes to the
-companion's business state; see the [batch API
+`ebox-keymap-create`, `ebox-help-create`, `ebox-selector-query-buffer`,
+`ebox-node-set-props` and `ebox-call-with-batch` APIs: each action finds its
+nodes by `:id`, changes their properties and the status text, and flushes the
+batch once. See the [batch API
 contract](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md).
 Offsets use inline `ch` and block `lh` units. The text renderer composes whole
 rows, and positioned content must share its host's line height.
@@ -154,31 +141,10 @@ Run the batch checks without opening GUI windows:
 make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 ```
 
-This target runs core layer contracts and the actual demo's native commands,
-covered updates, movement, stacking, all four anchor placements, cross-buffer
-mouse dispatch, and independent previews. After each command, the tests compare
-the mounted output with a fresh render of the committed snapshot, including
-paint and native capabilities. `make check` includes the Playground tests.
-For repeated command timing, use the existing interaction evaluator with
-`"examples/layer-reference.ebox"` and a toolbar label such as
-`"UPDATE COVERED NOTE"`; see the invocation below.
-
-For the spatial desktop's expand/collapse path, run:
-
-```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss \
-  --eval '(setq load-prefer-newer t native-comp-jit-compilation nil)' \
-  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
-  --eval '(let ((r (ebox-playground-interaction-evaluator-run "examples/layer-reference.ebox" "EXPLODE STACK" "RET" 6 104 100))) (cl-remf r :text) (pp r))'
-```
-
-With the root menu closed, the three desktop toolbar commands publish the
-affected layer host and status text together, without a full candidate render.
-The layer host still recomposes its stacking group; this is owner-level
-incremental work, not a minimal pixel rectangle. Visible root portals and
-content-dependent geometry keep the broader composition fallback. Regression
-tests require one publication per command and reject full candidate rendering;
-wall-clock timings are diagnostic, not a CI threshold.
+This target runs the demo's native commands: covered note updates, panel
+visibility and the card layout toggle. `make check` includes the Playground
+tests. Repeated EXPLODE STACK timing is the `ebox-playground.layer.explode`
+[performance scenario](#performance-scenarios).
 
 <a id="native-interaction-lab"></a>
 ## Native interaction lab
@@ -205,8 +171,8 @@ help text and pointer shapes from hover paint, then combines `:help-echo`,
 - **SWITCH HOVER PALETTE** replaces hover paint. **REMOVE / RESTORE** clears
   all four capabilities with explicit `nil`, then restores them. The Text
   reset action resets the count.
-- **UPDATE STATUS GROUP** updates the three `.demo-status` Boxes together
-  through one public `ebox-update-selector` call.
+- **UPDATE STATUS GROUP** updates the three `.demo-status` Boxes found by one
+  `ebox-selector-query-buffer` class query in one batch.
 - The nested surface demonstrates parent coverage, a Text child with its own
   commands, and an explicit-`nil` child that blocks enclosing capabilities.
   The event log records which command ran.
@@ -224,10 +190,10 @@ settings and the window system. See the
 `interaction-reference.ebox` owns the layout. The runner reloads the matching
 `.el` before each preview. Ebox's `ebox-help-create` supplies the native help
 adapter; `ebox-keymap-create` binds
-zero-argument callbacks and updates named regions with
-`ebox-region-update`. Mouse callbacks automatically run in the event window's
+zero-argument callbacks, which update nodes found by `:id` with
+`ebox-node-set-props`, `ebox-node-set-text` and `ebox-node-replace-children`. Mouse callbacks automatically run in the event window's
 buffer. Ebox adds no application state or focus navigation system; use ordinary
-point motion for keyboard bindings. Keymaps are snapshotted, so publishing new
+point motion for keyboard bindings. Keymaps are snapshotted, so installing new
 bindings requires replacing `:keymap`. Each evaluation creates a fresh demo.
 
 Run the interaction checks from this directory:
@@ -236,83 +202,10 @@ Run the interaction checks from this directory:
 make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 ```
 
-The target verifies the core interaction contracts and this fixture's rendered
-capabilities, command effects, replacements, and removal/restoration.
-`make check` also includes the Playground interaction regression tests.
-
-For repeated-key behavior and command timing, use the shared interaction
-evaluator:
-
-```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss \
-  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
-  --eval '(pp (ebox-playground-interaction-evaluator-run "examples/interaction-reference.ebox" "ADD " "RET" 30 720 200))'
-```
-
-The signature is `(FILE LABEL &optional KEY STEPS WIDTH HEIGHT OPTIONS)`. It opens a
-fresh temporary preview, finds the visible label once, and repeats native key
-lookup at the resulting point without repositioning after updates. Losing the
-node's binding fails the run. `KEY` accepts a key-description string or event
-vector; defaults are `RET`, 30 commands, 720 px width, and 200 lines of height.
-Sample count and dimensions must be positive integers. `OPTIONS` is an optional
-plist accepting `:alternate-key` (the same key formats), `:warmup` (nonnegative
-integer, default 0), and `:profile` (boolean, default nil). Both keys must be
-bound on the label. Alternation continues across warmup and measured commands,
-so an odd warmup starts measurement with the alternate key. Unknown or repeated
-option names, invalid values, or a lost binding fail the run.
-
-The returned plist reports mean/p95/max command milliseconds, GC count/time,
-allocated cons cells (`:cons-cells`, to track allocation pressure),
-publication count, final plain text, and parity with an independent render of
-the committed snapshot. Work counters `:layout-calls`, `:surface-plans`,
-`:fragment-scans`, and `:node-registrations` count calls to layout rendering,
-surface planning, fragment extraction (including local slices), and node-tree
-registration. Planning also runs for local patches; the legacy
-`:full-surface-renders` field counts candidate-render calls, which may render a
-scoped candidate. It does not prove a full-root render. `:last-update` includes
-only scalar `:strategy`, `:projection-kind`, `:publication-scope`, and
-`:constraint-source` fields from the final public update report.
-`:fragment-characters` sums the characters passed to fragment extraction. Read
-the call counts alongside this character total to distinguish local work from full-surface scanning; call counts are not affected-node counts.
-A parity mismatch fails.
-
-With `:profile t`, `:cpu-profile` adds `:total-samples`, the sampling interval in
-nanoseconds, and at most 15 rows each for inclusive and exclusive CPU samples.
-Each row contains only a function name, sample count, and percentage of the
-total. Inclusive counts include callees and count recursive frames once per
-stack; exclusive counts use the top frame. Unnamed frames share `<anonymous>`;
-no closures, runtime objects, or call trees are returned. A short run can have
-zero samples. Sampling refuses to start while any CPU or memory profiler is
-active, preserving that session. Existing stopped logs remain available; an
-undrained low-level CPU log is merged into `profiler-cpu-log` before sampling.
-
-Timing includes synchronous command execution, publication, and GC. Timings,
-GC, publication counts, and work counters cover only the command loop.
-Initial mounting, explicit warmup, and the final parity render are excluded.
-The evaluator excludes GUI redisplay, OS key-repeat latency, and idle prewarming.
-Warmup and samples share a 30-second deadline checked between commands. Temporary preview, advice, owned profiler, and owned
-timer cleanup runs on success, error, timeout, or interruption, preserving
-existing previews and windows.
-Reuse this entry point for interaction regressions instead of ad hoc key-repeat
-timing scripts.
-
-For native click dispatch in an already visible preview, load the same evaluator
-and call `(ebox-playground-interaction-evaluator-click BUFFER LABEL &optional OFFSET)`.
-`BUFFER` is a live buffer or its name; the first matching label must be visible
-in a displaying window. `OFFSET` is a zero-based integer within the label and
-defaults to zero. For example, evaluate from the preview buffer:
-
-```elisp
-(load (expand-file-name "benchmarks/ebox-playground-flex-resize-evaluator.el"
-                        ebox-playground-directory) nil t t)
-(ebox-playground-interaction-evaluator-click (current-buffer) "ADD " 0)
-(ebox-playground-interaction-evaluator-click (current-buffer) "[-]" 1)
-```
-
-This constructs an Emacs mouse event, resolves the native binding, and uses
-`call-interactively`; it does not inject an OS mouse click. The helper does not
-select a window or move point itself. It returns the clicked position; check
-the counter or event log separately to verify the business result.
+The target runs this fixture's counter, event log, status group and binding
+removal. `make check` also includes the Playground interaction regression tests.
+Repeated ADD timing is the `ebox-playground.interaction.add`
+[performance scenario](#performance-scenarios).
 
 ## Author and render `.ebox` files
 
@@ -334,10 +227,10 @@ properties do not need additional quotes:
 
 Keep necessary business functions and variables in an optional same-basename
 `.el` file beside the `.ebox`. Before each preview evaluation, the runner loads
-that exact `.el` source if it exists, then evaluates the `.ebox` expression.
+that `.el` companion if it exists, then evaluates the `.ebox` expression.
 This applies to `C-c C-c`, `ebox-playground-open-file`, and file rendering;
-saved `.el` edits are loaded on the next preview without `require` caching or
-selecting stale bytecode. A missing companion is allowed; a companion load error
+saved `.el` edits are loaded on the next preview without `require` caching.
+Compiled companion bytecode is used only when it is newer than the source. A missing companion is allowed; a companion load error
 stops evaluation. Ordinary Elisp variable definitions control state retention
 or reset on reload.
 
@@ -353,7 +246,8 @@ For example, put the data and action in `notes.el`:
 
 (defun notes-activate ()
   "Mark the article in the current Ebox buffer."
-  (ebox-region-update "article" :color "#166534"))
+  (dolist (node (ebox-selector-query-buffer (current-buffer) "#article"))
+    (ebox-node-put node :color "#166534")))
 ```
 
 Keep `notes.ebox` focused on the layout:
@@ -387,62 +281,6 @@ values in panels that teach those properties. The [authoring rules](https://gite
 explain which properties inherit. Empty Boxes have zero automatic content
 height; give one-line separators an explicit `:height (lh 1)`.
 
-For example simplifications, compare a saved baseline directory with the
-current `examples` directory using the existing evaluator:
-
-```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss \
-  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
-  --eval '(ebox-playground-compare-example-directories "/path/to/baseline" "examples")'
-```
-
-The optional third and fourth arguments select viewport widths and file names.
-Defaults cover both references at 720 and 1000 px, including their complete
-documents. The comparison checks text, effective faces, display and interaction
-properties, and line widths; a mismatch fails the batch command. It creates no
-files or GUI windows and supersedes one-off comparison probes for this task.
-
-For scrolling regressions across examples, use the same evaluator's generic
-scroll entry point:
-
-```sh
-emacs -Q --batch -L . -L ../ebox -L ../ecss \
-  -l benchmarks/ebox-playground-flex-resize-evaluator.el \
-  --eval '(ebox-playground-scroll-evaluator-run (directory-files "examples" t "\\.ebox$") 721 20 45)'
-```
-
-The arguments are one file path or a list of paths, viewport width in pixels,
-sample count, viewport height in lines, and an optional options plist.
-By default, each file needs a scrollable root.
-Content is fully cached before alternating one-line motions at the top and
-midpoint. Results report mean/p95/max milliseconds, measurement-loop GC count/time,
-full root renders, general document preparations, surface-plan construction,
-node style visits, style computations, prefix rendering, full content materialization, and
-fresh-render parity; incomplete motion or changed
-output fails the run. The independent render comparison ignores runtime identity
-and zero-pixel spacers beside identical font faces; height carriers are retained.
-This measures retained Ebox publication scroll publication, excluding
-native window scrolling, idle prewarming, and redisplay. To compare GUI font
-metrics, load this evaluator and call the same function in the existing GUI
-Emacs. It uses undisplayed temporary buffers, preserves live previews and windows,
-and cleans its mounts, advice, and timers even on errors or interruption. This
-entry point supersedes temporary per-example scroll timing probes.
-
-Pass `(:region-id "log")` to measure a nested scroll box declared with
-`:id "log"`. Pass `(:cold t)` to measure consecutive forward steps from the
-initial render without materializing or warming the content first; combine
-both options for a nested cold run. Cold mode requires enough forward scroll
-capacity for the requested samples and does not seek to the midpoint. The
-initial render can already include lookahead rows; use enough steps to cross
-that prefix and inspect `:prefix-renders` and `:materializations` when measuring
-a cache miss. Completed-cache no-ops do not count as materialization. The
-fresh oracle renders the committed input with its scroll offsets, preserving
-callback and keymap identity. It does not reload companion application state.
-These checks cover Ebox publication work; use an actual displayed window when
-measuring input delivery and Emacs redisplay latency.
-Inspect `:document-preparations` and `:surface-plans` to distinguish a viewport
-publication from scrolling that still enters the general document update path.
-
 Size data uses `(unit number)` with `px`, `%`, `vw`, `vh`, `ch`, and `lh`, plus
 `calc`, `min`, `max`, and `clamp`. The [shared unit-constraint
 table](https://gitea.gklazycat.heiyu.space/emacs-taf/ebox/src/branch/main/docs/manual.md#size-unit-constraints) defines which
@@ -474,14 +312,18 @@ The reference fixtures live directly under `examples/`. For example:
 
 Run `make check EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` from this directory.
 
-Run `make performance` for the committed Flex resize gate.  It prepares ECSS,
-Ebox publication, Ebox, Playground bytecode, and the Rust module, then renders a read-only
-`HEAD:examples/flex-reference.ebox` snapshot without touching the working-tree
-fixture.  The GUI driver performs five warmups followed by 30 accepted viewport
-updates; requested and published widths must match exactly, and both p95 and max
-must remain at or below 50ms.  For uncontaminated repeated samples, run
-`make performance-prepare`, let compilation activity settle, then run
-`make performance-evaluator` without rebuilding.
+<a id="performance-scenarios"></a>
+### Performance scenarios
+
+[`benchmarks/performance-scenarios.el`](benchmarks/performance-scenarios.el)
+registers interaction workloads on these examples for the workspace
+[performance tool](https://gitea.gklazycat.heiyu.space/emacs-taf/emacs-taf/src/branch/main/docs/manual.md):
+`ebox-playground.desktop.nudge`, `ebox-playground.layer.explode`,
+`ebox-playground.interaction.add` and `ebox-playground.flex.resize`. Each
+opens a fresh preview, repeats one native key binding at a control label (or
+alternates the Flex reference width) and compares the buffer with a fresh
+render of the retained tree. Run them in batch with `make perf-check`, or pass
+`--mode gui` to `scripts/performance.py` for real redisplay.
 
 ## Development
 

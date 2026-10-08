@@ -2,8 +2,8 @@
 
 ;;; Commentary:
 ;; The matching .ebox file declares the five windows and their initial layout.
-;; Native mouse tracking publishes positions while the button is held.  All
-;; document changes use public Ebox region updates; each preview owns its state.
+;; Native mouse tracking moves panes while the button is held.  All document
+;; changes update retained Ebox nodes; each preview owns its state.
 
 ;;; Code:
 
@@ -44,9 +44,7 @@ Control text keymaps retain their own activation and title-drag commands."
   "Apply the desktop mouse policy only to a successfully mounted desktop."
   (desktop-demo-input-mode
    (if (and ebox-buffer-mode
-            (condition-case nil
-                (ebox-region-resolve (current-buffer) "desktop-root")
-              (user-error nil)))
+            (ebox-selector-query-buffer (current-buffer) "#desktop-root"))
        1 -1)))
 
 (add-hook 'ebox-buffer-mode-hook #'desktop-demo--sync-input-mode)
@@ -106,7 +104,7 @@ Control text keymaps retain their own activation and title-drag commands."
                           (1+ (point)) 'keymap nil (point-min))))))))
 
 (defun desktop-demo--restore-keyboard-anchor (anchor)
-  "Restore point within ANCHOR's surviving native control after publication."
+  "Restore point within ANCHOR's surviving native control after an update."
   (when anchor
     (let ((position (point-min)))
       (catch 'restored
@@ -118,15 +116,34 @@ Control text keymaps retain their own activation and title-drag commands."
               (throw 'restored t))
             (setq position end)))))))
 
-(defun desktop-demo--publish (demo candidate updates)
-  "Publish UPDATES and CANDIDATE's status, then advance DEMO's state.
-Failed Ebox publication leaves the business state on its accepted generation."
+(defun desktop-demo--update (target &rest props)
+  "Apply author PROPS to TARGET, a node or the id of nodes in this preview.
+A :content property replaces the node's children with that string."
+  (let ((content (plist-member props :content))
+        (rest (cl-loop for (key value) on props by #'cddr
+                       unless (eq key :content) append (list key value))))
+    (dolist (node (if (stringp target)
+                      (ebox-selector-query-buffer (current-buffer) (concat "#" target))
+                    (list target)))
+      (when rest
+        (let ((merged (copy-sequence (ebox-node-props node))))
+          (cl-loop for (key value) on rest by #'cddr
+                   do (setq merged (plist-put merged key value)))
+          (ebox-node-set-props node merged)))
+      (when content
+        (if (ebox-node-text-p node)
+            (ebox-node-set-text node (cadr content))
+          (ebox-node-replace-children node (list (ebox-text-create (cadr content)))))))))
+
+(defun desktop-demo--apply (demo candidate updates)
+  "Apply UPDATES and CANDIDATE's status in one batch, then advance DEMO's state.
+Each update is (TARGET . PROPS) for `desktop-demo--update'.  An update error
+leaves DEMO's business state unchanged."
   (let ((anchor (desktop-demo--keyboard-anchor)))
-    (ebox-call-with-update-batch
-     (lambda ()
-       (dolist (update updates)
-         (apply #'ebox-region-update update))
-       (ebox-region-update "desktop-status" :content (desktop-demo-status candidate))))
+    (ebox-with-batch
+      (dolist (update updates)
+        (apply #'desktop-demo--update update))
+      (desktop-demo--update "desktop-status" :content (desktop-demo-status candidate)))
     (setf (desktop-demo-windows demo) (desktop-demo-windows candidate)
           (desktop-demo-order demo) (desktop-demo-order candidate)
           (desktop-demo-active demo) (desktop-demo-active candidate)
@@ -143,7 +160,7 @@ Failed Ebox publication leaves the business state on its accepted generation."
               (desktop-demo-order candidate)
               (append (remove id (desktop-demo-order demo)) (list id))
               (desktop-demo-serial candidate) (1+ (desktop-demo-serial demo)))
-        (desktop-demo--publish
+        (desktop-demo--apply
          demo candidate
          (append (list (list id :z-index (desktop-demo-serial candidate)))
                  (desktop-demo--chrome
@@ -154,7 +171,7 @@ Failed Ebox publication leaves the business state on its accepted generation."
 (defun desktop-demo-move (demo id x y &optional row-height)
   "Move DEMO's pane ID to pixel displacement X, Y from its initial offsets.
 ROW-HEIGHT is the drag frame's host row size, defaulting to the selected frame.
-Return non-nil only after a changed position has been published."
+Return non-nil only after a changed position has been applied."
   (let ((pane (desktop-demo--window demo id)))
     (unless (and (= x (desktop-demo-window-x pane))
                  (= y (desktop-demo-window-y pane)))
@@ -166,7 +183,7 @@ Return non-nil only after a changed position has been published."
               (desktop-demo-windows candidate)
               (mapcar (lambda (item) (if (eq item pane) moved item))
                       (desktop-demo-windows demo)))
-        (desktop-demo--publish
+        (desktop-demo--apply
          demo candidate
          (list (list id :left `(calc (+ ,(desktop-demo-window-left pane) (px ,x)))
                      :top `(calc (+ ,(desktop-demo-window-top pane) (lh ,rows))))))
@@ -230,7 +247,7 @@ Return non-nil only after a changed position has been published."
                                     demo pane (equal active (desktop-demo-window-id pane))))))
     (setf (desktop-demo-windows candidate) panes (desktop-demo-order candidate) ids
           (desktop-demo-active candidate) active (desktop-demo-serial candidate) (length ids))
-    (desktop-demo--publish demo candidate updates)))
+    (desktop-demo--apply demo candidate updates)))
 
 (defun desktop-demo-toggle-theme (demo)
   "Switch DEMO's complete palette without changing window geometry or order."
@@ -238,11 +255,10 @@ Return non-nil only after a changed position has been published."
     (setf (desktop-demo-theme candidate)
           (if (eq (desktop-demo-theme demo) 'dark) 'light 'dark))
     (dolist (entry (desktop-demo-styles demo))
-      (dolist (match (ebox-selector-query-buffer
-                      (current-buffer) (concat "." (symbol-name (car entry)))))
-        (when-let* ((handle (plist-get match :region-handle)))
-          (push (cons handle (desktop-demo-style candidate (car entry))) updates))))
-    (desktop-demo--publish
+      (dolist (node (ebox-selector-query-buffer
+                     (current-buffer) (concat "." (symbol-name (car entry)))))
+        (push (cons node (desktop-demo-style candidate (car entry))) updates)))
+    (desktop-demo--apply
      demo candidate
      (append (nreverse updates)
              (desktop-demo--chrome

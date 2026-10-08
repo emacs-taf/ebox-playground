@@ -12,7 +12,7 @@
 (defun ebox-playground-test--line-widths (text)
   "Return rendered pixel widths for every line in TEXT."
   (mapcar #'ebox-string-pixel-width
-          (ebox-string-lines text)))
+          (split-string text "\n")))
 
 (defun ebox-playground-test--max-line-width (text)
   "Return the widest rendered pixel line in TEXT."

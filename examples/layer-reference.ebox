@@ -249,4 +249,4 @@
     (box :padding-top (lh 1)
          "Try: update the covered note twice, hide A, then activate the revealed note.\n"
          "Open the menu, cycle all four placements, move its anchor, and select a color.\n"
-         "Commands publish named-region updates. Layers do not create a focus system.")))
+         "Commands update nodes by id. Layers do not create a focus system.")))

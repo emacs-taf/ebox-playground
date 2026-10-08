@@ -3,7 +3,8 @@
 ;;; Commentary:
 ;; Loaded by the generic playground runner before interaction-reference.ebox.
 ;; Each DSL evaluation creates its own state.  Ebox supplies command/keymap
-;; construction, mouse-buffer targeting, and named-region updates.
+;; construction and mouse-buffer targeting; actions update retained nodes
+;; found by id or class.
 
 ;;; Code:
 
@@ -32,6 +33,25 @@
           (interaction-demo-count demo) (if subtract "subtracts" "adds")
           (interaction-demo-step demo)))
 
+(defun interaction-demo--update (target &rest props)
+  "Apply author PROPS to TARGET, a node or the id of nodes in this preview.
+A :content property replaces the node's children with that string."
+  (let ((content (plist-member props :content))
+        (rest (cl-loop for (key value) on props by #'cddr
+                       unless (eq key :content) append (list key value))))
+    (dolist (node (if (stringp target)
+                      (ebox-selector-query-buffer (current-buffer) (concat "#" target))
+                    (list target)))
+      (when rest
+        (let ((merged (copy-sequence (ebox-node-props node))))
+          (cl-loop for (key value) on rest by #'cddr
+                   do (setq merged (plist-put merged key value)))
+          (ebox-node-set-props node merged)))
+      (when content
+        (if (ebox-node-text-p node)
+            (ebox-node-set-text node (cadr content))
+          (ebox-node-replace-children node (list (ebox-text-create (cadr content)))))))))
+
 (defun interaction-demo--record (demo description)
   "Record DEMO's action DESCRIPTION and refresh its four-line event log."
   (push (format "%02d  %s" (cl-incf (interaction-demo-serial demo))
@@ -40,13 +60,13 @@
   (setf (interaction-demo-events demo)
         (seq-take (interaction-demo-events demo) 4))
   (let ((events (interaction-demo-events demo)))
-    (ebox-region-update
+    (interaction-demo--update
      "event-log" :content
      (string-join (append events (make-list (- 4 (length events)) "—")) "\n"))))
 
 (defun interaction-demo--show-count (demo)
   "Refresh the displayed count for DEMO."
-  (ebox-region-update "count" :content
+  (interaction-demo--update "count" :content
                       (format "COUNT  %02d" (interaction-demo-count demo))))
 
 (defun interaction-demo--add (demo amount)
@@ -78,7 +98,7 @@
   "Publish DEMO's current action properties and binding summary."
   (let ((enabled (interaction-demo-enabled demo))
         (step (interaction-demo-step demo)))
-    (ebox-region-update
+    (interaction-demo--update
      "live-action"
      :help-echo (and enabled
                      (ebox-help-create
@@ -86,16 +106,16 @@
      :pointer (and enabled 'hand)
      :hover-style (and enabled (interaction-demo-hover demo))
      :keymap (and enabled (interaction-demo-keymap demo)))
-    (ebox-region-update
+    (interaction-demo--update
      "action-label" :content
      (if enabled (format "ADD %d   [+] " step) "BINDING REMOVED "))
-    (ebox-region-update
+    (interaction-demo--update
      "subtract-text"
      :help-echo (and enabled
                      (ebox-help-create
                       (apply-partially #'interaction-demo-description demo t)))
      :keymap (and enabled (interaction-demo-subtract-keymap demo))))
-  (ebox-region-update
+  (interaction-demo--update
    "binding-state" :content
    (format "step %d  ·  %s  ·  %s hover"
            (interaction-demo-step demo)
@@ -108,7 +128,8 @@
   (ebox-keymap-create
    :activate
    (lambda ()
-     (pcase action
+     (ebox-with-batch
+      (pcase action
        ('step
         (setf (interaction-demo-step demo)
               (if (= (interaction-demo-step demo) 1) 5 1)
@@ -138,13 +159,14 @@
         (interaction-demo--show-count demo)
         (interaction-demo--record demo "Reset count"))
        ('group
-        (ebox-update-selector (current-buffer) ".demo-status"
-                              :content "READY" :color "#287A52"
-                              :help-echo "This status was updated with its class group.")
-        (interaction-demo--record demo "Updated three .demo-status regions in one batch"))
+        (dolist (node (ebox-selector-query-buffer (current-buffer) ".demo-status"))
+          (interaction-demo--update
+           node :content "READY" :color "#287A52"
+           :help-echo "This status was updated with its class group."))
+        (interaction-demo--record demo "Updated three .demo-status Boxes in one batch"))
        ('parent (interaction-demo--record demo "PARENT surface activated"))
        ('child (interaction-demo--record demo "CHILD text activated"))
-       (_ (error "Unknown interaction-lab action: %S" action))))))
+       (_ (error "Unknown interaction-lab action: %S" action)))))))
 
 (provide 'interaction-demo-reference)
 

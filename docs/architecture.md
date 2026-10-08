@@ -12,12 +12,12 @@ selector engine or viewport controller.
 `examples/` contains `.ebox` layouts and same-basename `.el` companions for
 interactive behavior. A preview loads its companion and builds the declared
 layout. Each preview owns its own interaction state. Reopening or resizing a
-preview must preserve the public Ebox publication and teardown contracts.
+preview must preserve the public Ebox mount and teardown contracts.
 
 The examples cover flex, grid, explicit units, cascade, interaction and layers.
 `desktop-reference.ebox` is an Ebox-only gesture and overlap fixture: it
-demonstrates how a companion can use Ebox's public keymap and incremental
-region APIs, but it is not a desktop manager or reusable framework service.
+demonstrates how a companion can use Ebox's public keymap and node update
+APIs, but it is not a desktop manager or reusable framework service.
 Application-level registration, workspaces and window policy belong to the
 higher-level `etaf-desktop` package. These examples are executable acceptance
 inputs, not screenshots standing in for running behavior. Product usage and

@@ -42,6 +42,16 @@
       "name": "ebox-playground-desktop-drag-publishes-motion-and-release",
       "file": "tests/desktop-reference-tests.el",
       "purpose": "The maintained Ebox desktop reference uses shared dragging to publish intermediate and release positions."
+    },
+    {
+      "name": "ebox-playground-interaction-example-updates-count-log-and-group",
+      "file": "tests/example-companion-tests.el",
+      "purpose": "The interaction lab's actions update the counter, event log and status group."
+    },
+    {
+      "name": "ebox-playground-layer-example-updates-covered-note-and-cards",
+      "file": "tests/example-companion-tests.el",
+      "purpose": "The layer lab updates covered content, panel visibility and card layout."
     }
   ]
 }

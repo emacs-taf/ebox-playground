@@ -157,29 +157,27 @@
         (kill-local-variable variable)))))
 
 (defun ebox-playground--render-to-preview-buffer (buffer input)
-  "Render canonical INPUT into BUFFER with transactional display settings."
-  (unless (ebox-canonical-input-p input)
-    (signal 'wrong-type-argument (list 'ebox-canonical-input-p input)))
+  "Mount INPUT, a node or author form, in BUFFER with preview display settings.
+Restore the display settings when mounting fails."
   (with-current-buffer (get-buffer-create buffer)
-    ;; A preview name is stable across edits, while its canonical source
-    ;; generation is not.  Drop the retained surface before publishing the
-    ;; replacement so a failed/old generation can never remain visible.
-    (when (ebox-surface-buffer-mounted-p (current-buffer))
+    ;; A preview name is stable across edits.  Drop the previous mount before
+    ;; mounting the replacement so a failed render never leaves the old tree.
+    (when (ebox-buffer-mount (current-buffer))
       (ebox-unmount-buffer (current-buffer)))
     (erase-buffer)
     (let ((snapshot (ebox-playground--preview-display-snapshot))
-          (published-p nil))
+          (mounted-p nil))
       (unwind-protect
           (prog1
               (progn
                 (ebox-playground--apply-preview-display-settings)
                 (ebox-render-to-buffer buffer input))
-            (setq published-p t))
-        (unless published-p
+            (setq mounted-p t))
+        (unless mounted-p
           (ebox-playground--restore-preview-display-snapshot snapshot))))))
 
 (defun ebox-playground--render-input-to-buffer (buffer input viewport-width)
-  "Render canonical INPUT into BUFFER using VIEWPORT-WIDTH.
+  "Mount INPUT into BUFFER using VIEWPORT-WIDTH.
 Visible mounted buffers follow their window through Ebox's viewport controller."
   (let ((ebox-viewport-width
          (or viewport-width
@@ -202,7 +200,7 @@ companion first.  Reload that exact source file on every evaluation."
 
 ;;;###autoload
 (defun ebox-playground-view (&optional file viewport-width)
-  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without publishing it.
+  "Build the Ebox DSL form in FILE at VIEWPORT-WIDTH without mounting it.
 Reload FILE's optional same-basename .el companion before evaluating its DSL."
   (let ((ebox-viewport-width
          (or viewport-width (ebox-playground--effective-viewport-width)))

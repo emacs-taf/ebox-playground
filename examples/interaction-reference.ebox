@@ -51,7 +51,7 @@
               :help-echo "Control sample: no hover-style declaration."
            "NO HOVER STYLE\nCompare the three cards"))
 
-       (box :font-weight bold "03  LIVE CONSOLE  /  native keymaps + region updates")
+       (box :font-weight bold "03  LIVE CONSOLE  /  native keymaps + node updates")
        (box :padding ((lh 1) (ch 1)) :border "#5893A3"
             :background-color "#FFFFFF"
          (box :id "count" :color "#205A6C" :font-weight bold "COUNT  00")
@@ -90,7 +90,7 @@
              "SWITCH HOVER PALETTE")
            (box :id "group-control" :width (ch 23) :padding ((lh 1) (ch 1))
                 :border "#789783" :background-color "#E9F0E9"
-                :pointer hand :help-echo "Update all three .demo-status regions with one selector call."
+                :pointer hand :help-echo "Update all three .demo-status Boxes with one selector query."
                 :hover-style (:background-color "#C8DDC9")
                 :keymap ,(interaction-demo-action demo 'group)
              "UPDATE STATUS GROUP"))
@@ -131,6 +131,6 @@
             :background-color "#153F4A" :color "#E2EFF2"
          "No actions yet.\n—\n—\n—")
        (box :padding-block (lh 1) :color "#586B6A"
-         "Commands update named regions; they do not rewrite buffer text.\n"
+         "Commands update nodes by id; Ebox rewrites only changed lines.\n"
          "Keymaps do not create a focus system: move point normally to use local keys.\n"
          "Hint display and exact pointer shapes follow your Emacs settings and window system.")))
