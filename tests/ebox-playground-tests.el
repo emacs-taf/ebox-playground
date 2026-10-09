@@ -20,8 +20,8 @@
 
 (ert-deftest ebox-playground-dsl-render-uses-window-width-for-viewport ()
   "C-c C-c should build viewport-dependent roots at the preview width.
-The viewport is the preview window's pixel content box, so the root fills
-the same width that window reports."
+The viewport is Ebox's display-safe width for the preview window, so the
+root fills exactly the width `ebox-viewport-window-width' reports."
   (let ((preview "*Ebox Preview: /tmp/ebox-playground-viewport-render.ebox*"))
     (unwind-protect
         (progn
@@ -35,7 +35,7 @@ the same width that window reports."
             (with-current-buffer preview
               (should (= (ebox-playground-test--max-line-width
                           (buffer-string))
-                         (window-pixel-width window))))))
+                         (ebox-viewport-window-width window))))))
       (when (get-buffer preview)
         (kill-buffer preview)))))
 
