@@ -131,7 +131,7 @@ as the covered note and root menu choices, retain their own hover paint.
 `ebox-node-set-props` and `ebox-call-with-batch` APIs: each action finds its
 nodes by `:id`, changes their properties and the status text, and flushes the
 batch once. See the [batch API
-contract](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/incremental-updates-and-publication.md#batching-and-flush).
+contract](https://etaf.top/incremental-updates-and-publication/#batching-and-flush).
 Offsets use inline `ch` and block `lh` units. The text renderer composes whole
 rows, and positioned content must share its host's line height.
 
@@ -184,7 +184,7 @@ use that owner's base style, including when child text normally differs.
 Physical left/right borders are excluded from hover; horizontal border strokes
 keep their paint. Native pointer appearance and help display depend on Emacs
 settings and the window system. See the
-[public capability contract](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/events.md#hover-feedback).
+[public capability contract](https://etaf.top/events/#hover-feedback).
 
 `interaction-reference.el` owns the business functions and state;
 `interaction-reference.ebox` owns the layout. The runner reloads the matching
@@ -266,7 +266,7 @@ or `nil` to native help with the hovered buffer as context. `ebox-keymap-create`
 handles `RET`, `[return]`, `SPC`, and `[mouse-1]` through
 `:activate`. Its optional `:bindings` alist pairs key-description strings or
 event vectors with zero-argument callbacks. Raw native keymaps are also accepted.
-See the [public helper contract](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/keyboard.md#ebox-keymaps).
+See the [public helper contract](https://etaf.top/keyboard/#ebox-keymaps).
 
 The runner evaluates one `.ebox` expression with lexical bindings on each
 render. Backquote preserves layout data, `,` inserts a value, and `,@` inserts a
@@ -277,13 +277,13 @@ helpers merely to hide repeated DSL property lists.
 
 Prefer concise DSL: omit redundant defaults, put common inheritable text
 styles on an existing parent, and write child overrides only. Keep explicit
-values in panels that teach those properties. The [authoring rules](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/values.md#inheritance-and-global-keywords)
+values in panels that teach those properties. The [authoring rules](https://etaf.top/values/#inheritance-and-global-keywords)
 explain which properties inherit. Empty Boxes have zero automatic content
 height; give one-line separators an explicit `:height (lh 1)`.
 
 Size data uses `(unit number)` with `px`, `%`, `vw`, `vh`, `ch`, and `lh`, plus
 `calc`, `min`, `max`, and `clamp`. The [shared unit-constraint
-table](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/values.md#lengths) defines which
+table](https://etaf.top/values/#lengths) defines which
 units each property accepts; the axes cannot be mixed, including in nested
 function branches. Ebox rejects invalid combinations when it builds the tree.
 For example, the preview can stay one line
@@ -292,7 +292,7 @@ expression is resolved by Ebox on each layout. `fit-content` stays a bare
 keyword and does not take an argument. Border thickness has its own paint-unit
 rule in the same table. Ebox's buffer backend quantizes
 vertical content to complete lines. See the [Ebox sizing
-contract](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/en/style-properties.md).
+contract](https://etaf.top/style-properties/).
 
 To migrate an old unquoted `.ebox` layout, quote the whole static list and
 remove the quotes around its list and symbol properties, for example

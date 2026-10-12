@@ -73,7 +73,7 @@ Companion 使用 `ebox-keymap-create :drag`，由 Ebox 管理原生跟踪，示�
 公共 `ebox-keymap-create`、`ebox-help-create`、`ebox-selector-query-buffer`、
 `ebox-node-set-props` 和 `ebox-call-with-batch`：每个操作按 `:id` 找到节点，修改
 其属性与状态文字，并在 batch 结束时只刷新一次，详见
-[批量更新契约](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/incremental-updates-and-publication.md#批处理与-flush)。
+[批量更新契约](https://etaf.top/zh-cn/incremental-updates-and-publication/#批处理与-flush)。
 
 运行 `make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs`，
 验证示例的原生命令：被覆盖笔记更新、面板显隐与卡片展开／收起，无需打开 GUI 窗口。
@@ -113,7 +113,7 @@ margin 及结构性换行符。同一渲染行内，一个 hover owner 的文字
 `mouse-face`；未指定属性取自 owner 的基础样式，即使子文本的正常样式不同。
 物理左右边框不参与悬停，水平边框线条保留自己的绘制。原生指针外观和帮助显示由
 Emacs 设置及窗口系统决定，
-见[公共能力契约](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/events.md#悬停反馈)。
+见[公共能力契约](https://etaf.top/zh-cn/events/#悬停反馈)。
 
 `interaction-reference.el` 负责业务函数与状态，`interaction-reference.ebox` 负责
 布局；运行器在每次预览前重新加载对应 `.el`。Ebox 的 `ebox-help-create` 提供原生
@@ -188,7 +188,7 @@ make test EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]`、`SPC`
 和 `[mouse-1]`。
 可选的 `:bindings` alist 将按键描述字符串或事件向量与零参数回调配对；也可以直接
-传入原生 keymap。详见[公共辅助函数契约](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/keyboard.md#ebox-keymap)。
+传入原生 keymap。详见[公共辅助函数契约](https://etaf.top/zh-cn/keyboard/#ebox-keymap)。
 
 运行器每次渲染都以词法绑定求值一个 `.ebox` 表达式。反引号保留布局数据，`,` 插入
 值，`,@` 展开子节点列表。结果中的属性和子节点都是数据，运行器不会再单独求值。
@@ -196,17 +196,17 @@ buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]
 重复 DSL 属性列表而添加辅助函数。
 
 默认采用简洁写法：省略冗余默认值，把可继承的共同文字样式放到已有父节点，子节点只写差异。
-示例正在讲解的属性仍显式保留。[编写原则](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/values.md#继承与全局关键字)
+示例正在讲解的属性仍显式保留。[编写原则](https://etaf.top/zh-cn/values/#继承与全局关键字)
 说明了哪些属性可以继承。空 Box 的自动内容高度为零；一行分隔框显式设置 `:height (lh 1)`。
 
 尺寸数据统一使用 `(单位 数值)`，支持 `px`、`%`、`vw`、`vh`、`ch`、`lh`，
-以及 `calc`、`min`、`max`、`clamp`。[统一单位约束表](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/values.md#长度)
+以及 `calc`、`min`、`max`、`clamp`。[统一单位约束表](https://etaf.top/zh-cn/values/#长度)
 规定每个属性允许的单位；不能跨轴混用，嵌套函数的所有分支也遵循同一规则。
 无效组合在 Ebox 构造树时就报错。边框厚度采用表中独立的绘制单位规则。
 例如比视口少一个行高，写
 `:height (calc (- (vh 100) (lh 1)))`；Ebox 会在每次布局时解析这个表达式。
 `fit-content` 只作为裸关键词使用，不带参数。Ebox buffer 后端的纵向内容仍按
-完整行量化，具体规则见 [Ebox 尺寸契约](https://gitea.gklazycat.heiyu.space/emacs-taf/etaf-manual/src/branch/main/book/zh-CN/style-properties.md)。
+完整行量化，具体规则见 [Ebox 尺寸契约](https://etaf.top/zh-cn/style-properties/)。
 
 迁移旧的裸结构 `.ebox` 时，静态布局在最外层加 quote，并去掉内部 list 和 symbol
 属性的 quote，例如 `:padding '(1 2)` 改成 `:padding ((lh 1) (ch 2))`。动态值使用
