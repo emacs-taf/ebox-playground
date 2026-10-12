@@ -2,7 +2,7 @@
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Author: Ebox contributors
-;; URL: https://github.com/ginqi7/ebox-playground
+;; URL: https://github.com/emacs-taf/ebox-playground
 
 ;;; Commentary:
 

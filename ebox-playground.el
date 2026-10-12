@@ -4,7 +4,7 @@
 ;; Author: Ebox contributors
 ;; Version: 0.1.1
 ;; Package-Requires: ((emacs "29.1") (ebox "3.0.0"))
-;; URL: https://github.com/ginqi7/ebox-playground
+;; URL: https://github.com/emacs-taf/ebox-playground
 
 ;;; Commentary:
 

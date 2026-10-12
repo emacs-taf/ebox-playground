@@ -317,7 +317,7 @@ Run `make check EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs` from this di
 
 [`benchmarks/performance-scenarios.el`](benchmarks/performance-scenarios.el)
 registers interaction workloads on these examples for the workspace
-[performance tool](https://gitea.gklazycat.heiyu.space/emacs-taf/emacs-taf/src/branch/main/docs/manual.md):
+[performance tool](https://github.com/emacs-taf/emacs-taf/blob/main/docs/manual.md):
 `ebox-playground.desktop.nudge`, `ebox-playground.layer.explode`,
 `ebox-playground.interaction.add` and `ebox-playground.flex.resize`. Each
 opens a fresh preview, repeats one native key binding at a control label (or

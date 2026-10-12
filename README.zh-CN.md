@@ -227,7 +227,7 @@ buffer 上下文。`ebox-keymap-create` 的 `:activate` 处理 `RET`、`[return]
 ### 性能场景
 
 [`benchmarks/performance-scenarios.el`](benchmarks/performance-scenarios.el)
-为这些示例注册交互负载，供工作区[性能工具](https://gitea.gklazycat.heiyu.space/emacs-taf/emacs-taf/src/branch/main/docs/manual.md)
+为这些示例注册交互负载，供工作区[性能工具](https://github.com/emacs-taf/emacs-taf/blob/main/docs/manual.md)
 使用：`ebox-playground.desktop.nudge`、`ebox-playground.layer.explode`、
 `ebox-playground.interaction.add` 和 `ebox-playground.flex.resize`。每个场景打开
 全新预览，在控件标签处重复同一原生按键（或交替 Flex 参考的视口宽度），并将
